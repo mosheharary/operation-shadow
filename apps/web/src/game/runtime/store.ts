@@ -53,7 +53,7 @@ export interface GameUiState {
   targeting: AbilityId | null;
   pinnedCones: string[];
   showAllCones: boolean;
-  menu: 'none' | 'pause' | 'help' | 'briefing';
+  menu: 'none' | 'pause' | 'help' | 'briefing' | 'saves';
   toasts: Toast[];
   subtitles: Subtitle[];
   noiseRings: NoiseRing[];

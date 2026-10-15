@@ -2,7 +2,9 @@ import { randomInt } from 'node:crypto';
 import { checkSquad, getMission, parseSquad } from '@operation-shadow/content';
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
+import { saveSlotSchema } from '@operation-shadow/schemas';
 import { resolveMission } from '@/server/missions';
+import { loadSave } from '@/server/saves';
 import { requireSession } from '@/server/session';
 import { PlayLoader } from './play-loader';
 
@@ -26,6 +28,25 @@ export default async function PlayPage({ params, searchParams }: { params: Param
   const resolved = await resolveMission(key, session.user.id);
   if (!resolved) notFound();
   const { entry, generated } = resolved;
+
+  // Continue a saved game: the save fixes the squad, seed and difficulty.
+  const slot = saveSlotSchema.safeParse(query.save);
+  if (slot.success) {
+    const save = await loadSave(session.user.id, slot.data);
+    if (typeof save === 'string' || save.payload.missionKey !== entry.key) redirect(`/dashboard?error=${encodeURIComponent('That save could not be loaded')}`);
+    const { payload } = save;
+    return (
+      <PlayLoader
+        setup={{
+          missionKey: entry.key,
+          ...payload.setup,
+          ...(generated ? { generated } : {}),
+          initialSave: { state: payload.state, camera: payload.camera, selection: payload.selection },
+        }}
+        title={entry.title}
+      />
+    );
+  }
 
   const squad = parseSquad(typeof query.squad === 'string' ? query.squad : '');
   const problem = checkSquad(entry, squad);

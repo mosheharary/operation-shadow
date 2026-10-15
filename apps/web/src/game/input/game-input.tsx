@@ -9,6 +9,7 @@ import { activeAudio } from '../audio/registry';
 import { focusOn } from '../camera/camera-rig';
 import type { GameController } from '../runtime/controller';
 import { closeMenu, openMenu } from '../runtime/menus';
+import { getActivePersistence } from '../runtime/persistence';
 import { useSettings } from '../runtime/settings';
 import { useGameUi } from '../runtime/store';
 import { actionForCode, SELECT_ACTIONS, SLOT_ACTIONS } from './bindings';
@@ -304,6 +305,14 @@ export function GameInput({ controller }: { controller: GameController }) {
         case 'help':
           e.preventDefault();
           openMenu(controller, 'help');
+          break;
+        case 'quicksave':
+          e.preventDefault();
+          if (running()) void getActivePersistence()?.save('quick');
+          break;
+        case 'quickload':
+          e.preventDefault();
+          void getActivePersistence()?.load('quick');
           break;
         case 'perf': {
           e.preventDefault();

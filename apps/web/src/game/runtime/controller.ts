@@ -7,10 +7,12 @@ import {
   type GameEvent,
   type LevelData,
   type MissionRuntime,
+  type SimState,
   type SpecialistId,
   type Vec2,
   World,
 } from '@operation-shadow/engine';
+import type { SavePayload } from '@operation-shadow/schemas';
 
 export interface GameSetup {
   missionKey: string;
@@ -19,6 +21,8 @@ export interface GameSetup {
   seed: number;
   /** A generated operation (its key starts with `op-`), already validated by the server. */
   generated?: GeneratedMissionData;
+  /** A saved game to continue from (validated by the server, re-checked by the engine). */
+  initialSave?: Pick<SavePayload, 'state' | 'camera' | 'selection'>;
 }
 
 type EventListener = (events: GameEvent[]) => void;
@@ -124,6 +128,15 @@ export class GameController {
 
   setPaused(paused: boolean): void {
     this.paused = paused;
+    this.notifyHud();
+  }
+
+  /** Continues from a saved simulation state (checked by the engine before play resumes). */
+  load(state: SimState): void {
+    this.world = World.restore(this.level, this.mission, state);
+    this.previous.clear();
+    this.accumulator = 0;
+    this.speed = 1;
     this.notifyHud();
   }
 

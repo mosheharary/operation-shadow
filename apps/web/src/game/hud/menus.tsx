@@ -1,9 +1,11 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import type { SaveSlotId, SaveSummary } from '@operation-shadow/schemas';
+import { useEffect, useRef, useState } from 'react';
 import { type BindingAction, getBindings, keyLabel } from '../input/bindings';
 import { useController } from '../runtime/game-context';
 import { closeMenu, openMenu } from '../runtime/menus';
+import { getActivePersistence, listSaves } from '../runtime/persistence';
 import { useSettings } from '../runtime/settings';
 import { useGameUi } from '../runtime/store';
 import styles from './hud.module.css';
@@ -78,6 +80,9 @@ export function PauseMenu({ onRestart, onExit }: MenuCallbacks) {
           <button ref={first} type="button" className={styles.primaryButton} onClick={() => closeMenu(controller)}>
             Resume
           </button>
+          <button type="button" className={styles.button} onClick={() => openMenu(controller, 'saves')} data-testid="open-saves">
+            Save / load
+          </button>
           <button type="button" className={styles.button} onClick={() => openMenu(controller, 'help')}>
             Controls
           </button>
@@ -129,6 +134,7 @@ const HELP_GROUPS: { title: string; rows: [BindingAction[] | string, string][] }
       [['pause'], 'Tactical pause (orders still work)'],
       [['speed-down', 'speed-up'], 'Game speed'],
       [['perf'], 'Frame rate readout'],
+      [['quicksave', 'quickload'], 'Quicksave, quickload'],
     ],
   },
 ];
@@ -178,9 +184,86 @@ export function HelpOverlay() {
 }
 
 /** Mounts whichever in-game menu is open. */
+const SLOT_LABEL: Record<SaveSlotId, string> = { quick: 'Quicksave', auto: 'Autosave', 'manual-1': 'Slot 1', 'manual-2': 'Slot 2', 'manual-3': 'Slot 3' };
+const clock = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+
+/** Save into the three manual slots; load any slot (quick, auto, manual). */
+export function SaveMenu() {
+  const controller = useController();
+  const first = useAutoFocus<HTMLButtonElement>();
+  const [saves, setSaves] = useState<SaveSummary[] | null>(null);
+  const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    let live = true;
+    void listSaves().then((list) => live && setSaves(list));
+    return () => {
+      live = false;
+    };
+  }, []);
+  const persistence = getActivePersistence();
+  const bySlot = new Map((saves ?? []).map((s) => [s.slot, s]));
+  const run = async (task: () => Promise<boolean>, close: boolean) => {
+    setBusy(true);
+    const ok = await task();
+    setBusy(false);
+    if (ok && close) closeMenu(controller);
+    else setSaves(await listSaves());
+  };
+  return (
+    <div className={styles.modalBackdrop}>
+      <div className={styles.modal} role="dialog" aria-modal="true" aria-labelledby="saves-title" data-testid="save-menu">
+        <h2 id="saves-title" className={styles.modalTitle}>
+          Save / load
+        </h2>
+        {!persistence && <p className="hint">Saving is not available right now.</p>}
+        {saves === null ? (
+          <p className="hint">Loading your saves…</p>
+        ) : (
+          <ul className={styles.saveList}>
+            {(['quick', 'auto', 'manual-1', 'manual-2', 'manual-3'] as const).map((slot) => {
+              const save = bySlot.get(slot);
+              const manual = slot.startsWith('manual');
+              return (
+                <li key={slot} data-testid={`save-${slot}`}>
+                  <div>
+                    <strong>{SLOT_LABEL[slot]}</strong>
+                    <span className={styles.saveMeta}>
+                      {save
+                        ? `${save.missionTitle} · ${clock(save.seconds)} · ${save.objectivesDone}/${save.objectivesTotal} objectives · ${new Date(save.updatedAt).toLocaleString()}`
+                        : 'Empty'}
+                    </span>
+                  </div>
+                  <div className={styles.saveActions}>
+                    {manual && persistence && (
+                      <button type="button" className={styles.button} disabled={busy} onClick={() => void run(() => persistence.save(slot), false)}>
+                        Save here
+                      </button>
+                    )}
+                    {save && persistence && (
+                      <button type="button" className={styles.button} disabled={busy} onClick={() => void run(() => persistence.load(slot), true)}>
+                        Load
+                      </button>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+        <div className={styles.menuButtons}>
+          <button ref={first} type="button" className={styles.primaryButton} onClick={() => openMenu(controller, 'pause')}>
+            Back
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function MenuLayer(props: MenuCallbacks) {
   const menu = useGameUi((s) => s.menu);
   if (menu === 'pause') return <PauseMenu {...props} />;
+  if (menu === 'saves') return <SaveMenu />;
   if (menu === 'help') return <HelpOverlay />;
   return null;
 }

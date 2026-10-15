@@ -238,6 +238,28 @@ Decisions D38–D44.
 | Browser tests vs. dev server | ✅ 17 / 17 (request an operation in the UI, read the briefing, deploy into it; API idempotency, validation, cross-site refusal, other user gets 404, signed-out gets 401) |
 | Live Gemini path | ✅ once from a script and once through the UI (2026-10-15): validated alpine rescue mission, no repair needed, about 13 s, about $0.0026 |
 
-## Milestones 4–6
+## Milestone 4 — Persistence and accounts ✅ (2026-10-15)
+
+Decisions D45–D50.
+
+- [x] Tables `campaigns`, `mission_runs`, `save_slots`, `save_revisions` (migration `0002_campaigns_and_saves`)
+- [x] Campaign progression: best rank and score per mission, medals, flags, service records; active campaign created on first use; new campaign; difficulty; delete (audited)
+- [x] Mission runs recorded from start to success, failure or abandonment
+- [x] Saves: quick (F5/F9), auto (objective completed; every 5 minutes while calm), three manual slots in the pause menu; atomic, versioned (migration chain), checksummed, three revisions kept, damaged revisions recovered from the previous one; offline copy in IndexedDB
+- [x] Field HQ: Continue from saves, campaign list with "Start here" for first-timers and ranks for completed missions
+- [x] Settings synced to the account (graphics stay per device)
+- [x] Account page with permanent deletion (cascade, cookies cleared, audited)
+- [x] Ownership: every repository function scoped by the session's user; other users' ids return 404
+
+### Verification (ran 2026-10-15)
+
+| Check | Result |
+|---|---|
+| `pnpm lint` / `pnpm typecheck` | ✅ |
+| Unit + integration tests | ✅ 159 / 159 (adds concurrent campaign updates, single completion of runs, revision pruning, failed writes leaving the previous save, cross-user isolation, account deletion cascade) |
+| Browser tests vs. dev server | ✅ 21 / 21 (quicksave and quickload restore the same moment; manual slot; Continue from Field HQ; saves private, validated and same-origin only; first-timer "Start here" and a recorded rank; settings round-trip; deletion needs confirmation) |
+| Browser tests vs. production build (`make prod`, `make e2e-prod`) | ✅ 21 / 21 |
+
+## Milestones 5–6
 
 See `docs/architecture/implementation-plan.md` §13.

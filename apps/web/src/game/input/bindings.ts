@@ -21,6 +21,8 @@ export type BindingAction =
   | 'speed-up'
   | 'help'
   | 'perf'
+  | 'quicksave'
+  | 'quickload'
   | 'select-1'
   | 'select-2'
   | 'select-3'
@@ -62,6 +64,8 @@ export const DEFAULT_BINDINGS: Bindings = {
   'speed-up': ['BracketRight'],
   help: ['F1', 'Slash'],
   perf: ['F3'],
+  quicksave: ['F5'],
+  quickload: ['F9'],
   'select-1': ['Digit1'],
   'select-2': ['Digit2'],
   'select-3': ['Digit3'],

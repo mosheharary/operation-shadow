@@ -24,6 +24,20 @@ export function focusOn(pos: Vec2): void {
   useGameUi.getState().focusCamera(pos);
 }
 
+/** Where the camera looks, for saves; and a view to restore on load. */
+export interface CameraView {
+  x: number;
+  z: number;
+  distance: number;
+  yaw: number;
+}
+let currentView: CameraView | null = null;
+let requestedView: CameraView | null = null;
+export const getCameraView = (): CameraView | null => (currentView ? { ...currentView } : null);
+export function setCameraView(view: CameraView | null): void {
+  requestedView = view ? { ...view } : null;
+}
+
 const focusPoint = new THREE.Vector3();
 const forward = new THREE.Vector3();
 /** Ground point the camera looks at (used by lighting and effects to stay near the action). */
@@ -158,6 +172,14 @@ export function CameraRig({ controller, edgeScroll = false, reducedShake = false
     const dt = Math.min(dtRaw, 0.05);
     const r = rig.current;
     const ui = useGameUi.getState();
+    if (requestedView) {
+      const v = requestedView;
+      requestedView = null;
+      r.target.set(v.x, v.z);
+      r.desiredTarget.set(v.x, v.z);
+      r.yaw = r.desiredYaw = v.yaw;
+      r.distance = r.desiredDistance = THREE.MathUtils.clamp(v.distance, MIN_DISTANCE, MAX_DISTANCE);
+    }
     const fx = -Math.sin(r.yaw);
     const fz = -Math.cos(r.yaw);
     const rx = Math.cos(r.yaw);
@@ -217,6 +239,7 @@ export function CameraRig({ controller, edgeScroll = false, reducedShake = false
     }
     camera.position.set(cx, cy, cz);
     camera.lookAt(r.target.x, ground + 1, r.target.y);
+    currentView = { x: r.desiredTarget.x, z: r.desiredTarget.y, distance: r.desiredDistance, yaw: r.desiredYaw };
   });
 
   return null;

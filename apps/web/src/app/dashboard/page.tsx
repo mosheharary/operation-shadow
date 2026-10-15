@@ -1,8 +1,10 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { MISSIONS } from '@operation-shadow/content';
-import { checkReadiness, listOwnedMissions } from '@operation-shadow/db';
+import { CAMPAIGN } from '@operation-shadow/content';
+import { checkReadiness, listOwnedMissions, listSaveSlots } from '@operation-shadow/db';
+import { saveSummarySchema } from '@operation-shadow/schemas';
 import { getDb } from '@/server/db';
+import { activeCampaign, readProgress } from '@/server/progress';
 import { requireSession } from '@/server/session';
 import { SignOutButton } from './sign-out-button';
 
@@ -20,12 +22,21 @@ const ROADMAP = [
   { label: 'Vertical slice: playable mission "Silent Tide"', state: 'ok' },
   { label: 'Campaign of six missions with a guided tutorial', state: 'ok' },
   { label: 'Generated operations (Gemini, with offline fallback)', state: 'ok' },
-  { label: 'Campaigns and saved games', state: 'pending' },
+  { label: 'Campaign progress, saved games, synced settings', state: 'ok' },
   { label: 'Full campaign, planning mode, polish', state: 'pending' },
 ] as const;
 
-export default async function DashboardPage() {
+const SLOT_NAME: Record<string, string> = { quick: 'Quicksave', auto: 'Autosave', 'manual-1': 'Slot 1', 'manual-2': 'Slot 2', 'manual-3': 'Slot 3' };
+
+export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   const session = await requireSession();
+  const { error } = await searchParams;
+  const campaign = await activeCampaign(session.user.id).catch(() => null);
+  const progress = readProgress(campaign?.progress);
+  const firstTimer = Object.keys(progress.completed).length === 0;
+  const saves = (await listSaveSlots(getDb().db, session.user.id).catch(() => []))
+    .map((s) => saveSummarySchema.safeParse({ ...s.summary, slot: s.slot, updatedAt: s.updatedAt.toISOString() }))
+    .flatMap((r) => (r.success ? [r.data] : []));
   const readiness = await checkReadiness(getDb().pool).catch(() => ({ database: 'error', migrations: 'error' }) as const);
   const generated = await listOwnedMissions(getDb().db, session.user.id, 6).catch(() => []);
 
@@ -41,18 +52,61 @@ export default async function DashboardPage() {
             <span>
               Signed in as <strong>{session.user.name}</strong>
             </span>
+            <Link href="/account" className="btn btn--ghost">
+              Account
+            </Link>
             <SignOutButton />
           </div>
         </header>
 
+        {typeof error === 'string' && (
+          <p className="alert" role="alert">
+            {error.slice(0, 200)}
+          </p>
+        )}
         <div className="hq__grid">
           <nav className="menu" aria-label="Main menu">
-            {Object.values(MISSIONS).map((mission) => (
-              <Link key={mission.key} className="menu__item" href={`/missions/${mission.key}`} data-testid={`mission-${mission.key}`}>
-                <span className="menu__title">Operation: {mission.title}</span>
-                <span className="menu__desc">{mission.summary}</span>
-              </Link>
-            ))}
+            {saves.length > 0 && (
+              <section className="menu__group" aria-labelledby="continue-title" data-testid="continue">
+                <h2 id="continue-title" className="menu__heading">
+                  Continue
+                </h2>
+                {saves.slice(0, 3).map((save) => (
+                  <Link key={save.slot} className="menu__item" href={`/play/${save.missionKey}?save=${save.slot}`} data-testid={`continue-${save.slot}`}>
+                    <span className="menu__title">
+                      {save.missionTitle} · {SLOT_NAME[save.slot]}
+                    </span>
+                    <span className="menu__desc">
+                      {Math.floor(save.seconds / 60)} min in · {save.objectivesDone}/{save.objectivesTotal} objectives · saved {save.updatedAt.slice(0, 16).replace('T', ' ')} UTC
+                    </span>
+                  </Link>
+                ))}
+              </section>
+            )}
+            <h2 className="menu__heading">{campaign?.name ?? 'Campaign'}</h2>
+            {CAMPAIGN.map((mission, i) => {
+              const done = progress.completed[mission.key];
+              return (
+                <Link
+                  key={mission.key}
+                  className={`menu__item${firstTimer && i === 0 ? ' menu__item--accent' : ''}`}
+                  href={`/missions/${mission.key}`}
+                  data-testid={`mission-${mission.key}`}
+                >
+                  <span className="menu__title">
+                    {mission.tutorial ? 'Training' : `Operation ${i}`}: {mission.title}
+                    {firstTimer && i === 0 && <span className="menu__badge">Start here</span>}
+                    {done && (
+                      <span className="menu__badge menu__badge--done" data-testid={`done-${mission.key}`}>
+                        ✓ Rank {done.bestRank}
+                      </span>
+                    )}
+                  </span>
+                  <span className="menu__desc">{mission.summary}</span>
+                </Link>
+              );
+            })}
+            <h2 className="menu__heading">Generated operations</h2>
             <Link className="menu__item menu__item--accent" href="/operations/new" data-testid="new-operation">
               <span className="menu__title">Request a generated operation</span>
               <span className="menu__desc">Lantern drafts a fresh mission on any map, checked to be winnable without being seen.</span>

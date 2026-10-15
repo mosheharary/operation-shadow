@@ -1,5 +1,6 @@
 'use client';
 
+import type { SimState } from '@operation-shadow/engine';
 import { useRouter } from 'next/navigation';
 import { type ReactNode, useCallback, useEffect, useState } from 'react';
 import { AudioEngine } from './audio/audio-engine';
@@ -10,6 +11,7 @@ import { type GameSetup, GameController } from './runtime/controller';
 import { DialogueDirector } from './runtime/dialogue';
 import { GameControllerProvider } from './runtime/game-context';
 import { closeMenu } from './runtime/menus';
+import { restoreView, SessionPersistence, setActivePersistence } from './runtime/persistence';
 import { wireSessionEvents } from './runtime/session-events';
 import { useSettings } from './runtime/settings';
 import { useGameUi } from './runtime/store';
@@ -36,6 +38,8 @@ export function PlaySession({ setup, title, fallback }: { setup: GameSetup; titl
       if (cancelled) return;
       try {
         const controller = new GameController(setup);
+        // Continuing a saved game: the engine checks the state before play resumes.
+        if (setup.initialSave) controller.load(setup.initialSave.state as unknown as SimState);
         const dialogue = new DialogueDirector(() => controller.world);
         setSession({ controller, dialogue, audio: new AudioEngine(controller) });
       } catch (e) {
@@ -59,8 +63,14 @@ export function PlaySession({ setup, title, fallback }: { setup: GameSetup; titl
     const stopSettings = useSettings.subscribe((settings) => audio.applySettings(settings));
     const first = controller.world.state.operatives[0];
     if (first) useGameUi.getState().select([first.id]);
+    if (setup.initialSave) restoreView(controller, setup.initialSave);
+    const persistence = new SessionPersistence(controller, (url) => router.push(url));
+    setActivePersistence(persistence);
+    const stopPersistence = persistence.start();
     // The simulation only advances while the scene renders, so unmounting stops it.
     return () => {
+      stopPersistence();
+      setActivePersistence(null);
       unsubscribe();
       stopAudioEvents();
       stopVoices();
@@ -68,7 +78,7 @@ export function PlaySession({ setup, title, fallback }: { setup: GameSetup; titl
       setActiveAudio(null);
       audio.dispose();
     };
-  }, [session]);
+  }, [router, session, setup.initialSave]);
 
   const restart = useCallback(() => {
     if (!session) return;
