@@ -1,7 +1,7 @@
 import type { BetterAuthOptions } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { nextCookies } from 'better-auth/next-js';
-import type { Database } from '@operation-shadow/db';
+import { type Database, recordAuditEvent } from '@operation-shadow/db';
 import { isDevLoginEnabled } from './dev-login';
 import type { ServerEnv } from './env';
 
@@ -28,6 +28,16 @@ export function buildAuthOptions(env: ServerEnv, db: Database, schema?: Record<s
     emailAndPassword: { enabled: devLogin, disableSignUp: true },
     ...(google ? { socialProviders: google } : {}),
     session: { expiresIn: SEVEN_DAYS, updateAge: ONE_DAY },
+    // Every new session is a sign-in: audited without tokens or IP addresses.
+    databaseHooks: {
+      session: {
+        create: {
+          after: async (session: { userId: string }) => {
+            await recordAuditEvent(db, { userId: session.userId, kind: 'sign_in' }).catch(() => undefined);
+          },
+        },
+      },
+    },
     // Database-backed counters: in-memory limits do not work across serverless instances.
     rateLimit: { enabled: true, storage: 'database', window: 60, max: 100 },
     advanced: { useSecureCookies: env.BETTER_AUTH_URL.startsWith('https://') },

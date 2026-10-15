@@ -31,6 +31,15 @@ export async function createGenerationJob(
   return { job: existing[0]!, created: false };
 }
 
+export async function findGenerationJobByKey(db: Database, ownerId: string, idempotencyKey: string): Promise<JobRow | null> {
+  const rows = await db
+    .select()
+    .from(generationJobs)
+    .where(and(eq(generationJobs.ownerId, ownerId), eq(generationJobs.idempotencyKey, idempotencyKey)))
+    .limit(1);
+  return rows[0] ?? null;
+}
+
 export async function getGenerationJob(db: Database, ownerId: string, jobId: string): Promise<JobRow | null> {
   const rows = await db
     .select()

@@ -1,5 +1,5 @@
 import { after } from 'next/server';
-import { countActiveGenerationJobs, countGenerationJobsSince, createGenerationJob } from '@operation-shadow/db';
+import { countActiveGenerationJobs, countGenerationJobsSince, createGenerationJob, findGenerationJobByKey } from '@operation-shadow/db';
 import { generationRequestSchema } from '@operation-shadow/schemas';
 import { ApiProblem, handle, json, readJson, requireApiSession, requireSameOrigin } from '@/server/api';
 import { getDb } from '@/server/db';
@@ -22,6 +22,9 @@ export async function POST(request: Request) {
     const body = await readJson(request, generationRequestSchema, 2048);
     const { db } = getDb();
     const ownerId = session.user.id;
+    // A retried request returns its job even when the quota has since been reached.
+    const existing = await findGenerationJobByKey(db, ownerId, key);
+    if (existing) return json({ job: jobDto(existing) }, 200);
 
     const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
     if ((await countGenerationJobsSince(db, ownerId, dayAgo)) >= getServerEnv().AI_DAILY_JOBS_PER_USER) {

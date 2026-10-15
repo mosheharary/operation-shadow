@@ -8,7 +8,10 @@ import { activeCampaign } from '@/server/progress';
 
 export const dynamic = 'force-dynamic';
 
-/** Records the start of an attempt (campaign missions are attached to the active campaign). */
+/**
+ * Records the start of an attempt. Campaign missions and generated operations are attached to the
+ * active campaign (generated ones count toward service records, not campaign completion).
+ */
 export async function POST(request: Request) {
   return handle(async () => {
     requireSameOrigin(request);

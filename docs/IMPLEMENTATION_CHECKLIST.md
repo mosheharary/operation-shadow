@@ -294,6 +294,27 @@ All within the High budgets (≤ 600 draw calls, ≤ 2 M triangles, ≤ 400 MB h
 | Browser tests vs. production build | ✅ 23 / 23 with the strict production CSP |
 | `make scan-bundle` / `make audit` | ✅ no secrets in 42 client files; no known vulnerabilities |
 
-## Milestone 6
+## Milestone 6 — Release readiness ✅ (2026-10-15)
+
+- [x] Full test run on the final code (below)
+- [x] Production build verified with the strict CSP (`make prod`, `make e2e-prod`)
+- [x] Migrations verified fresh (integration `database.test.ts`) and as an upgrade from the first release with data (`upgrade.test.ts`)
+- [x] End-to-end run with no AI key, from a clean `git clone` (no `.env`) under a fresh Compose project: `make up` healthy in 44 s (Docker image cached; new volumes), lint, typecheck, 165 / 165 tests and 23 / 23 browser tests passed, generated operations used the offline generator
+- [x] Vercel configuration (`apps/web/vercel.json`: migrations run before the build) and production guide reviewed; **deployment itself not performed** (needs your accounts)
+- [x] Documentation: README; architecture overview; game design; AI design; API; database; testing; security (threat model and checklist); production guide; troubleshooting; known limitations; roadmap; asset register; local guide
+- [x] Fixes from the documentation review: a retried generation request returns its job before quota checks; sign-ins are audited
+
+### Verification (ran 2026-10-15, final)
+
+| Check | Result |
+|---|---|
+| `pnpm lint` / `pnpm typecheck` | ✅ |
+| Unit + integration tests | ✅ 165 / 165 |
+| Browser tests vs. dev server | ✅ 23 / 23 |
+| Browser tests vs. production build | ✅ 23 / 23 |
+| Clean checkout, no AI key | ✅ (as above) |
+| `make scan-bundle` | ✅ no secrets in 44 client files |
+| `make audit` | ✅ no known vulnerabilities |
+| Real-GPU check in Chrome (M5 Pro) | ✅ 120 FPS on the High preset on every map tried (see Milestone 5) |
 
 See `docs/architecture/implementation-plan.md` §13.
