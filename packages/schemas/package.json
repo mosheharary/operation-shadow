@@ -1,0 +1,16 @@
+{
+  "name": "@operation-shadow/schemas",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Versioned Zod schemas shared by the engine, server and client: API contracts, mission specs, saves.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "zod": "4.6.5"
+  }
+}

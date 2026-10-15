@@ -1,0 +1,26 @@
+{
+  "name": "@operation-shadow/db",
+  "version": "0.1.0",
+  "private": true,
+  "description": "PostgreSQL schema, migrations and ownership-scoped repositories (same code for local Postgres and Neon).",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./migrate": "./src/migrate.ts",
+    "./schema": "./src/schema/index.ts",
+    "./migrations/meta/_journal.json": "./migrations/meta/_journal.json"
+  },
+  "scripts": {
+    "generate": "drizzle-kit generate",
+    "migrate": "tsx src/migrate-cli.ts",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "drizzle-orm": "0.45.4",
+    "pg": "8.23.1"
+  },
+  "devDependencies": {
+    "@types/pg": "8.23.1",
+    "drizzle-kit": "0.31.11"
+  }
+}

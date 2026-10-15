@@ -1,0 +1,155 @@
+# Operation Shadow local stack. See docs/operations/local-development.md (or run `make help`).
+name: operation-shadow
+
+x-node-env: &node-env
+  APP_ENV: local
+  DATABASE_URL: postgres://shadow:shadow@db:5432/operation_shadow
+  DATABASE_URL_UNPOOLED: postgres://shadow:shadow@db:5432/operation_shadow
+  TEST_DATABASE_URL: postgres://shadow:shadow@db:5432/operation_shadow_test
+  BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-local-development-secret-not-for-production}
+  BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:3000}
+  NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
+  ALLOW_DEV_LOGIN: "true"
+  DEV_LOGIN_PASSWORD: ${DEV_LOGIN_PASSWORD:-shadow-section-dev-only}
+  GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+  GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+  GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
+  NEXT_TELEMETRY_DISABLED: "1"
+
+x-tools: &tools
+  build:
+    context: .
+    dockerfile: infra/docker/Dockerfile
+    target: dev
+  image: operation-shadow/tools:local
+  working_dir: /app
+  environment: *node-env
+  volumes:
+    - .:/app
+    - node_modules:/app/node_modules
+    - pnpm_store:/pnpm/store
+  depends_on:
+    db:
+      condition: service_healthy
+
+services:
+  db:
+    image: postgres:18.6
+    environment:
+      POSTGRES_USER: shadow
+      POSTGRES_PASSWORD: shadow
+      POSTGRES_DB: operation_shadow
+    ports:
+      - "127.0.0.1:54329:5432"
+    volumes:
+      # PostgreSQL 18+ images keep data under /var/lib/postgresql/<major>/docker.
+      - pgdata:/var/lib/postgresql
+      - ./infra/docker/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U shadow -d operation_shadow"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+
+  migrate:
+    <<: *tools
+    command: ["pnpm", "db:migrate"]
+    restart: "no"
+
+  seed:
+    <<: *tools
+    command: ["pnpm", "db:seed"]
+    restart: "no"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  app:
+    <<: *tools
+    command: ["pnpm", "dev"]
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      seed:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:3000/api/health > /dev/null"]
+      interval: 5s
+      timeout: 5s
+      start_period: 60s
+      retries: 30
+
+  # One-off tooling shell: `docker compose run --rm tools pnpm lint`
+  tools:
+    <<: *tools
+    profiles: ["tools"]
+    command: ["bash"]
+
+  test:
+    <<: *tools
+    profiles: ["test"]
+    command: ["pnpm", "test"]
+
+  # Production-like build (Next.js standalone) on http://localhost:3001
+  app-prod:
+    profiles: ["prod"]
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile
+      target: runner
+      args:
+        NEXT_PUBLIC_APP_URL: http://localhost:3001
+    image: operation-shadow/web:local
+    environment:
+      <<: *node-env
+      # Same port inside and outside the container, so the configured auth origin matches.
+      PORT: "3001"
+      BETTER_AUTH_URL: http://localhost:3001
+      NEXT_PUBLIC_APP_URL: http://localhost:3001
+    ports:
+      - "127.0.0.1:3001:3001"
+    depends_on:
+      seed:
+        condition: service_completed_successfully
+
+  e2e:
+    profiles: ["e2e"]
+    image: mcr.microsoft.com/playwright:v1.64.0-noble
+    working_dir: /app
+    ipc: host
+    # Share the app container's network so the browser uses http://localhost:3000 — the same origin
+    # the app is configured with (auth origin checks), and exempt from Chromium's HTTPS upgrades.
+    network_mode: service:app
+    environment:
+      E2E_BASE_URL: http://localhost:3000
+      CI: "true"
+    volumes:
+      - .:/app
+      - node_modules:/app/node_modules
+    command: ["node", "node_modules/@playwright/test/cli.js", "test"]
+    depends_on:
+      app:
+        condition: service_healthy
+
+  # The same browser suite against the production-like build.
+  e2e-prod:
+    profiles: ["e2e-prod"]
+    image: mcr.microsoft.com/playwright:v1.64.0-noble
+    working_dir: /app
+    ipc: host
+    network_mode: service:app-prod
+    environment:
+      E2E_BASE_URL: http://localhost:3001
+      CI: "true"
+    volumes:
+      - .:/app
+      - node_modules:/app/node_modules
+    command: ["node", "node_modules/@playwright/test/cli.js", "test"]
+    depends_on:
+      app-prod:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+  node_modules:
+  pnpm_store:

@@ -1,0 +1,17 @@
+packages:
+  - apps/*
+  - packages/*
+
+# A single hoisted node_modules keeps the Docker volume layout simple.
+nodeLinker: hoisted
+
+# Supply-chain policy: only install package versions published at least 7 days ago
+# (10080 minutes). Pinned versions in package.json files follow the same rule.
+minimumReleaseAge: 10080
+
+# Install scripts are denied unless reviewed and listed here (pnpm fails on unreviewed ones).
+# These only fetch or verify prebuilt native binaries.
+allowBuilds:
+  esbuild: true
+  sharp: true
+  unrs-resolver: true
