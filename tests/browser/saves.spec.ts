@@ -111,7 +111,8 @@ test.describe('Saved games and progress', () => {
     // The pause menu shows the synced values in a new browser context.
     await play(page, '/play/boot-camp?squad=infiltrator,engineer&seed=7');
     await page.keyboard.press('Escape');
-    await expect(page.getByLabel('Subtitles')).not.toBeChecked();
+    await page.getByTestId('open-settings').click();
+    await expect(page.getByLabel('Subtitles', { exact: true })).not.toBeChecked();
 
     expect((await json(page, 'POST', '/api/v1/account/delete', {})).status()).toBe(400);
     expect((await json(page, 'POST', '/api/v1/account/delete', { confirm: 'delete' })).status()).toBe(400);

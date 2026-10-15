@@ -6,6 +6,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { getBindings, isBound } from '../input/bindings';
 import type { GameController } from '../runtime/controller';
+import { useSettings } from '../runtime/settings';
 import { useGameUi } from '../runtime/store';
 
 const DEFAULT_PITCH = 0.93;
@@ -131,8 +132,9 @@ export function CameraRig({ controller, edgeScroll = false, reducedShake = false
       pointer.current = { x: (e.clientX - rect.left) / rect.width, y: (e.clientY - rect.top) / rect.height, inside: true };
       if (drag.current) {
         const r = rig.current;
-        r.desiredYaw -= (e.clientX - drag.current.x) * 0.006;
-        r.pitch = THREE.MathUtils.clamp(r.pitch + (e.clientY - drag.current.y) * 0.004, 0.55, 1.3);
+        const sensitivity = useSettings.getState().mouseSensitivity;
+        r.desiredYaw -= (e.clientX - drag.current.x) * 0.006 * sensitivity;
+        r.pitch = THREE.MathUtils.clamp(r.pitch + (e.clientY - drag.current.y) * 0.004 * sensitivity, 0.55, 1.3);
         drag.current = { x: e.clientX, y: e.clientY };
       }
     };

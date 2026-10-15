@@ -2,6 +2,7 @@
 COMPOSE := docker compose
 
 .DEFAULT_GOAL := help
+PHONY_EXTRA := scan-bundle audit
 .PHONY: help up down logs ps migrate seed shell lint typecheck test test-unit test-integration e2e e2e-prod check prod prod-down build rebuild reset voice-bank textures
 
 help: ## Show this help
@@ -57,6 +58,12 @@ e2e-prod: ## Run browser tests against the production-like build
 	$(COMPOSE) --profile prod --profile e2e-prod run --rm e2e-prod
 
 check: lint typecheck test ## Lint, typecheck and test
+
+scan-bundle: build ## Build, then scan the browser bundle for server secrets (prints names only)
+	$(COMPOSE) run --rm --no-deps tools npx tsx tools/security/scan-bundle.ts
+
+audit: ## Check dependencies for known vulnerabilities
+	$(COMPOSE) run --rm --no-deps tools pnpm audit --prod
 
 build: ## Build the production Next.js bundle in the tools container
 	$(COMPOSE) run --rm --no-deps tools pnpm build

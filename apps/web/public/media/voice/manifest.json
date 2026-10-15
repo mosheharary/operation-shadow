@@ -1,7 +1,7 @@
 {
   "version": 1,
   "model": "gemini-3.8-flash-tts",
-  "generatedAt": "2026-10-15T13:54:07.149Z",
+  "generatedAt": "2026-10-15T19:51:50.859Z",
   "lines": {
     "badger-ack-action-1": {
       "file": "badger-ack-action-1.mp3",
@@ -91,6 +91,94 @@
       "text": "Somebody is coming, mind yourselves.",
       "hash": "91300baed687c40e"
     },
+    "deck-intel-bodies": {
+      "file": "deck-intel-bodies.mp3",
+      "seconds": 4.99,
+      "voice": "Gacrux",
+      "speaker": "LANTERN",
+      "text": "Bodies left in the open will be found. Hide them before you move on.",
+      "hash": "a4d22b40c6a66901"
+    },
+    "deck-intel-shifts": {
+      "file": "deck-intel-shifts.mp3",
+      "seconds": 5.35,
+      "voice": "Gacrux",
+      "speaker": "LANTERN",
+      "text": "The garrison changes shifts on the hour. Fresh sentries look around more.",
+      "hash": "1ff86b88b42ad87c"
+    },
+    "deck-patrol-battery": {
+      "file": "deck-patrol-battery.mp3",
+      "seconds": 4.01,
+      "voice": "Gacrux",
+      "speaker": "LANTERN",
+      "text": "A Dominion patrol is sweeping the battery. Keep clear of it.",
+      "hash": "3f8a0fab9093a85d"
+    },
+    "deck-patrol-hamlet": {
+      "file": "deck-patrol-hamlet.mp3",
+      "seconds": 3.79,
+      "voice": "Gacrux",
+      "speaker": "LANTERN",
+      "text": "A Dominion patrol is sweeping the hamlet. Keep clear of it.",
+      "hash": "68787cc200a7f64c"
+    },
+    "deck-patrol-station": {
+      "file": "deck-patrol-station.mp3",
+      "seconds": 4.27,
+      "voice": "Gacrux",
+      "speaker": "LANTERN",
+      "text": "A Dominion patrol is sweeping the station. Keep clear of it.",
+      "hash": "76f76969703376fd"
+    },
+    "deck-patrol-village": {
+      "file": "deck-patrol-village.mp3",
+      "seconds": 3.79,
+      "voice": "Gacrux",
+      "speaker": "LANTERN",
+      "text": "A Dominion patrol is sweeping the village. Keep clear of it.",
+      "hash": "3e2ee7b2c686dab5"
+    },
+    "deck-patrol-yard": {
+      "file": "deck-patrol-yard.mp3",
+      "seconds": 3.84,
+      "voice": "Gacrux",
+      "speaker": "LANTERN",
+      "text": "A Dominion patrol is sweeping the yard. Keep clear of it.",
+      "hash": "0293773b797713ed"
+    },
+    "deck-weather-clear": {
+      "file": "deck-weather-clear.mp3",
+      "seconds": 3.91,
+      "voice": "Gacrux",
+      "speaker": "LANTERN",
+      "text": "The sky is clearing. Visibility will improve.",
+      "hash": "f9aeddf364668eea"
+    },
+    "deck-weather-fog": {
+      "file": "deck-weather-fog.mp3",
+      "seconds": 3.7,
+      "voice": "Gacrux",
+      "speaker": "LANTERN",
+      "text": "Fog is rolling in. Sentries will not see far.",
+      "hash": "190e663f0df66da4"
+    },
+    "deck-weather-rain": {
+      "file": "deck-weather-rain.mp3",
+      "seconds": 3.65,
+      "voice": "Gacrux",
+      "speaker": "LANTERN",
+      "text": "Rain is coming in. It will cover your footsteps.",
+      "hash": "38a61f1717da6929"
+    },
+    "deck-weather-snow": {
+      "file": "deck-weather-snow.mp3",
+      "seconds": 3.17,
+      "voice": "Gacrux",
+      "speaker": "LANTERN",
+      "text": "Snow is starting to fall. Mind your tracks.",
+      "hash": "98a2f8ed57137b95"
+    },
     "fox-ack-action-1": {
       "file": "fox-ack-action-1.mp3",
       "seconds": 3.02,
@@ -178,6 +266,22 @@
       "speaker": "FOX",
       "text": "Visitors. Look natural.",
       "hash": "a29fcf1aa3283bb5"
+    },
+    "frozen-ledger-landing": {
+      "file": "frozen-ledger-landing.mp3",
+      "seconds": 6.41,
+      "voice": "Gacrux",
+      "speaker": "LANTERN",
+      "text": "Lantern to Shadow Section. The pilot is hurt and frightened. Get him out before dawn.",
+      "hash": "1b362d79c67793b4"
+    },
+    "frozen-ledger-pilot-free": {
+      "file": "frozen-ledger-pilot-free.mp3",
+      "seconds": 3.58,
+      "voice": "Gacrux",
+      "speaker": "LANTERN",
+      "text": "He is with you. Keep him close and keep moving.",
+      "hash": "6e6cdae9ada845a2"
     },
     "guard-alarm-1-a": {
       "file": "guard-alarm-1-a.mp3",
@@ -571,6 +675,54 @@
       "text": "Someone is coming. Quiet now.",
       "hash": "333db602a065ae63"
     },
+    "iron-junction-driver": {
+      "file": "iron-junction-driver.mp3",
+      "seconds": 6.1,
+      "voice": "Gacrux",
+      "speaker": "LANTERN",
+      "text": "New information. One of our engine drivers is held in the yard lock-up. Bring him out if you can.",
+      "hash": "a64bc7b591a15119"
+    },
+    "iron-junction-landing": {
+      "file": "iron-junction-landing.mp3",
+      "seconds": 7.68,
+      "voice": "Gacrux",
+      "speaker": "LANTERN",
+      "text": "Lantern to Shadow Section. The fog is on our side tonight. The ammunition train stands on the third track.",
+      "hash": "acdc45f39df697b1"
+    },
+    "iron-junction-train-done": {
+      "file": "iron-junction-train-done.mp3",
+      "seconds": 3.53,
+      "voice": "Gacrux",
+      "speaker": "LANTERN",
+      "text": "That train is going nowhere. Back to the woods.",
+      "hash": "01375b6f15dba0d1"
+    },
+    "last-light-alarm": {
+      "file": "last-light-alarm.mp3",
+      "seconds": 5.11,
+      "voice": "Gacrux",
+      "speaker": "LANTERN",
+      "text": "They know you are there. If the sirens sound, the fleet turns back.",
+      "hash": "511223eef31ba1cf"
+    },
+    "last-light-first-gun": {
+      "file": "last-light-first-gun.mp3",
+      "seconds": 2.59,
+      "voice": "Gacrux",
+      "speaker": "LANTERN",
+      "text": "One gun down. One to go.",
+      "hash": "1d352abbd263ba0b"
+    },
+    "last-light-landing": {
+      "file": "last-light-landing.mp3",
+      "seconds": 7.39,
+      "voice": "Gacrux",
+      "speaker": "LANTERN",
+      "text": "Lantern to Shadow Section. The invasion fleet arrives at first light. Those guns must be silent by then.",
+      "hash": "c8caae9ebf5d1905"
+    },
     "moth-ack-action-1": {
       "file": "moth-ack-action-1.mp3",
       "seconds": 2.83,
@@ -866,6 +1018,22 @@
       "speaker": "LANTERN",
       "text": "New intelligence. A captured Coalition scout is held in the village lock-up. The battery is still your priority, but bringing him home would save an entire network.",
       "hash": "38d6aac727874a64"
+    },
+    "white-silence-landing": {
+      "file": "white-silence-landing.mp3",
+      "seconds": 7.82,
+      "voice": "Gacrux",
+      "speaker": "LANTERN",
+      "text": "Lantern to Shadow Section. Fresh snow keeps every footprint. The radar sits on the plateau beyond the gorge.",
+      "hash": "dc2eba91fc052ff8"
+    },
+    "white-silence-radar-done": {
+      "file": "white-silence-radar-done.mp3",
+      "seconds": 5.93,
+      "voice": "Gacrux",
+      "speaker": "LANTERN",
+      "text": "The radar is blind. Our bombers are already in the air. Get back to the drop zone.",
+      "hash": "ad5487161126392a"
     }
   }
 }

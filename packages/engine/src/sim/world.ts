@@ -319,6 +319,11 @@ export class World {
     return result;
   }
 
+  /** Orders accepted but not yet applied (they apply at the next tick; useful while paused). */
+  pendingCommands(): readonly Command[] {
+    return this.pending;
+  }
+
   /** Validation only, for hover feedback and context menus. */
   validate(command: Command): CommandResult {
     return validateCommand(this, command);

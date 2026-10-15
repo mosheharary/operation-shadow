@@ -1,11 +1,26 @@
 import { create } from 'zustand';
+import { type Bindings, setBindings } from '../input/bindings';
 
 /**
  * Game settings: kept in this browser and synced to the account (newest copy wins), except the
  * graphics preset, which belongs to the device's GPU.
  */
 export interface GameSettings {
-  quality: 'high' | 'low';
+  /** Preset that sets the three graphics options below ('custom' once one is changed by hand). */
+  quality: 'high' | 'low' | 'custom';
+  shadows: boolean;
+  postEffects: boolean;
+  /** Device pixel ratio cap: 0.75, 1, 1.25 or 1.5. */
+  resolutionScale: number;
+  /** Interface size, 0.75 to 1.5. */
+  uiScale: number;
+  subtitleSize: 'normal' | 'large';
+  /** Colour-blind-safe cone and alert colours (cones are also striped when alerted). */
+  palette: 'standard' | 'colorblind';
+  /** Camera rotate and tilt speed with the middle mouse button. */
+  mouseSensitivity: number;
+  /** Remapped keys (only the changed actions). */
+  keyBindings: Partial<Bindings>;
   edgeScroll: boolean;
   reducedShake: boolean;
   subtitles: boolean;
@@ -21,6 +36,14 @@ export interface GameSettings {
 
 const DEFAULTS: GameSettings = {
   quality: 'high',
+  shadows: true,
+  postEffects: true,
+  resolutionScale: 1.5,
+  uiScale: 1,
+  subtitleSize: 'normal',
+  palette: 'standard',
+  mouseSensitivity: 1,
+  keyBindings: {},
   edgeScroll: false,
   reducedShake: false,
   subtitles: true,
@@ -34,7 +57,13 @@ const DEFAULTS: GameSettings = {
 };
 
 /** Settings that stay on this device. */
-const DEVICE_ONLY = new Set<keyof GameSettings>(['quality', 'showFps']);
+const DEVICE_ONLY = new Set<keyof GameSettings>(['quality', 'shadows', 'postEffects', 'resolutionScale', 'showFps']);
+
+/** What each graphics preset sets. */
+export const PRESETS: Record<'high' | 'low', Pick<GameSettings, 'shadows' | 'postEffects' | 'resolutionScale'>> = {
+  high: { shadows: true, postEffects: true, resolutionScale: 1.5 },
+  low: { shadows: false, postEffects: false, resolutionScale: 1 },
+};
 
 const STORAGE_KEY = 'operation-shadow:settings';
 
@@ -43,7 +72,9 @@ function load(): GameSettings {
     const raw = typeof window === 'undefined' ? null : window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return DEFAULTS;
     const parsed = JSON.parse(raw) as Partial<GameSettings>;
-    return { ...DEFAULTS, ...parsed };
+    // Older copies only stored the preset: derive its options.
+    const preset = parsed.quality === 'low' || parsed.quality === 'high' ? PRESETS[parsed.quality] : {};
+    return { ...DEFAULTS, ...preset, ...parsed };
   } catch {
     return DEFAULTS;
   }
@@ -102,18 +133,26 @@ async function pullFromAccount(set: (s: Partial<GameSettings>) => void, get: () 
   }
 }
 
+/** Settings that live outside React: key bindings and the interface scale. */
+function applyGlobal(settings: GameSettings): void {
+  setBindings(settings.keyBindings);
+  if (typeof document !== 'undefined') document.documentElement.style.setProperty('--ui-scale', String(settings.uiScale));
+}
+
 export const useSettings = create<SettingsStore>((set, get) => ({
   ...DEFAULTS,
   hydrated: false,
   hydrate: () => {
     if (get().hydrated) return;
     set({ ...load(), hydrated: true });
-    void pullFromAccount(set, get);
+    applyGlobal(current(get()));
+    void pullFromAccount(set, get).then(() => applyGlobal(current(get())));
   },
   update: (patch) => {
     const synced = Object.keys(patch).some((k) => !DEVICE_ONLY.has(k as keyof GameSettings));
     set(synced ? { ...patch, updatedAt: Date.now() } : patch);
     save(current(get()));
+    applyGlobal(current(get()));
     if (synced) pushToAccount(current(get()));
   },
 }));

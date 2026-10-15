@@ -6,7 +6,12 @@ export type Command =
   | { type: 'move'; unitIds: string[]; target: Vec2; gait: Gait; queue?: boolean }
   | { type: 'stance'; unitIds: string[]; stance: Stance }
   | { type: 'stop'; unitIds: string[] }
-  | { type: 'ability'; unitId: string; abilityId: AbilityId; target: AbilityTarget; queue?: boolean; gait?: Gait };
+  | { type: 'ability'; unitId: string; abilityId: AbilityId; target: AbilityTarget; queue?: boolean; gait?: Gait }
+  /** Planning mode: wait for the signal (after current orders when `queue`). */
+  | { type: 'hold'; unitIds: string[]; queue?: boolean }
+  /** Planning mode: releases every operative waiting for the signal. */
+  | { type: 'signal' }
+  | { type: 'abort-rule'; unitIds: string[]; rule: 'none' | 'spotted' | 'alarm' };
 
 export type RejectReason =
   | 'unknown-unit'

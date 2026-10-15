@@ -149,18 +149,24 @@ function edgeGeometry(level: LevelData): THREE.BufferGeometry {
  * depth tint over the sea bed, foam along shores, quay walls and posts, and a translucent cut
  * edge where the diorama block ends.
  */
-export function Water({ level }: { level: LevelData }) {
+/**
+ * `glint` scales the specular sparkle: full under a night sky, much less in daylight (the scene's
+ * lights already brighten the water) and in fog.
+ */
+export function Water({ level, glint = 1 }: { level: LevelData; glint?: number }) {
   const hasWater = useMemo(() => level.flags.some((f) => (f & CellFlag.Deep) !== 0), [level]);
-  return hasWater ? <Sea level={level} /> : null;
+  return hasWater ? <Sea level={level} glint={glint} /> : null;
 }
 
-function Sea({ level }: { level: LevelData }) {
+function Sea({ level, glint }: { level: LevelData; glint: number }) {
   const { geometry, material, uniforms, edge, edgeMaterial } = useMemo(() => {
     const geo = new THREE.PlaneGeometry(level.width, level.depth, 160, 120);
     geo.rotateX(-Math.PI / 2);
     geo.translate(level.width / 2, level.seaLevel - 0.12, level.depth / 2);
     const u = {
       uTime: { value: 0 },
+      uGlint: { value: 1 },
+      uRough: { value: 0.06 },
       tWaves: { value: waveNormalTexture() },
       tShore: { value: shoreTexture(level) },
       uMapSize: { value: new THREE.Vector2(level.width, level.depth) },
@@ -182,6 +188,8 @@ function Sea({ level }: { level: LevelData }) {
           '#include <common>',
           `#include <common>
           uniform float uTime;
+          uniform float uGlint;
+          uniform float uRough;
           uniform sampler2D tWaves;
           uniform sampler2D tShore;
           uniform vec2 uMapSize;
@@ -204,7 +212,7 @@ function Sea({ level }: { level: LevelData }) {
           diffuseColor.a = mix(mix(0.6, 0.94, smoothstep(0.1, 2.0, depth)), 0.95, foam);
           vec3 waterN = vec3(0.0, 1.0, 0.0);`,
         )
-        .replace('#include <roughnessmap_fragment>', 'float roughnessFactor = mix(0.06, 0.6, foam);')
+        .replace('#include <roughnessmap_fragment>', 'float roughnessFactor = mix(uRough, 0.6, foam);')
         .replace(
           '#include <normal_fragment_maps>',
           `{
@@ -226,17 +234,20 @@ function Sea({ level }: { level: LevelData }) {
             vec3 refl = reflect(-viewDir, waterN);
             float glint = pow(max(dot(refl, normalize(vec3(0.42, 0.77, -0.48))), 0.0), 140.0);
             float sparkle = pow(max(dot(refl, normalize(vec3(-0.3, 0.9, 0.3))), 0.0), 260.0);
-            totalEmissiveRadiance += (vec3(0.09, 0.13, 0.19) * fres + vec3(0.8, 0.85, 0.9) * (glint * 1.2 + sparkle * 0.6)) * (1.0 - foam);
+            totalEmissiveRadiance += (vec3(0.09, 0.13, 0.19) * fres + vec3(0.8, 0.85, 0.9) * (glint * 1.2 + sparkle * 0.6) * uGlint) * (1.0 - foam);
           }`,
         );
     };
-    mat.customProgramCacheKey = () => 'water-v3';
+    mat.customProgramCacheKey = () => 'water-v4';
     const edgeMat = new THREE.MeshStandardMaterial({ color: '#0d2229', roughness: 0.2, transparent: true, opacity: 0.82, side: THREE.DoubleSide, depthWrite: false });
     return { geometry: geo, material: mat, uniforms: u, edge: edgeGeometry(level), edgeMaterial: edgeMat };
   }, [level]);
 
   useFrame((_, delta) => {
     uniforms.uTime.value += delta;
+    uniforms.uGlint.value = glint;
+    // A glassy sea suits moonlight; under daylight or fog the sun's highlight would cover it.
+    uniforms.uRough.value = 0.06 + (1 - glint) * 0.4;
   });
 
   return (

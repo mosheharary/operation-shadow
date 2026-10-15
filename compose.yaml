@@ -17,7 +17,8 @@ x-node-env: &node-env
   AI_PROVIDER: ${AI_PROVIDER:-}
   AI_MOCK_SCENARIO: ${AI_MOCK_SCENARIO:-}
   AI_MONTHLY_BUDGET_USD: ${AI_MONTHLY_BUDGET_USD:-5}
-  AI_DAILY_JOBS_PER_USER: ${AI_DAILY_JOBS_PER_USER:-20}
+  # Production default is 20; the local stack allows more so repeated test runs never hit it.
+  AI_DAILY_JOBS_PER_USER: ${AI_DAILY_JOBS_PER_USER:-500}
   NEXT_TELEMETRY_DISABLED: "1"
 
 x-tools: &tools

@@ -15,3 +15,8 @@ allowBuilds:
   esbuild: true
   sharp: true
   unrs-resolver: true
+
+# drizzle-kit's legacy loader pins esbuild 0.18 (GHSA-67mh-4wv8-2f99 affects only esbuild's dev
+# server, which nothing here runs); it works unchanged on the patched line already in the lockfile.
+overrides:
+  '@esbuild-kit/core-utils>esbuild': 0.25.12

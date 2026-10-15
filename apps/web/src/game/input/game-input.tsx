@@ -306,6 +306,18 @@ export function GameInput({ controller }: { controller: GameController }) {
           e.preventDefault();
           openMenu(controller, 'help');
           break;
+        case 'hold': {
+          const ids = activeSelected();
+          if (ids.length > 0 && running()) {
+            issue({ type: 'hold', unitIds: ids, queue: e.shiftKey });
+            state.toast(e.shiftKey ? 'Will wait for the signal after current orders' : 'Waiting for the signal', 'info');
+          }
+          break;
+        }
+        case 'signal':
+          e.preventDefault();
+          if (running()) issue({ type: 'signal' });
+          break;
         case 'quicksave':
           e.preventDefault();
           if (running()) void getActivePersistence()?.save('quick');

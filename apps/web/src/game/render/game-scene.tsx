@@ -44,12 +44,16 @@ export interface GameSceneProps {
 const ignoreSample = () => {};
 
 export function GameScene({ controller, onSample = ignoreSample, testHooks = false, audio = null }: GameSceneProps) {
-  const quality = useSettings((s) => s.quality);
+  const shadows = useSettings((s) => s.shadows);
+  const post = useSettings((s) => s.postEffects);
+  const resolutionScale = useSettings((s) => s.resolutionScale);
   const edgeScroll = useSettings((s) => s.edgeScroll);
   const reducedShake = useSettings((s) => s.reducedShake);
-  const high = quality === 'high';
   const weather = controller.world.state.env.weather;
   const wetness = weather === 'rain' ? 1 : weather === 'fog' || weather === 'snow' ? 0.5 : 0.15;
+  const hour = controller.world.state.env.timeOfDay;
+  const night = hour >= 20 || hour < 5;
+  const glint = (night ? 1 : hour < 8 || hour >= 18 ? 0.35 : 0.2) * (weather === 'fog' ? 0.5 : weather === 'rain' ? 0.7 : 1);
 
   // Roofs lift off buildings that hold a squad member or sit under the cursor.
   const cutawayRegions = useCallback(() => {
@@ -70,24 +74,24 @@ export function GameScene({ controller, onSample = ignoreSample, testHooks = fal
 
   return (
     <Canvas
-      key={quality}
-      shadows={high ? 'percentage' : false}
-      dpr={high ? [1, 1.5] : [1, 1]}
-      flat={high}
-      gl={{ antialias: !high, powerPreference: 'high-performance', stencil: false }}
+      key={`${shadows}-${post}`}
+      shadows={shadows ? 'percentage' : false}
+      dpr={[Math.min(1, resolutionScale), resolutionScale]}
+      flat={post}
+      gl={{ antialias: !post, powerPreference: 'high-performance', stencil: false }}
       camera={{ fov: 32, near: 0.5, far: 650, position: [40, 50, 60] }}
       onCreated={({ gl }) => {
         // With post-processing the ToneMapping effect maps HDR to the screen; otherwise the renderer does.
-        if (!high) gl.toneMapping = THREE.ACESFilmicToneMapping;
+        if (!post) gl.toneMapping = THREE.ACESFilmicToneMapping;
         gl.toneMappingExposure = 1.2;
       }}
     >
       <SimulationDriver controller={controller} />
-      <Lighting controller={controller} shadows={high} />
+      <Lighting controller={controller} shadows={shadows} />
       <Terrain level={controller.level} wetness={wetness} />
       <Rocks level={controller.level} />
       <Harbor level={controller.level} />
-      <Water level={controller.level} />
+      <Water level={controller.level} glint={glint} />
       <Structures level={controller.level} cutawayRegions={cutawayRegions} />
       <Props level={controller.level} />
       <LampGlows level={controller.level} />
@@ -99,7 +103,7 @@ export function GameScene({ controller, onSample = ignoreSample, testHooks = fal
       <Effects controller={controller} />
       <CameraRig controller={controller} edgeScroll={edgeScroll} reducedShake={reducedShake} />
       <GameInput controller={controller} />
-      {high && <PostEffects />}
+      {post && <PostEffects />}
       <PerfProbe onSample={onSample} />
       {testHooks && <TestHooks controller={controller} />}
       {audio && <AudioBridge audio={audio} />}

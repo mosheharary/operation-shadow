@@ -66,7 +66,16 @@ export function validateCommand(world: World, cmd: Command): CommandResult {
       return OK;
     }
     case 'stop':
+    case 'signal':
       return OK;
+    case 'hold':
+    case 'abort-rule': {
+      for (const id of cmd.unitIds) {
+        const u = activeUnit(world, id);
+        if ('ok' in u) return u;
+      }
+      return cmd.unitIds.length > 0 ? OK : reject('unknown-unit', 'Select a squad member');
+    }
     case 'ability': {
       const u = activeUnit(world, cmd.unitId);
       if ('ok' in u) return u;
@@ -85,7 +94,7 @@ export function validateCommand(world: World, cmd: Command): CommandResult {
 export function applyCommand(world: World, cmd: Command): void {
   const result = validateCommand(world, cmd);
   if (!result.ok) {
-    const unitId = cmd.type === 'ability' ? cmd.unitId : (cmd.unitIds[0] ?? '');
+    const unitId = cmd.type === 'ability' ? cmd.unitId : cmd.type === 'signal' ? '' : (cmd.unitIds[0] ?? '');
     world.emit({ type: 'rejected', unitId, reason: result.message });
     return;
   }
@@ -119,6 +128,35 @@ export function applyCommand(world: World, cmd: Command): void {
         interrupt(world, op);
         op.action = null;
         op.queue = [];
+      }
+      return;
+    case 'hold':
+      for (const id of cmd.unitIds) {
+        const op = world.operative(id)!;
+        if (cmd.queue && (op.action || op.queue.length > 0)) op.queue.push({ kind: 'wait-signal' });
+        else {
+          interrupt(world, op);
+          op.queue = [];
+          op.action = { kind: 'wait-signal' };
+        }
+      }
+      return;
+    case 'signal': {
+      let released = 0;
+      for (const op of world.state.operatives) {
+        if (op.action?.kind === 'wait-signal') {
+          op.action = null;
+          released += 1;
+        }
+        // A signal releases one hold per operative; later holds wait for the next signal.
+      }
+      if (released > 0) world.log('info', `Signal given: ${released} on the move`);
+      return;
+    }
+    case 'abort-rule':
+      for (const id of cmd.unitIds) {
+        const op = world.operative(id)!;
+        op.abortRule = cmd.rule === 'none' ? null : { on: cmd.rule, since: world.state.tick, alarmAt: world.state.alarm.level };
       }
       return;
     case 'ability': {

@@ -77,7 +77,7 @@ const hq = (world: World, lineKey: string, text: string) => {
 };
 
 /** Whether a card can be played now (plan §3.11 precondition checks). */
-function playable(world: World, card: DeckCard, index: number, complications: number): boolean {
+function playable(world: World, card: DeckCard, complications: number): boolean {
   const s = world.state;
   switch (card.kind) {
     case 'patrol':
@@ -89,27 +89,38 @@ function playable(world: World, card: DeckCard, index: number, complications: nu
     case 'weather':
       return card.weather !== s.env.weather;
     case 'intel':
-      return !s.director.fired.includes(`deck:intel:${index}`);
+      return !s.director.fired.includes(`deck:intel:${card.id}`);
   }
 }
 
-function play(world: World, card: DeckCard, index: number): void {
+/** The HQ line a card plays (shared with the voice-bank tool, which pre-records them). */
+export function deckMessage(card: DeckCard): { lineKey: string; text: string } {
+  switch (card.kind) {
+    case 'patrol':
+      return { lineKey: `deck-patrol-${card.sector}`, text: `A Dominion patrol is sweeping the ${card.sector}. Keep clear of it.` };
+    case 'weather':
+      return { lineKey: `deck-weather-${card.weather}`, text: WEATHER_TEXT[card.weather] };
+    case 'intel':
+      return { lineKey: `deck-intel-${card.id}`, text: card.text };
+  }
+}
+
+function play(world: World, card: DeckCard): void {
   const s = world.state;
+  const { lineKey, text } = deckMessage(card);
   switch (card.kind) {
     case 'patrol':
       for (let i = 0; i < card.count; i += 1) world.spawnReinforcement(card.sector, { x: card.pos.x + i * 0.8, z: card.pos.z }, card.pos);
       s.director.deck!.complications += 1;
-      hq(world, `deck-patrol-${card.sector}`, `A Dominion patrol is sweeping the ${card.sector}. Keep clear of it.`);
       break;
     case 'weather':
       setWeather(world, card.weather);
-      hq(world, `deck-weather-${card.weather}`, WEATHER_TEXT[card.weather]);
       break;
     case 'intel':
-      s.director.fired.push(`deck:intel:${index}`);
-      hq(world, `deck-intel-${index}`, card.text);
+      s.director.fired.push(`deck:intel:${card.id}`);
       break;
   }
+  hq(world, lineKey, text);
 }
 
 /** Draws from the mission's dynamic-event deck at intervals; skips cards whose preconditions fail. */
@@ -122,8 +133,8 @@ function updateDeck(world: World): void {
   for (let i = 0; i < deck.cards.length; i += 1) {
     const index = (start + i) % deck.cards.length;
     const card = deck.cards[index]!;
-    if (playable(world, card, index, state.complications)) {
-      play(world, card, index);
+    if (playable(world, card, state.complications)) {
+      play(world, card);
       break;
     }
   }

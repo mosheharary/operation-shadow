@@ -31,7 +31,7 @@ export interface MissionRuntime {
 export type DeckCard =
   | { kind: 'patrol'; sector: string; pos: Vec2; count: number }
   | { kind: 'weather'; weather: Weather }
-  | { kind: 'intel'; text: string };
+  | { kind: 'intel'; id: string; text: string };
 
 export interface DirectorDeck {
   firstAtSeconds: number;

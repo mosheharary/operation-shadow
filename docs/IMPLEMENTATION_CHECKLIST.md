@@ -260,6 +260,40 @@ Decisions D45–D50.
 | Browser tests vs. dev server | ✅ 21 / 21 (quicksave and quickload restore the same moment; manual slot; Continue from Field HQ; saves private, validated and same-origin only; first-timer "Start here" and a recorded rank; settings round-trip; deletion needs confirmation) |
 | Browser tests vs. production build (`make prod`, `make e2e-prod`) | ✅ 21 / 21 |
 
-## Milestones 5–6
+## Milestone 5 — Polish ✅ (2026-10-15)
+
+Decisions D51–D56. The tutorial and missions 2–5 were delivered earlier (see "Campaign and first-time tutorial").
+
+- [x] Planning mode: wait-for-signal orders, the signal, abort rules, timeline panel with durations, speed controls
+- [x] Settings screen: graphics (preset, shadows, post-processing, resolution), audio, accessibility (interface size, subtitle size, colour-blind palette, noise rings, camera shake, edge scroll, mouse speed), key remapping with conflict detection; synced to the account except graphics
+- [x] Voices: 21 new HQ lines for the campaign and the dynamic-event deck (`make voice-bank`, about $0.025)
+- [x] Error and not-found pages
+- [x] CSP with nonces, bundle secret scan, dependency audit clean
+- [x] Real-GPU check in Chrome on the M5 Pro (below)
+
+### Performance on the M5 Pro, real Chrome, High preset (2026-10-15)
+
+Measured with `requestAnimationFrame` timing over 5–8 s in a visible, focused tab, at 1512×749 CSS px and devicePixelRatio 2. The display refreshes at 120 Hz, which caps the frame rate.
+
+| Map | FPS | Median frame | 95th pct | Draw calls | Triangles | JS heap |
+|---|---|---|---|---|---|---|
+| White Silence (alpine, snow) | 120 | 8.3 ms | 8.5 ms | 225 | 0.67 M | 84 MB |
+| Last Light (coastal, heavy garrison, fog), all view cones shown | 120 | 8.3 ms | 8.5 ms (99th: 10.0) | 244 | 0.71 M | 101 MB |
+| Silent Tide (coastal night) | 120 | — | 8.9 ms | 320 | 0.71 M | — |
+
+All within the High budgets (≤ 600 draw calls, ≤ 2 M triangles, ≤ 400 MB heap). Screenshots: `docs/perf/`. No console errors or CSP violations.
+**Not measured:** low-end hardware (none available); the Performance preset is the fallback.
+
+### Verification (ran 2026-10-15)
+
+| Check | Result |
+|---|---|
+| `pnpm lint` / `pnpm typecheck` | ✅ |
+| Unit + integration tests | ✅ 164 / 164 (adds planning: synchronized start, second hold, abort if spotted, abort on alarm, plan survives save/load) |
+| Browser tests vs. dev server | ✅ 23 / 23 (adds planning with real keys, key remapping with a refused conflict, palette and interface size) |
+| Browser tests vs. production build | ✅ 23 / 23 with the strict production CSP |
+| `make scan-bundle` / `make audit` | ✅ no secrets in 42 client files; no known vulnerabilities |
+
+## Milestone 6
 
 See `docs/architecture/implementation-plan.md` §13.

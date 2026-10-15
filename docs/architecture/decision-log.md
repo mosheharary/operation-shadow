@@ -85,3 +85,14 @@ The first M2 build rendered flat-coloured primitives; the user expected the look
 | D48 | Slots: quick (F5/F9), auto (objective completed, and every five minutes of mission time while no guard is alerted) and three manual slots. If an upload fails for network reasons the save is kept in IndexedDB and uploaded on the next session | Plan §9.3 |
 | D49 | Settings sync to the account except the graphics preset and FPS readout, which stay per device; the newest copy (by its own timestamp) wins | Graphics depend on the device's GPU; everything else should follow the player |
 | D50 | Account deletion requires typing DELETE, removes the user row (everything owned cascades), clears the session cookies and writes an audit entry with only a one-way hash of the id | Plan §9 and the privacy expectation that deletion is complete |
+
+## Milestone 5: polish (2026-10-15)
+
+| # | Decision | Why |
+|---|---|---|
+| D51 | Planning mode uses engine orders: `hold` (wait for the signal, L; Shift queues it after current orders), `signal` (Enter releases one hold per specialist), and a per-specialist abort rule ("if spotted", "on alarm") armed when set. A timeline panel shows each specialist's current, queued and still-pending orders with rough durations, plus 0.5×/1×/2× speed | Plan §3.12. Orders stay deterministic commands, so plans survive save and load (tested) |
+| D52 | Graphics presets set three per-device options (shadows, post-processing, resolution scale), each adjustable. Accessibility settings sync to the account: interface size 75–150%, subtitle size, colour-blind palette (Okabe–Ito cone colours; alerted cones are also striped), mouse rotate speed, and full key remapping with conflict detection that blocks applying | Plan §5 graphics settings and §6 accessibility |
+| D53 | Content-Security-Policy with a per-request nonce and `strict-dynamic`, set by `proxy.ts` on every page; development additionally allows `unsafe-eval` and WebSocket for hot reloading. `make scan-bundle` builds and scans the client bundle for secret values and key patterns; `make audit` runs `pnpm audit --prod` | Plan §10 controls |
+| D54 | `pnpm` override pins drizzle-kit's legacy esbuild to 0.25.12 | Clears GHSA-67mh-4wv8-2f99 (esbuild dev server); drizzle-kit still generates migrations unchanged |
+| D55 | Water glints and roughness follow the time of day and weather: glassy with moon glints at night, matte and choppy in daylight and fog | Found in the real-GPU check: the dawn mission's sea was a field of sparkles |
+| D56 | The local stack allows 500 generated operations per player per day (production default stays 20) | Repeated browser-test runs exhausted the production quota (the quota itself worked) |

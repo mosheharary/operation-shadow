@@ -15,7 +15,7 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { GUARD_BARKS, GUARD_VOICES, HQ_PROFILE, MISSIONS, SPECIALIST_PROFILES, SQUAD_BARKS } from '@operation-shadow/content';
-import { SPECIALISTS } from '@operation-shadow/engine';
+import { deckFor, deckMessage, GENERATOR_TEMPLATES, SPECIALISTS } from '@operation-shadow/engine';
 
 const MODEL = 'gemini-3.8-flash-tts';
 const API = 'https://generativelanguage.googleapis.com/v1beta/interactions';
@@ -84,6 +84,16 @@ function collectJobs(): Job[] {
         }
       }
     }
+  }
+  // Dynamic-event lines of generated operations (same key and text across templates are recorded once).
+  const deckKeys = new Set<string>();
+  for (const template of GENERATOR_TEMPLATES) {
+    deckFor(template).cards.forEach((card) => {
+      const { lineKey, text } = deckMessage(card);
+      if (deckKeys.has(lineKey)) return;
+      deckKeys.add(lineKey);
+      jobs.push({ key: lineKey, speaker: HQ_PROFILE.callSign, text, voice: HQ_PROFILE.voice, style: HQ_PROFILE.voiceStyle });
+    });
   }
   const keys = new Set<string>();
   for (const job of jobs) {

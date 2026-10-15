@@ -139,8 +139,8 @@ export function deckFor(template: TemplateDef): DirectorDeck {
     cards: [
       ...template.reinforcements.map((r): DeckCard => ({ kind: 'patrol', sector: r.sector, pos: { ...r.pos }, count: Math.min(2, r.count) })),
       ...DECK_WEATHER[template.theme].map((weather): DeckCard => ({ kind: 'weather', weather })),
-      { kind: 'intel', text: 'The garrison changes shifts on the hour. Fresh sentries look around more.' },
-      { kind: 'intel', text: 'Bodies left in the open will be found. Hide them before you move on.' },
+      { kind: 'intel', id: 'shifts', text: 'The garrison changes shifts on the hour. Fresh sentries look around more.' },
+      { kind: 'intel', id: 'bodies', text: 'Bodies left in the open will be found. Hide them before you move on.' },
     ],
   };
 }

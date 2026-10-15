@@ -1,7 +1,7 @@
 import { distance, headingTo, moveToward, type Vec2 } from '../core/math';
 import { CellFlag, Surface } from '../level/types';
 import { followPath } from './movement';
-import { completeChannel, navProfileFor, tryBegin } from './orders';
+import { completeChannel, interrupt, navProfileFor, tryBegin } from './orders';
 import { DIFFICULTY, operativeSpeed, SPECIALIST_RULES } from './rules';
 import { DT, type Gait, type Operative, type Stance, seconds } from './types';
 import type { World } from './world';
@@ -79,7 +79,24 @@ function afterMove(world: World, op: Operative, moved: number, gait: Gait): void
   }
 }
 
+/** Planning mode: drops the plan when its abort condition has occurred since it was armed. */
+function checkAbort(world: World, op: Operative): void {
+  const rule = op.abortRule;
+  if (!rule || (!op.action && op.queue.length === 0)) return;
+  const s = world.state;
+  const spotted = rule.on === 'spotted' && (op.lastSpottedTick ?? -1) > rule.since;
+  const alarmed = rule.on === 'alarm' && s.alarm.level > rule.alarmAt;
+  if (!spotted && !alarmed) return;
+  interrupt(world, op);
+  op.action = null;
+  op.queue = [];
+  op.abortRule = { on: rule.on, since: s.tick, alarmAt: s.alarm.level };
+  world.log('warning', `${op.role} aborted the plan: ${spotted ? 'spotted' : 'the alarm went up'}`);
+  world.emit({ type: 'rejected', unitId: op.id, reason: spotted ? 'Plan aborted: spotted' : 'Plan aborted: alarm' });
+}
+
 function processAction(world: World, op: Operative): void {
+  checkAbort(world, op);
   if (!op.action) {
     const next = op.queue.shift();
     if (!next) return;
@@ -143,6 +160,8 @@ function processAction(world: World, op: Operative): void {
       if (!guard || guard.status !== 'active' || guard.distractedBy !== op.id) op.action = null;
       return;
     }
+    case 'wait-signal':
+      return;
   }
 }
 

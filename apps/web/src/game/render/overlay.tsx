@@ -8,6 +8,12 @@ import type { GameController } from '../runtime/controller';
 import { useSettings } from '../runtime/settings';
 import { useGameUi } from '../runtime/store';
 
+/** Cone colours; the colour-blind palette uses Okabe-Ito hues (alerted cones are striped in both). */
+const CONE_COLORS = {
+  standard: { calm: '#5fd17a', wary: '#f0a23a', alert: '#ff5a3c' },
+  colorblind: { calm: '#56b4e9', wary: '#e69f00', alert: '#d55e00' },
+} as const;
+
 const RAYS = 41;
 const MAX_CONES = 26;
 const PATH_DOTS = 160;
@@ -180,7 +186,8 @@ export function Overlay({ controller }: { controller: GameController }) {
       writeFan(slot.near.geometry, world.grid, origin, fan, fan.near);
       const alert = g.state === 'alerted' || g.state === 'combat' || g.state === 'challenge';
       const wary = g.state === 'suspicious' || g.state === 'investigate' || g.state === 'search';
-      const color = alert ? '#ff5a3c' : wary ? '#f0a23a' : '#5fd17a';
+      const colors = CONE_COLORS[useSettings.getState().palette];
+      const color = alert ? colors.alert : wary ? colors.wary : colors.calm;
       slot.far.material.uniforms.uColor!.value.set(color);
       slot.near.material.uniforms.uColor!.value.set(color);
       slot.far.material.uniforms.uOpacity!.value = 0.16;

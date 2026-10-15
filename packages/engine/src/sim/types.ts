@@ -106,7 +106,16 @@ export type Action =
   | { kind: 'move'; path: MovePathPoint[]; index: number; gait: Gait; target: Vec2; linkProgress: number }
   | { kind: 'approach'; abilityId: AbilityId; target: AbilityTarget; path: MovePathPoint[]; index: number; gait: Gait; repathTick: number; linkProgress: number }
   | { kind: 'channel'; abilityId: AbilityId; target: AbilityTarget; remaining: number; total: number; anchor: Vec2; applied: boolean }
-  | { kind: 'converse'; guardId: string };
+  | { kind: 'converse'; guardId: string }
+  /** Planning mode: holds the queue until the player gives the signal. */
+  | { kind: 'wait-signal' };
+
+/** Planning mode: clear this operative's orders when the condition occurs after it was set. */
+export interface AbortRule {
+  on: 'spotted' | 'alarm';
+  since: number;
+  alarmAt: AlarmLevel;
+}
 
 export type OperativeStatus = 'active' | 'downed' | 'dead' | 'captured' | 'extracted';
 
@@ -132,6 +141,10 @@ export interface Operative {
   escortedBy: string | null;
   action: Action | null;
   queue: Action[];
+  /** Planning-mode abort condition (absent in older saves = none). */
+  abortRule?: AbortRule | null;
+  /** Tick a guard last spotted this operative. */
+  lastSpottedTick?: number;
   cooldowns: Partial<Record<AbilityId, number>>;
   stride: number;
   /** Tick of the last movement, for the visibility motion factor. */

@@ -9,6 +9,7 @@ import { DragBox, Subtitles, Toasts } from './messages';
 import { Minimap } from './minimap';
 import { ObjectivesPanel } from './objectives';
 import { PerfReadout } from './perf-readout';
+import { PlanningPanel } from './planning';
 import { PortraitBar } from './portraits';
 import { StatusBar } from './status-bar';
 import { TutorialPanel } from '../tutorial/tutorial-panel';
@@ -35,6 +36,9 @@ export function Hud(props: MenuCallbacks) {
         <Minimap />
         <ObjectivesPanel />
         <EnemyInfo />
+      </div>
+      <div className={styles.bottomLeft}>
+        <PlanningPanel />
       </div>
       <div className={styles.bottomCenter}>
         <Subtitles />

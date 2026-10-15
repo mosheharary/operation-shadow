@@ -101,6 +101,8 @@ function onDetected(world: World, g: Guard, targetId: string, pos: Vec2): void {
     s.stats.detections += 1;
     world.emit({ type: 'detected', guardId: g.id, targetId });
   }
+  const spotted = world.operative(targetId);
+  if (spotted) spotted.lastSpottedTick = s.tick;
   g.targetId = targetId;
   g.goal = { ...pos };
   g.focus = null;

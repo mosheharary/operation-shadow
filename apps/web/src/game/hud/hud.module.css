@@ -20,6 +20,7 @@
 .topLeft,
 .topCenter,
 .topRight,
+.bottomLeft,
 .bottomCenter {
   position: absolute;
   display: flex;
@@ -928,4 +929,130 @@
   display: flex;
   gap: 0.4rem;
   flex-shrink: 0;
+}
+
+.bottomLeft {
+  bottom: 0.75rem;
+  left: 0.75rem;
+  width: min(30rem, 32vw);
+}
+
+.planning {
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: rgba(15, 20, 24, 0.9);
+  pointer-events: auto;
+}
+
+.planningHint {
+  margin: 0 0 0.4rem;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.timeline li {
+  display: grid;
+  grid-template-columns: 4.2rem 1fr auto;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+}
+
+.timeline select {
+  font: inherit;
+  font-size: 0.75rem;
+  background: var(--panel-strong);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.step,
+.stepWait {
+  padding: 0.05rem 0.4rem;
+  border-radius: var(--radius);
+  background: var(--panel-strong);
+  white-space: nowrap;
+}
+
+.stepWait {
+  background: rgba(201, 164, 92, 0.25);
+  border: 1px dashed var(--brass);
+}
+
+.planningActions {
+  display: flex;
+  gap: 0.35rem;
+  margin-top: 0.5rem;
+}
+
+.subtitlesLarge p {
+  font-size: 1.3rem;
+  background: rgba(8, 10, 12, 0.92);
+}
+
+.modalWide {
+  width: min(56rem, calc(100vw - 2rem));
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+}
+
+.bindings {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 0.3rem 1rem;
+}
+
+.binding {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.bindingKey,
+.bindingClash {
+  min-width: 5.5rem;
+  padding: 0.2rem 0.5rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel-strong);
+  color: var(--ink);
+  font: inherit;
+  font-family: var(--font-type);
+  cursor: pointer;
+}
+
+.bindingClash {
+  border-color: #ff5a3c;
+  color: #ffb4a3;
+}
+
+.bindingClash::before {
+  content: '⚠ ';
+}
+
+.warning {
+  margin: 0.5rem 0;
+  padding: 0.35rem 0.55rem;
+  border-left: 3px solid #f0a23a;
+  background: rgba(240, 162, 58, 0.12);
+  font-size: 0.82rem;
 }

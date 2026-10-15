@@ -23,7 +23,7 @@ const ROADMAP = [
   { label: 'Campaign of six missions with a guided tutorial', state: 'ok' },
   { label: 'Generated operations (Gemini, with offline fallback)', state: 'ok' },
   { label: 'Campaign progress, saved games, synced settings', state: 'ok' },
-  { label: 'Full campaign, planning mode, polish', state: 'pending' },
+  { label: 'Planning mode, settings and accessibility, security hardening', state: 'ok' },
 ] as const;
 
 const SLOT_NAME: Record<string, string> = { quick: 'Quicksave', auto: 'Autosave', 'manual-1': 'Slot 1', 'manual-2': 'Slot 2', 'manual-3': 'Slot 3' };

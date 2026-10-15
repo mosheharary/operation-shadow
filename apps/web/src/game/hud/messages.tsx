@@ -20,11 +20,12 @@ function useNow(active: boolean): number {
 export function Subtitles() {
   const subtitles = useGameUi((s) => s.subtitles);
   const enabled = useSettings((s) => s.subtitles);
+  const large = useSettings((s) => s.subtitleSize === 'large');
   const now = useNow(subtitles.length > 0);
   const live = subtitles.filter((s) => s.until > now).slice(-2);
   if (!enabled || live.length === 0) return null;
   return (
-    <div className={styles.subtitles} aria-live="polite" data-testid="subtitles">
+    <div className={`${styles.subtitles}${large ? ` ${styles.subtitlesLarge}` : ''}`} aria-live="polite" data-testid="subtitles">
       {live.map((line) => (
         <p key={line.id}>
           <strong>{line.speaker}:</strong> {line.text}
