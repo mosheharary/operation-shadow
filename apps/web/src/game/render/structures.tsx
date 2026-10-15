@@ -337,6 +337,7 @@ function buildFortifications(level: LevelData): Fortifications {
   const concrete = surfaceMaterial('concrete', { scale: 2.5, vertexColors: true, tint: '#b9b6ae' });
   const iron = surfaceMaterial('metal', { scale: 1, vertexColors: true, tint: '#3f4245', metalness: 0.5, roughness: 0.6 });
   const slate = surfaceMaterial('roof-slate', { scale: 1.6, vertexColors: true });
+  const railSteel = surfaceMaterial('metal', { scale: 1, tint: '#5b5550', metalness: 0.8, roughness: 0.35 });
   const bag = (x: number, y: number, z: number, rotY: number) => {
     const m = new THREE.Matrix4().makeRotationY(rotY + (random() - 0.5) * 0.18);
     m.setPosition(x, y, z);
@@ -442,6 +443,25 @@ function buildFortifications(level: LevelData): Fortifications {
       batches.add('slate', slate, roof);
       for (let y = 0.4; y < 5.1; y += 0.35) batches.add('timber', timber, tinted(box(0.06, 0.06, 0.55, s.pos.x + 1.32, s.baseHeight + y, s.pos.z), new THREE.Color('#6d5a44')));
       for (const side of [-0.28, 0.28]) batches.add('timber', timber, tinted(box(0.07, 5.3, 0.07, s.pos.x + 1.32, s.baseHeight + 2.65, s.pos.z + side), new THREE.Color('#6d5a44')));
+    } else if (s.kind === 'rail' && s.path && s.path.length >= 2) {
+      // Two steel rails on timber sleepers (the ballast is the gravel surface).
+      const a = s.path[0]!;
+      const b = s.path[1]!;
+      const len = Math.hypot(b.x - a.x, b.z - a.z);
+      const rot = -Math.atan2(b.z - a.z, b.x - a.x);
+      const mid = { x: (a.x + b.x) / 2, z: (a.z + b.z) / 2 };
+      for (const side of [-0.72, 0.72]) {
+        const rail = box(len, 0.12, 0.08, 0, s.baseHeight + 0.2, side);
+        rail.rotateY(rot);
+        rail.translate(mid.x, 0, mid.z);
+        batches.add('rail', railSteel, rail);
+      }
+      for (let u = -len / 2 + 0.3; u < len / 2; u += 0.65) {
+        const sleeper = box(0.24, 0.12, 2.3, u, s.baseHeight + 0.08, 0);
+        sleeper.rotateY(rot);
+        sleeper.translate(mid.x, 0, mid.z);
+        batches.add('timber', timber, tinted(sleeper, shade(0.6, 0.15, random)));
+      }
     } else if (s.kind === 'sandbags') {
       const alongZ = s.size.z >= s.size.x;
       const length = Math.max(s.size.x, s.size.z);

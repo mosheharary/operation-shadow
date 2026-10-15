@@ -20,7 +20,7 @@ import { PostEffects } from './post';
 import { Props } from './props';
 import { Rocks } from './rocks';
 import { Structures } from './structures';
-import { TargetingPreview } from './targeting';
+import { TargetingPreview, TutorialMarker } from './targeting';
 import { Terrain } from './terrain';
 import { TestHooks } from './test-hooks';
 import { PerfProbe, type RenderSample } from './test-range/perf-probe';
@@ -95,6 +95,7 @@ export function GameScene({ controller, onSample = ignoreSample, testHooks = fal
       <Units controller={controller} />
       <Overlay controller={controller} />
       <TargetingPreview controller={controller} />
+      {controller.entry.tutorial && <TutorialMarker controller={controller} />}
       <Effects controller={controller} />
       <CameraRig controller={controller} edgeScroll={edgeScroll} reducedShake={reducedShake} />
       <GameInput controller={controller} />

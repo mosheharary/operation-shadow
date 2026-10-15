@@ -150,6 +150,11 @@ function edgeGeometry(level: LevelData): THREE.BufferGeometry {
  * edge where the diorama block ends.
  */
 export function Water({ level }: { level: LevelData }) {
+  const hasWater = useMemo(() => level.flags.some((f) => (f & CellFlag.Deep) !== 0), [level]);
+  return hasWater ? <Sea level={level} /> : null;
+}
+
+function Sea({ level }: { level: LevelData }) {
   const { geometry, material, uniforms, edge, edgeMaterial } = useMemo(() => {
     const geo = new THREE.PlaneGeometry(level.width, level.depth, 160, 120);
     geo.rotateX(-Math.PI / 2);

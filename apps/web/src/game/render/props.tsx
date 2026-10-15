@@ -328,12 +328,48 @@ function partsFor(kind: PropKind): Part[] {
       return [{ geometry: box(0.62, 0.24, 0.34, 0, 0.12, 0), material: M.canvas() }];
     case 'searchlight':
       return [];
+    case 'wagon': {
+      // Box wagon, 10 m long along x: body, roof, underframe, bogies and sliding door.
+      const body = box(9.6, 2.7, 2.7, 0, 2.15, 0);
+      const roof = t(new THREE.CylinderGeometry(1.5, 1.5, 9.8, 12, 1, false, -Math.PI / 2, Math.PI), (g) => { g.rotateZ(Math.PI / 2); g.scale(1, 0.22, 0.98); g.translate(0, 3.5, 0); });
+      const frame = merge([box(10, 0.3, 2.2, 0, 0.75, 0), box(10.4, 0.18, 0.18, 0, 0.75, 1.15), box(10.4, 0.18, 0.18, 0, 0.75, -1.15)])!;
+      const wheels = merge([-3.6, -2.6, 2.6, 3.6].flatMap((x) => [-0.72, 0.72].map((z) => t(new THREE.CylinderGeometry(0.42, 0.42, 0.12, 12), (g) => { g.rotateX(Math.PI / 2); g.translate(x, 0.42, z); }))))!;
+      const doors = merge([box(2.2, 2.2, 0.06, 0, 2.05, 1.38), box(2.2, 2.2, 0.06, 0, 2.05, -1.38)])!;
+      return [
+        { geometry: merge([body, roof])!, material: surfaceMaterial('planks', { scale: 1.6, tint: '#8a4a36', roughness: 0.8 }), shadow: true },
+        { geometry: merge([frame, wheels])!, material: M.iron(), shadow: true },
+        { geometry: doors, material: surfaceMaterial('planks', { scale: 1.2, tint: '#6d3a2b', roughness: 0.8 }) },
+      ];
+    }
+    case 'water-tower':
+      return [
+        {
+          geometry: merge([
+            ...[
+              [1.1, 1.1],
+              [-1.1, 1.1],
+              [1.1, -1.1],
+              [-1.1, -1.1],
+            ].map(([x, z]) => box(0.22, 6, 0.22, x!, 3, z!)),
+            box(2.6, 0.12, 0.12, 0, 2.5, 1.1),
+            box(2.6, 0.12, 0.12, 0, 2.5, -1.1),
+            box(0.12, 0.12, 2.6, 1.1, 2.5, 0),
+            box(0.12, 0.12, 2.6, -1.1, 2.5, 0),
+          ])!,
+          material: M.bark(),
+          shadow: true,
+        },
+        { geometry: t(new THREE.CylinderGeometry(1.7, 1.7, 2.6, 16), (g) => g.translate(0, 7.3, 0)), material: surfaceMaterial('planks', { scale: 1.2, tint: '#7a6a58' }), shadow: true },
+        { geometry: t(new THREE.ConeGeometry(1.9, 0.9, 16), (g) => g.translate(0, 9.05, 0)), material: M.iron(), shadow: true },
+      ];
   }
 }
 
 const FLOATING: ReadonlySet<PropKind> = new Set(['rowboat', 'fishing-boat', 'buoy']);
 /** Painted hull colours for boats (instance tint), like the moored boats in the concept art. */
 const HULL_TINTS = ['#c9c2b4', '#5b7183', '#8a3f30', '#b8b29e', '#3f5c4d'];
+/** Wagon paint (body instance tint). */
+const WAGON_TINTS = ['#ffffff', '#8c9a8a', '#b9a37f', '#a0a8b0'];
 
 function PropKindInstances({ kind, props, grid, seaLevel }: { kind: PropKind; props: PropDef[]; grid: Grid; seaLevel: number }) {
   const parts = useMemo(() => partsFor(kind), [kind]);
@@ -358,6 +394,7 @@ function PropKindInstances({ kind, props, grid, seaLevel }: { kind: PropKind; pr
         mesh.setMatrixAt(i, dummy.matrix);
         // Per-instance shade: hull paint for boats, gentle variation for everything else.
         if (FLOATING.has(kind) && j === 0) color.set(HULL_TINTS[Math.floor(hash2(i, 5, 13) * HULL_TINTS.length)]!);
+        else if (kind === 'wagon' && j === 0) color.set(WAGON_TINTS[Math.floor(hash2(i, 9, 17) * WAGON_TINTS.length)]!);
         else color.setScalar(0.85 + hash2(Math.round(p.pos.x * 3), Math.round(p.pos.z * 3), j) * 0.3);
         mesh.setColorAt(i, color);
       }

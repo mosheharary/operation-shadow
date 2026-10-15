@@ -80,7 +80,8 @@ export type StructureKind =
   | 'wall'
   | 'fence'
   | 'sandbags'
-  | 'cliff-stairs';
+  | 'cliff-stairs'
+  | 'rail';
 
 /** Rendering and gameplay description of a generated structure. */
 export interface StructureDef {
@@ -126,7 +127,9 @@ export type PropKind =
   | 'truck'
   | 'bench'
   | 'bollard'
-  | 'buoy';
+  | 'buoy'
+  | 'wagon'
+  | 'water-tower';
 
 export interface PropDef {
   id: string;

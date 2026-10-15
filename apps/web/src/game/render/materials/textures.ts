@@ -15,7 +15,8 @@ export type SurfaceKey =
   | 'roof-slate'
   | 'roof-clay'
   | 'concrete'
-  | 'metal';
+  | 'metal'
+  | 'snow';
 
 export type MapKind = 'color' | 'normal' | 'rough';
 

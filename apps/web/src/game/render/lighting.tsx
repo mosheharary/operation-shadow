@@ -57,7 +57,7 @@ export function Lighting({ controller, shadows = true }: { controller: GameContr
   const fogColor = useMemo(() => new THREE.Color('#1b2632').lerp(new THREE.Color('#a9b6bf'), daylight), [daylight]);
   const background = useMemo(() => fogColor.clone().multiplyScalar(0.8), [fogColor]);
   // Light enough to read as sea mist from the tactical camera rather than as darkness.
-  const fogDensity = env.weather === 'fog' ? 0.02 : env.weather === 'rain' ? 0.0075 : 0.005;
+  const fogDensity = env.weather === 'fog' ? 0.0105 : env.weather === 'rain' ? 0.0075 : env.weather === 'snow' ? 0.006 : 0.005;
 
   useFrame((frame) => {
     const focus = cameraFocus(frame.camera);

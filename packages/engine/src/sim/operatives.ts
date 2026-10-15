@@ -108,8 +108,10 @@ function processAction(world: World, op: Operative): void {
     case 'approach': {
       if (tryBegin(world, op, action)) return;
       const s = world.state;
-      if (action.path.length === 0 || s.tick >= action.repathTick || action.index >= action.path.length) {
-        const target = world.resolveTargetPos(action.target);
+      // Re-plan toward a moving target, but never in the middle of a climb or ladder.
+      const midLink = action.linkProgress > 0;
+      if (action.path.length === 0 || action.index >= action.path.length || (s.tick >= action.repathTick && !midLink)) {
+        const target = world.resolveTargetPos(action.target, op.pos);
         const res = target ? world.pathfinder.findPath(op.pos, target, navProfileFor(op)) : null;
         if (!res || !res.ok) {
           world.emit({ type: 'rejected', unitId: op.id, reason: 'Cannot reach the target' });

@@ -3,10 +3,10 @@ import { NOISE_GLSL } from './surface';
 import { type SurfaceArrays, type SurfaceKey, surfaceArrays } from './textures';
 
 /** Terrain layers, in array order. Rock (index 5) is projected triplanar on steep ground. */
-export const TERRAIN_LAYERS: readonly SurfaceKey[] = ['grass', 'sand', 'cobble', 'gravel', 'forest', 'rock', 'concrete', 'planks'];
+export const TERRAIN_LAYERS: readonly SurfaceKey[] = ['grass', 'sand', 'cobble', 'gravel', 'forest', 'rock', 'concrete', 'planks', 'snow'];
 export const ROCK_LAYER = 5;
 /** Metres per texture tile for each layer (cobbles slightly enlarged so they read at tactical zoom). */
-const LAYER_SCALE = [2.6, 3.2, 2.2, 2.6, 3.2, 4.5, 3.0, 2.6];
+const LAYER_SCALE = [2.6, 3.2, 2.2, 2.6, 3.2, 4.5, 3.0, 2.6, 3.4];
 /** Per-layer colour grade: the grass is lifted toward the concept's moss green. */
 const LAYER_TINT = [
   [1.25, 1.45, 0.95],
@@ -17,6 +17,7 @@ const LAYER_TINT = [
   [1.15, 1.18, 1.15],
   [1.0, 1.0, 1.0],
   [1.0, 1.0, 1.0],
+  [1.0, 1.02, 1.06],
 ];
 
 let arrays: SurfaceArrays | null = null;
@@ -52,9 +53,11 @@ export function createTerrainMaterial(options: TerrainMaterialOptions): THREE.Me
         attribute float aLight;
         attribute vec4 splatA;
         attribute vec4 splatB;
+        attribute vec4 splatC;
         varying float vLight;
         varying vec4 vSplatA;
         varying vec4 vSplatB;
+        varying vec4 vSplatC;
         varying vec3 vTpPos;
         varying vec3 vTpNormal;`,
       )
@@ -64,6 +67,7 @@ export function createTerrainMaterial(options: TerrainMaterialOptions): THREE.Me
         vLight = aLight;
         vSplatA = splatA;
         vSplatB = splatB;
+        vSplatC = splatC;
         vTpPos = (modelMatrix * vec4(transformed, 1.0)).xyz;
         vTpNormal = normalize(mat3(modelMatrix) * objectNormal);`,
       );
@@ -74,13 +78,14 @@ export function createTerrainMaterial(options: TerrainMaterialOptions): THREE.Me
         precision highp sampler2DArray;
         uniform sampler2DArray tTerrainColor;
         uniform sampler2DArray tTerrainNormal;
-        uniform float uLayerScale[8];
-        uniform vec3 uLayerTint[8];
+        uniform float uLayerScale[9];
+        uniform vec3 uLayerTint[9];
         uniform float uSea;
         uniform float uWet;
         varying float vLight;
         varying vec4 vSplatA;
         varying vec4 vSplatB;
+        varying vec4 vSplatC;
         varying vec3 vTpPos;
         varying vec3 vTpNormal;
         ${NOISE_GLSL}`,
@@ -92,23 +97,23 @@ export function createTerrainMaterial(options: TerrainMaterialOptions): THREE.Me
         float nB = osNoise(vTpPos.xz * 3.1);
         float steep = 1.0 - smoothstep(0.6, 0.8, tN.y);
         float rockW = clamp(max(steep, vSplatB.y) + (nA - 0.5) * 0.35 * steep, 0.0, 1.0);
-        float w[8];
+        float w[9];
         w[0] = vSplatA.x; w[1] = vSplatA.y; w[2] = vSplatA.z; w[3] = vSplatA.w;
-        w[4] = vSplatB.x; w[5] = 0.0; w[6] = vSplatB.z; w[7] = vSplatB.w;
+        w[4] = vSplatB.x; w[5] = 0.0; w[6] = vSplatB.z; w[7] = vSplatB.w; w[8] = vSplatC.x;
         float jitter = (nA * 0.7 + nB * 0.3 - 0.5) * 0.5;
         float total = 0.0;
-        for (int i = 0; i < 8; i++) {
+        for (int i = 0; i < 9; i++) {
           float v = w[i] > 0.001 ? max(0.0, w[i] + jitter) : 0.0;
           v = v * v * v;
           w[i] = v;
           total += v;
         }
-        for (int i = 0; i < 8; i++) w[i] = total > 0.0 ? w[i] / total * (1.0 - rockW) : 0.0;
+        for (int i = 0; i < 9; i++) w[i] = total > 0.0 ? w[i] / total * (1.0 - rockW) : 0.0;
         w[5] = total > 0.0 ? rockW : 1.0;
         vec3 terrainCol = vec3(0.0);
         vec3 terrainN = vec3(0.0);
         float terrainRough = 0.0;
-        for (int i = 0; i < 8; i++) {
+        for (int i = 0; i < 9; i++) {
           if (i == 5 || w[i] < 0.003) continue;
           vec3 uvw = vec3(vTpPos.xz / uLayerScale[i], float(i));
           terrainCol += texture(tTerrainColor, uvw).rgb * uLayerTint[i] * w[i];

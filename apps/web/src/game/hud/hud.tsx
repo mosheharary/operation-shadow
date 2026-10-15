@@ -11,12 +11,16 @@ import { ObjectivesPanel } from './objectives';
 import { PerfReadout } from './perf-readout';
 import { PortraitBar } from './portraits';
 import { StatusBar } from './status-bar';
+import { TutorialPanel } from '../tutorial/tutorial-panel';
+import { useController } from '../runtime/game-context';
 import styles from './hud.module.css';
 
 /** Screen-edge HUD (no permanent labels in the world). Empty areas pass pointer input to the 3D view. */
 export function Hud(props: MenuCallbacks) {
+  const controller = useController();
   return (
     <div className={styles.hud}>
+      {controller.entry.tutorial && <TutorialPanel />}
       <DragBox />
       <div className={styles.topLeft}>
         <PortraitBar />

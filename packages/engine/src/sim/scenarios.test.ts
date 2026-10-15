@@ -390,3 +390,16 @@ describe('determinism and save/load', () => {
     expect(() => World.restore(lvl, { ...mission, id: 'other' }, save)).toThrow(/different mission/);
   });
 });
+
+describe('climbing on the way to an ability target', () => {
+  it('finishes a long climb instead of restarting it when the approach re-plans', () => {
+    const lvl = level((b) => {
+      b.addWall(vec(0, 20), vec(40, 20), { height: 4 });
+      b.addLink(vec(10, 18.5), vec(10, 21.5), 'climb', 8, 'climb');
+    });
+    const world = makeWorld(lvl, makeMission(lvl, { objects: [{ type: 'item', id: 'item:x', pos: vec(10, 30), item: 'codebook', amount: 1 }] }), ['infiltrator']);
+    placeOperative(world, 'infiltrator', vec(10, 10));
+    expect(world.enqueue({ type: 'ability', unitId: 'op:infiltrator', abilityId: 'pick-up', target: { kind: 'entity', id: 'item:x' } }).ok).toBe(true);
+    expect(runUntil(world, (w) => (w.object('item:x') as { takenBy: string | null }).takenBy === 'op:infiltrator', 60)).toBe(true);
+  });
+});

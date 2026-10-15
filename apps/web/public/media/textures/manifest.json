@@ -269,6 +269,25 @@
         "normal": "metal/normal.webp",
         "rough": "metal/rough.webp"
       }
+    },
+    "snow": {
+      "source": "Poly Haven",
+      "id": "snow_02",
+      "name": "Snow 02",
+      "url": "https://polyhaven.com/a/snow_02",
+      "authors": [
+        "Rob Tuytel"
+      ],
+      "license": "CC0-1.0",
+      "tileMeters": [
+        2,
+        2
+      ],
+      "files": {
+        "color": "snow/color.webp",
+        "normal": "snow/normal.webp",
+        "rough": "snow/rough.webp"
+      }
     }
   }
 }

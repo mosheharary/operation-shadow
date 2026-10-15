@@ -124,7 +124,12 @@ export function abilityTargetFor(abilityId: AbilityId, hover: PointerTarget, gro
     if (hover && hover.kind !== 'operative') return { kind: 'entity', id: hover.id };
     return ground ? { kind: 'point', pos: ground } : null;
   }
-  return hover ? { kind: 'entity', id: hover.id } : null;
+  return hover ? { kind: 'entity', id: hover.id, ...(ground ? { at: ground } : {}) } : null;
+}
+
+/** Entity order; a fence also remembers which stretch was clicked. */
+function entityTarget(world: World, id: string, ground: Vec2 | null): AbilityTarget {
+  return world.object(id)?.type === 'fence' && ground ? { kind: 'entity', id, at: ground } : { kind: 'entity', id };
 }
 
 /**
@@ -154,7 +159,7 @@ export function resolveContextAction(world: World, selected: string[], hover: Po
         type: 'ability',
         unitId: op.id,
         abilityId,
-        target: { kind: 'entity', id: hover.id },
+        target: entityTarget(world, hover.id, ground),
         queue: options.queue,
         gait: options.gait,
       };

@@ -67,3 +67,31 @@ export function TargetingPreview({ controller }: { controller: GameController })
     </>
   );
 }
+
+/** Pulsing ring and light pillar where the tutorial wants the player to go. */
+export function TutorialMarker({ controller }: { controller: GameController }) {
+  const ring = useRef<THREE.Mesh>(null);
+  const pillar = useRef<THREE.Mesh>(null);
+  const geometry = useMemo(() => new THREE.RingGeometry(0.85, 1, 48).rotateX(-Math.PI / 2), []);
+  const pillarGeometry = useMemo(() => new THREE.CylinderGeometry(0.9, 0.9, 6, 24, 1, true).translate(0, 3, 0), []);
+  useFrame((frame) => {
+    const pos = useGameUi.getState().tutorialMarker;
+    const t = frame.clock.elapsedTime;
+    for (const mesh of [ring.current, pillar.current]) {
+      if (!mesh) continue;
+      mesh.visible = Boolean(pos);
+      if (pos) mesh.position.set(pos.x, controller.world.grid.heightAt(pos) + 0.12, pos.z);
+    }
+    if (ring.current) ring.current.scale.setScalar(1.6 + Math.sin(t * 3) * 0.25);
+  });
+  return (
+    <>
+      <mesh ref={ring} geometry={geometry} renderOrder={5} visible={false}>
+        <meshBasicMaterial color="#7fd6ff" transparent opacity={0.9} depthWrite={false} />
+      </mesh>
+      <mesh ref={pillar} geometry={pillarGeometry} renderOrder={5} visible={false}>
+        <meshBasicMaterial color="#7fd6ff" transparent opacity={0.12} depthWrite={false} side={THREE.DoubleSide} blending={THREE.AdditiveBlending} />
+      </mesh>
+    </>
+  );
+}

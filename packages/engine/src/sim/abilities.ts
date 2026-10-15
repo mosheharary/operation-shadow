@@ -291,7 +291,7 @@ export const ABILITIES: Record<AbilityId, AbilityDef> = {
     check: (_w, _op, t) => (t.kind === 'object' && t.obj.type === 'fence' && t.obj.cutCells.length === 0 ? OK : reject('condition', 'Already cut')),
     apply: (w, op, t) => {
       if (t.kind !== 'object' || t.obj.type !== 'fence') return;
-      w.cutFence(t.obj, op.pos);
+      w.cutFence(t.obj, t.pos);
       w.noise(op.pos, NOISE_DB.tool, 'tool', op.id);
     },
   },
@@ -655,6 +655,7 @@ export function resolveTarget(world: World, op: Operative, def: AbilityDef, targ
     case 'object': {
       if (target.kind !== 'entity') return null;
       const obj = world.object(target.id);
+      if (obj?.type === 'fence' && def.objectTypes?.includes('fence')) return { kind: 'object', obj, pos: world.fenceCellNear(obj, target.at ?? op.pos) };
       if (obj && def.objectTypes?.includes(obj.type)) return { kind: 'object', obj, pos: obj.pos };
       // Freeing a captured squad member uses the same order.
       if (def.id === 'free') {

@@ -16,7 +16,7 @@ const SURFACE_LAYER: Record<Surface, number> = {
   [Surface.Sand]: 1,
   [Surface.ShallowWater]: 1,
   [Surface.DeepWater]: 1,
-  [Surface.Snow]: 1,
+  [Surface.Snow]: 8,
   [Surface.Stone]: 2,
   [Surface.Gravel]: 3,
   [Surface.Dirt]: 4,
@@ -36,8 +36,9 @@ function buildTerrainGeometry(level: LevelData): THREE.BufferGeometry {
   const positions = new Float32Array(vx * vz * 3);
   const splatA = new Float32Array(vx * vz * 4);
   const splatB = new Float32Array(vx * vz * 4);
+  const splatC = new Float32Array(vx * vz * 4);
   const light = new Float32Array(vx * vz);
-  const weights = new Float32Array(8);
+  const weights = new Float32Array(12);
   const H = (x: number, z: number) => grid.heightAt({ x, z });
 
   for (let iz = 0; iz < vz; iz += 1) {
@@ -69,6 +70,7 @@ function buildTerrainGeometry(level: LevelData): THREE.BufferGeometry {
       for (let k = 0; k < 4; k += 1) {
         splatA[i * 4 + k] = weights[k]! / sum;
         splatB[i * 4 + k] = weights[k + 4]! / sum;
+        splatC[i * 4 + k] = weights[k + 8]! / sum;
       }
       light[i] = samples ? lit / samples / 255 : 0;
 
@@ -115,6 +117,7 @@ function buildTerrainGeometry(level: LevelData): THREE.BufferGeometry {
   geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
   geometry.setAttribute('splatA', new THREE.BufferAttribute(splatA, 4));
   geometry.setAttribute('splatB', new THREE.BufferAttribute(splatB, 4));
+  geometry.setAttribute('splatC', new THREE.BufferAttribute(splatC, 4));
   geometry.setAttribute('aLight', new THREE.BufferAttribute(light, 1));
   geometry.setIndex(new THREE.BufferAttribute(indices, 1));
   geometry.computeVertexNormals();

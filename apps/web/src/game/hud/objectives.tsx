@@ -34,7 +34,9 @@ export function ObjectivesPanel() {
           <Icon name="exit" size={14} />
           <span>
             <strong>Extract</strong>
-            <span className={styles.objectiveDesc}>{requiredDone ? 'Bring every surviving squad member to the boat.' : 'Complete the required objectives, then return to the boat.'}</span>
+            <span className={styles.objectiveDesc}>
+              {requiredDone ? `Bring every surviving squad member here: ${controller.entry.briefing.extraction}` : `Complete the required objectives, then extract: ${controller.entry.briefing.extraction}`}
+            </span>
           </span>
         </li>
       </ul>

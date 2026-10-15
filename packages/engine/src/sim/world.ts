@@ -190,7 +190,8 @@ export class World {
     if (door?.type === 'door' && !door.open && !door.locked) this.setDoor(door, true, agentId);
   }
 
-  cutFence(fence: FenceObject, near: Vec2): void {
+  /** Centre of the fence cell closest to a point: a long fence is approached and cut where aimed. */
+  fenceCellNear(fence: FenceObject, near: Vec2): Vec2 {
     let nearest = fence.cells[0];
     let best = Infinity;
     for (const cell of fence.cells) {
@@ -200,8 +201,12 @@ export class World {
         nearest = cell;
       }
     }
-    if (nearest === undefined) return;
-    const centre = this.grid.center(nearest);
+    return nearest === undefined ? fence.pos : this.grid.center(nearest);
+  }
+
+  cutFence(fence: FenceObject, near: Vec2): void {
+    if (fence.cells.length === 0) return;
+    const centre = this.fenceCellNear(fence, near);
     fence.cutCells = fence.cells.filter((cell) => distance(this.grid.center(cell), centre) <= 0.8);
     this.rebuildDynamic();
     this.log('info', 'Fence cut open');
@@ -256,10 +261,12 @@ export class World {
     return isObservedBy(this, op);
   }
 
-  resolveTargetPos(target: AbilityTarget): Vec2 | null {
+  resolveTargetPos(target: AbilityTarget, from?: Vec2): Vec2 | null {
     if (target.kind === 'point') return target.pos;
     if (target.kind === 'self') return null;
-    return this.guards.get(target.id)?.pos ?? this.objects.get(target.id)?.pos ?? this.operatives.get(target.id)?.pos ?? null;
+    const obj = this.objects.get(target.id);
+    if (obj?.type === 'fence') return this.fenceCellNear(obj, target.at ?? from ?? obj.pos);
+    return this.guards.get(target.id)?.pos ?? obj?.pos ?? this.operatives.get(target.id)?.pos ?? null;
   }
 
   /** Sector of a restricted zone containing the point, or null. */

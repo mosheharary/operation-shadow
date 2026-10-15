@@ -1,4 +1,4 @@
-import type { LevelData, MissionRuntime, SpecialistId } from '@operation-shadow/engine';
+import type { LevelData, MissionRuntime, MissionSpec, SpecialistId } from '@operation-shadow/engine';
 
 export interface Briefing {
   codename: string;
@@ -19,11 +19,15 @@ export interface Briefing {
 export interface MissionEntry {
   key: string;
   title: string;
-  theme: 'coastal' | 'alpine' | 'rail';
+  theme: 'coastal' | 'alpine' | 'rail' | 'training';
   summary: string;
   /** Squad rules, known without building the level (must match the built mission). */
   squad: { required: SpecialistId[]; min: number; max: number };
   briefing: Briefing;
   debrief: { success: string; failure: string };
   build: () => { level: LevelData; mission: MissionRuntime };
+  /** The data spec the mission compiles from (absent for the hand-placed Silent Tide). */
+  spec?: MissionSpec;
+  /** The guided tutorial (Boot Camp). */
+  tutorial?: boolean;
 }

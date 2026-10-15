@@ -30,6 +30,7 @@ const SETS: Record<string, string> = {
   'roof-clay': 'clay_roof_tiles',
   concrete: 'chipped_concrete',
   metal: 'rusty_metal_02',
+  snow: 'snow_02',
 };
 
 const MAPS = { color: 'Diffuse', normal: 'nor_gl', rough: 'Rough' } as const;

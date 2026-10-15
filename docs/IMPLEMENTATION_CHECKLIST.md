@@ -197,6 +197,24 @@ Comparison sheet: `docs/art/art-pass-2026-10-15.jpg`. Decisions D25–D31.
 **Not verified:** the frame rate of the High preset on a real GPU. Rendering on the SwiftShader software path says
 nothing about it. Check with F3 in Chrome; if it is low, switch the pause-menu Graphics setting to Performance.
 
+## Campaign and first-time tutorial ✅ (2026-10-15)
+
+Decisions D32–D37.
+
+- [x] Level kit and three new templates: Whitecrown Ridge (alpine, snow layer, gorge, bridge, radar plateau), Corvan Junction (rail yard, wagons, water tower), Boot Camp (training ground)
+- [x] `MissionSpec` v1, compiler and validator, deterministic offline fallback generator
+- [x] Six-mission campaign with briefings: Boot Camp, Silent Tide, White Silence, Iron Junction, Frozen Ledger, Last Light
+- [x] Guided tutorial (15 steps): select, move, camera, group orders, view cones, crouch in grass, silent takedown, tie up, hide a body, lock-pick, steal, get past a fence, regroup, extract
+- [x] Engine fixes: endless climb re-plan; fence orders cut where clicked
+
+### Verification (ran 2026-10-15)
+
+| Check | Result |
+|---|---|
+| `pnpm lint` / `pnpm typecheck` | ✅ |
+| Unit tests | ✅ 128 / 128 (each template validates across seeds; every campaign mission has a stealth route; the tutorial script played to extraction with 0 detections) |
+| Browser tests vs. dev server | ✅ 15 / 15 (tutorial steps with real input; each new mission loads without console errors) |
+
 ## Milestones 3–6
 
 See `docs/architecture/implementation-plan.md` §13.

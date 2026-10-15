@@ -1,0 +1,55 @@
+import { COASTAL_GENERATOR_VERSION, COASTAL_TEMPLATE_ID, generateCoastal } from '../../levelgen/coastal';
+import type { TemplateDef } from '../spec';
+
+/** Varrow Harbor: beach, fishing village, quay and piers, and the cliff-top gun battery. */
+export const COASTAL_TEMPLATE: TemplateDef = {
+  id: COASTAL_TEMPLATE_ID,
+  name: 'Varrow Harbor',
+  theme: 'coastal',
+  version: COASTAL_GENERATOR_VERSION,
+  description:
+    'A fishing harbour at night: landing beach in the west, village street, stone quay with two piers, and a fenced gun battery with a concrete bunker on the cliff to the east.',
+  sectors: ['beach', 'village', 'harbor', 'battery', 'south'],
+  generate: (seed, id) => generateCoastal({ seed, id }),
+  guards: [
+    { id: 'beach', sector: 'beach', route: 'route:beach', priority: 1, lantern: true },
+    { id: 'street-1', sector: 'village', route: 'route:street', priority: 1 },
+    { id: 'street-2', sector: 'village', route: 'route:street', routeStart: 2, priority: 2, lantern: true },
+    { id: 'office-officer', sector: 'village', post: 'post:office-inside', priority: 1, rank: 'officer', temperament: 'strict' },
+    { id: 'office-door', sector: 'village', post: 'post:office-door', priority: 2 },
+    { id: 'holding-door', sector: 'village', post: 'post:holding-door', priority: 1, temperament: 'passive' },
+    { id: 'junction', sector: 'village', post: 'post:junction', priority: 2 },
+    { id: 'quay', sector: 'harbor', route: 'route:quay', priority: 1, lantern: true },
+    { id: 'pier', sector: 'harbor', post: 'post:pier-a-end', priority: 3, temperament: 'passive' },
+    { id: 'warehouse', sector: 'harbor', post: 'post:warehouse-door', priority: 2 },
+    { id: 'quay-east', sector: 'harbor', post: 'post:quay-east', priority: 2, lantern: true },
+    { id: 'ramp', sector: 'battery', route: 'route:ramp', priority: 2 },
+    { id: 'gate-north', sector: 'battery', post: 'post:gate-north', priority: 1, temperament: 'strict' },
+    { id: 'gate-south', sector: 'battery', post: 'post:gate-south', priority: 2 },
+    { id: 'tower-nw', sector: 'battery', post: 'post:tower-nw', priority: 1 },
+    { id: 'tower-se', sector: 'battery', post: 'post:tower-se', priority: 3 },
+    { id: 'compound-north', sector: 'battery', route: 'route:compound-north', priority: 1 },
+    { id: 'battery-officer', sector: 'battery', route: 'route:compound-south', priority: 2, rank: 'officer', temperament: 'strict' },
+    { id: 'bunker-door', sector: 'battery', post: 'post:bunker-door', priority: 1, temperament: 'strict' },
+    { id: 'radio-operator', sector: 'battery', post: 'post:bunker-radio', priority: 1, temperament: 'passive', radio: true },
+    { id: 'gun-crew', sector: 'battery', post: 'post:gun-1', priority: 3 },
+    { id: 'barracks-door', sector: 'battery', post: 'post:barracks-door', priority: 2 },
+    { id: 'forest', sector: 'south', route: 'route:forest-edge', priority: 3, lantern: true },
+  ],
+  reinforcements: [
+    { sector: 'battery', pos: { x: 130, z: 41.6 }, count: 4 },
+    { sector: 'village', pos: { x: 60.5, z: 39 }, count: 2 },
+  ],
+  extractionZoneId: 'extraction',
+  holdingZoneId: 'holding',
+  defaults: { timeOfDay: 23.5, weather: 'rain', parSeconds: 900 },
+  slots: [
+    { id: 'bunker-console', tag: 'objective-target', label: 'fire-control radio in the cliff bunker', sector: 'battery' },
+    { id: 'gun-1', tag: 'objective-target', label: 'western coastal gun', sector: 'battery' },
+    { id: 'gun-2', tag: 'objective-target', label: 'eastern coastal gun', sector: 'battery' },
+    { id: 'radio-hut', tag: 'objective-target', label: 'battery radio hut', sector: 'battery' },
+    { id: 'office-desk', tag: 'item', label: "harbour master's office", sector: 'village' },
+    { id: 'warehouse-floor', tag: 'item', label: 'quayside warehouse', sector: 'harbor' },
+    { id: 'holding-cell', tag: 'prisoner', label: 'village lock-up', sector: 'village' },
+  ],
+};

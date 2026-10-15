@@ -93,7 +93,8 @@ export interface NoiseEvent {
 // ── Operatives ────────────────────────────────────────────────────────────────────────────────
 
 export type AbilityTarget =
-  | { kind: 'entity'; id: string }
+  /** `at`: where on the entity the player clicked (which stretch of a long fence). */
+  | { kind: 'entity'; id: string; at?: Vec2 }
   | { kind: 'point'; pos: Vec2 }
   | { kind: 'self' };
 

@@ -51,3 +51,14 @@ The first M2 build rendered flat-coloured primitives; the user expected the look
 | D29 | Harbour details (stone quay walls with coping, plank piers on braced posts, ladders), faceted mossy rocks, detailed props, textured buildings, lamp halos and the water (wave normals, fresnel sheen, moon glints, shore foam, diorama cut edge) are all generated from level data at load | Every coastal layout gets them without hand-placed art |
 | D30 | Coastal generator v2 adds solid barrels, crates and nets against building walls and along the quay, kept clear of doors, routes, posts and other props | The concept's clutter doubles as cover. Mission validation (stealth route, objective chain) still passes |
 | D31 | Browser tests run on the Performance preset | SwiftShader renders post-processing at about 1 FPS, which would slow the simulation clock far below real time |
+
+## Campaign and tutorial (2026-10-15, start of the "finish all milestones" goal)
+
+| # | Decision | Why |
+|---|---|---|
+| D32 | Three more hand-built templates (alpine `alpine@1`, rail `rail@1`, training `training@1`) share a `LevelKit` of building, fence, lamp and clutter helpers. Every template exposes named slots (targets, items, prisoners, markers) | Missions, including the AI-generated ones in M3, choose objectives by slot instead of coordinates, so a spec can never place an objective inside a wall |
+| D33 | Missions are described by a declarative `MissionSpec` (template, seed, environment, guard density, objectives on slots, squad rules, alarm limit, par time, timed events) compiled and validated by `compileMission`; `fallbackSpec` makes a valid spec offline | The same path serves the authored campaign, Gemini output (M3) and the no-AI fallback; validation (stealth route, objective chain) runs on all of them |
+| D34 | The campaign is six missions: Boot Camp (tutorial), Silent Tide, White Silence, Iron Junction, Frozen Ledger, Last Light | "Multi-mission campaign" (Q11), covering coastal, alpine and rail settings, day, dusk, dawn and night, and all six specialists |
+| D35 | The tutorial is a guided Boot Camp mission: one instruction at a time in a side panel, advancing when the player does it, with a pulsing ground marker; it can be hidden or skipped. Key names come from the live binding table | First-time players learn by doing in a safe map. A unit test plays the whole script with the real right-click logic and requires extraction with zero detections |
+| D36 | An entity order may carry the clicked point (`target.at`). A fence is approached and cut at the cell nearest that point (or the operative), not at the fence's midpoint | Found by the tutorial test: cutting a long fence sent the Engineer to its middle, past the gate sentry |
+| D37 | Approach orders no longer re-plan in the middle of a climb or ladder link | The re-plan restarted the climb forever; regression test in `scenarios.test.ts` |

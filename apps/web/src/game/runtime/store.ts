@@ -62,6 +62,8 @@ export interface GameUiState {
   contextHint: ContextHint | null;
   orderMarker: OrderMarker | null;
   dragBox: DragBox | null;
+  /** Ground ring the tutorial points at. */
+  tutorialMarker: Vec2 | null;
   select: (ids: string[], additive?: boolean) => void;
   setHovered: (target: HoverTarget) => void;
   setGroundPoint: (point: Vec2 | null) => void;
@@ -78,6 +80,7 @@ export interface GameUiState {
   setContextHint: (hint: ContextHint | null) => void;
   markOrder: (pos: Vec2, kind: OrderMarker['kind']) => void;
   setDragBox: (box: DragBox | null) => void;
+  setTutorialMarker: (pos: Vec2 | null) => void;
   reset: () => void;
 }
 
@@ -99,6 +102,7 @@ const initial = {
   contextHint: null as ContextHint | null,
   orderMarker: null as OrderMarker | null,
   dragBox: null as DragBox | null,
+  tutorialMarker: null as Vec2 | null,
 };
 
 /** UI-only state for one game session. Gameplay state lives in the engine, never here. */
@@ -150,5 +154,6 @@ export const useGameUi = create<GameUiState>((set) => ({
     }),
   markOrder: (pos, kind) => set({ orderMarker: { id: nextId++, pos, kind, at: performance.now() } }),
   setDragBox: (dragBox) => set({ dragBox }),
+  setTutorialMarker: (tutorialMarker) => set({ tutorialMarker }),
   reset: () => set({ ...initial }),
 }));
