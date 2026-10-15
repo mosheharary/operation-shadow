@@ -1,0 +1,14 @@
+.game {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: #0b1014;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+}
+
+.canvas {
+  position: absolute;
+  inset: 0;
+}

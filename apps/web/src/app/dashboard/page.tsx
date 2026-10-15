@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { MISSIONS } from '@operation-shadow/content';
 import { checkReadiness } from '@operation-shadow/db';
 import { getDb } from '@/server/db';
 import { requireSession } from '@/server/session';
@@ -16,7 +17,7 @@ const statusClass = (value: string) =>
 // Milestones from docs/architecture/implementation-plan.md; only built features appear in the menu.
 const ROADMAP = [
   { label: 'Foundation: accounts, database, 3D pipeline', state: 'ok' },
-  { label: 'Vertical slice: playable mission "Silent Tide"', state: 'pending' },
+  { label: 'Vertical slice: playable mission "Silent Tide"', state: 'ok' },
   { label: 'Generated operations (Gemini)', state: 'pending' },
   { label: 'Campaigns and saved games', state: 'pending' },
   { label: 'Full campaign, planning mode, polish', state: 'pending' },
@@ -44,6 +45,12 @@ export default async function DashboardPage() {
 
         <div className="hq__grid">
           <nav className="menu" aria-label="Main menu">
+            {Object.values(MISSIONS).map((mission) => (
+              <Link key={mission.key} className="menu__item" href={`/missions/${mission.key}`} data-testid={`mission-${mission.key}`}>
+                <span className="menu__title">Operation: {mission.title}</span>
+                <span className="menu__desc">{mission.summary}</span>
+              </Link>
+            ))}
             <Link className="menu__item" href="/test-range">
               <span className="menu__title">Test range</span>
               <span className="menu__desc">3D rendering check: terrain, lighting, shadows and a live performance readout.</span>

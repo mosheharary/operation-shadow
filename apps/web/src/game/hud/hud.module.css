@@ -1,0 +1,900 @@
+/* In-mission HUD: field-equipment panels anchored to the screen edges. */
+.hud {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  user-select: none;
+  font-size: 0.875rem;
+  --panel-bg: rgba(15, 20, 24, 0.82);
+  --panel-line: rgba(201, 164, 92, 0.28);
+}
+
+.hud button,
+.hud select,
+.hud input,
+.hud canvas,
+.panelInteractive {
+  pointer-events: auto;
+}
+
+.topLeft,
+.topCenter,
+.topRight,
+.bottomCenter {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.topLeft {
+  top: 0.75rem;
+  left: 0.75rem;
+  width: min(34rem, 36vw);
+}
+
+.topCenter {
+  top: 0.75rem;
+  left: 50%;
+  transform: translateX(-50%);
+  align-items: center;
+}
+
+.topRight {
+  top: 0.75rem;
+  right: 0.75rem;
+  width: min(17rem, 24vw);
+  align-items: stretch;
+  max-height: calc(100vh - 9rem);
+}
+
+.bottomCenter {
+  bottom: 0.75rem;
+  left: 50%;
+  transform: translateX(-50%);
+  align-items: center;
+  width: max-content;
+  max-width: calc(100vw - 1.5rem);
+}
+
+.panelTitle {
+  margin: 0 0 0.35rem;
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--brass-strong);
+}
+
+.muted {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+/* ── Portraits ───────────────────────────────────────────────────────────── */
+.portraits {
+  display: flex;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.portrait {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto auto auto;
+  justify-items: center;
+  gap: 0.2rem;
+  width: 5.4rem;
+  padding: 0.35rem 0.3rem 0.4rem;
+  border: 1px solid var(--panel-line);
+  border-radius: var(--radius);
+  background: var(--panel-bg);
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+}
+
+.portrait:hover {
+  border-color: var(--accent);
+}
+
+.portraitSelected {
+  border-color: var(--brass-strong);
+  box-shadow: 0 0 0 1px var(--brass-strong), 0 0 12px rgba(221, 184, 107, 0.25);
+}
+
+.portraitOut {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.portraitImg {
+  width: 3.6rem;
+  height: 3.6rem;
+  border-radius: 2px;
+  object-fit: cover;
+  border-bottom: 3px solid var(--accent);
+}
+
+.portraitKey {
+  position: absolute;
+  top: 0.2rem;
+  left: 0.3rem;
+  font-family: var(--font-type);
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+
+.portraitName {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 0.9rem;
+  letter-spacing: 0.08em;
+}
+
+.portraitBadge {
+  font-size: 0.65rem;
+  color: var(--brass);
+}
+
+.health {
+  display: block;
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.healthFill {
+  display: block;
+  height: 100%;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.05rem 0.35rem;
+  border-radius: 2px;
+  font-size: 0.68rem;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.chip_ok {
+  background: rgba(134, 161, 124, 0.2);
+  color: #b8d2ad;
+}
+
+.chip_warn {
+  background: rgba(240, 162, 58, 0.22);
+  color: #f6c47a;
+}
+
+.chip_danger {
+  background: rgba(207, 106, 79, 0.28);
+  color: #f3a28c;
+}
+
+.chip_muted {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--muted);
+}
+
+/* ── Status bar ──────────────────────────────────────────────────────────── */
+.status {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.4rem 0.75rem;
+  border: 1px solid var(--panel-line);
+  border-radius: var(--radius);
+  background: var(--panel-bg);
+}
+
+.alarm {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ladder {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rung {
+  width: 0.45rem;
+  height: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: transparent;
+}
+
+.rung:nth-child(2) {
+  height: 0.7rem;
+}
+
+.rung:nth-child(3) {
+  height: 0.9rem;
+}
+
+.rung:nth-child(4) {
+  height: 1.1rem;
+}
+
+.rung:nth-child(5) {
+  height: 1.3rem;
+}
+
+.rung_0 {
+  background: var(--moss);
+}
+
+.rung_1 {
+  background: #d8c46a;
+}
+
+.rung_2 {
+  background: #f0a23a;
+}
+
+.rung_3 {
+  background: #e7713f;
+}
+
+.rung_4 {
+  background: #ff4a2e;
+}
+
+.rungLimit {
+  outline: 1px dashed #ff8a6a;
+  outline-offset: 1px;
+}
+
+.alarmLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.alarm_0 {
+  color: #b8d2ad;
+}
+
+.alarm_1 {
+  color: #e6d585;
+}
+
+.alarm_2 {
+  color: #f6c47a;
+}
+
+.alarm_3,
+.alarm_4 {
+  color: #ff8a6a;
+}
+
+.clock,
+.speed {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-family: var(--font-type);
+  color: var(--muted);
+}
+
+.speed {
+  color: var(--brass-strong);
+}
+
+.paused {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: 2px;
+  background: rgba(201, 164, 92, 0.2);
+  color: var(--brass-strong);
+  font-family: var(--font-heading);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.toasts {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.toasts p {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius);
+  background: var(--panel-bg);
+  border-left: 3px solid var(--brass);
+}
+
+.toast_warning {
+  border-left-color: #f0a23a !important;
+}
+
+.toast_danger {
+  border-left-color: var(--rust) !important;
+  color: #ffd2c4;
+}
+
+.toast_info {
+  border-left-color: var(--moss) !important;
+}
+
+/* ── Objectives and enemy info ───────────────────────────────────────────── */
+.objectives,
+.enemy,
+.log {
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--panel-line);
+  border-radius: var(--radius);
+  background: var(--panel-bg);
+}
+
+.objectives ul,
+.log ol,
+.enemyFacts {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.objective {
+  display: grid;
+  grid-template-columns: 1rem 1fr;
+  gap: 0.4rem;
+  padding: 0.3rem 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.objective svg {
+  margin-top: 0.2rem;
+}
+
+.objective strong {
+  display: block;
+  font-weight: 600;
+}
+
+.objectiveDesc {
+  display: block;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.objective_completed {
+  color: #b8d2ad;
+}
+
+.objective_completed .objectiveDesc,
+.objective_completed strong {
+  text-decoration: line-through;
+  text-decoration-color: rgba(184, 210, 173, 0.6);
+}
+
+.objective_failed {
+  color: #f3a28c;
+}
+
+.objective_pending {
+  opacity: 0.65;
+}
+
+.optional {
+  font-style: normal;
+  font-size: 0.7rem;
+  color: var(--brass);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.enemyState {
+  margin: 0 0 0.35rem;
+  font-weight: 600;
+}
+
+.meter {
+  height: 5px;
+  margin-bottom: 0.4rem;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.meter span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #d8c46a, #f0a23a 50%, #ff4a2e);
+}
+
+.enemyFacts li {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.hintSmall {
+  margin: 0.35rem 0 0;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+/* ── Event log ───────────────────────────────────────────────────────────── */
+.log {
+  max-width: 26rem;
+  background: rgba(15, 20, 24, 0.6);
+  font-size: 0.78rem;
+}
+
+.log:empty,
+.log ol:empty {
+  display: none;
+}
+
+.log li {
+  line-height: 1.45;
+}
+
+.log time {
+  font-family: var(--font-type);
+  color: var(--muted);
+  margin-right: 0.3rem;
+}
+
+.log_success {
+  color: #b8d2ad;
+}
+
+.log_warning {
+  color: #f6c47a;
+}
+
+.log_danger {
+  color: #f3a28c;
+}
+
+/* ── Bottom: hint, subtitles, ability bar ────────────────────────────────── */
+.bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  width: 100%;
+}
+
+.hintLine {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  min-height: 1.6rem;
+}
+
+.hintOk,
+.hintBad,
+.hintIdle,
+.hintReason {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius);
+  background: var(--panel-bg);
+  font-size: 0.82rem;
+}
+
+.hintOk {
+  color: #cfe3c6;
+}
+
+.hintBad {
+  color: #f3a28c;
+}
+
+.hintReason {
+  color: var(--ink);
+}
+
+.hintIdle {
+  margin: 0;
+  color: var(--muted);
+}
+
+.subtitles {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  max-width: 46rem;
+}
+
+.subtitles p {
+  margin: 0;
+  padding: 0.3rem 0.75rem;
+  border-radius: var(--radius);
+  background: rgba(8, 10, 12, 0.78);
+  font-size: 1rem;
+  text-align: center;
+}
+
+.subtitles strong {
+  color: var(--brass-strong);
+  font-family: var(--font-heading);
+  letter-spacing: 0.06em;
+}
+
+.abilityBar {
+  display: flex;
+  align-items: stretch;
+  gap: 0.5rem;
+  padding: 0.45rem;
+  border: 1px solid var(--panel-line);
+  border-radius: var(--radius);
+  background: var(--panel-bg);
+}
+
+.unitTag {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 6.5rem;
+  padding: 0 0.5rem;
+  border-left: 3px solid var(--accent);
+}
+
+.unitTag strong {
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+  letter-spacing: 0.08em;
+}
+
+.unitTag span {
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.groupNote {
+  color: var(--brass) !important;
+}
+
+.stances,
+.slots {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.stances {
+  padding-right: 0.5rem;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.slot {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  width: 4.6rem;
+  min-height: 3.2rem;
+  padding: 1rem 0.35rem 0.3rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 3px;
+  background: rgba(34, 44, 51, 0.85);
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.slot:hover:not(:disabled) {
+  border-color: var(--brass);
+}
+
+.slot:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.stanceSlot {
+  width: 3.5rem;
+}
+
+.slotActive {
+  border-color: var(--brass-strong);
+  background: rgba(201, 164, 92, 0.22);
+}
+
+.slotLethal {
+  border-bottom: 2px solid rgba(207, 106, 79, 0.75);
+}
+
+.slotKey {
+  position: absolute;
+  top: 0.15rem;
+  left: 0.3rem;
+  font-family: var(--font-type);
+  font-size: 0.72rem;
+  color: var(--brass);
+}
+
+.slotName {
+  font-size: 0.74rem;
+  line-height: 1.15;
+}
+
+.slotCount {
+  position: absolute;
+  top: 0.15rem;
+  right: 0.3rem;
+  font-family: var(--font-type);
+  font-size: 0.72rem;
+}
+
+.slotTag {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #f3a28c;
+}
+
+.slotCooldown {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.55);
+  font-family: var(--font-type);
+}
+
+/* ── Minimap ─────────────────────────────────────────────────────────────── */
+.minimap {
+  padding: 0.35rem;
+  border: 1px solid var(--panel-line);
+  border-radius: var(--radius);
+  background: var(--panel-bg);
+}
+
+.minimap canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  cursor: crosshair;
+  image-rendering: pixelated;
+}
+
+/* ── Selection box ───────────────────────────────────────────────────────── */
+.dragBox {
+  position: absolute;
+  border: 1px solid var(--brass-strong);
+  background: rgba(221, 184, 107, 0.1);
+}
+
+/* ── Modals ──────────────────────────────────────────────────────────────── */
+.modalBackdrop {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(6, 8, 10, 0.62);
+  pointer-events: auto;
+}
+
+.modal {
+  width: min(30rem, 100%);
+  max-height: calc(100vh - 2rem);
+  overflow: auto;
+  padding: 1.4rem 1.6rem;
+  border: 1px solid var(--panel-line);
+  border-radius: var(--radius);
+  background: var(--panel);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.5);
+  user-select: text;
+}
+
+.modalWide {
+  width: min(52rem, 100%);
+}
+
+.modalTitle {
+  margin: 0.1rem 0 1rem;
+  font-family: var(--font-heading);
+  font-size: 2rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.menuButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1rem 0 0.5rem;
+}
+
+.button,
+.primaryButton {
+  padding: 0.55rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel-strong);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.button:hover {
+  border-color: var(--brass);
+}
+
+.primaryButton {
+  border-color: var(--brass);
+  background: var(--brass);
+  color: #15120c;
+}
+
+.primaryButton:hover {
+  background: var(--brass-strong);
+}
+
+.settings {
+  display: grid;
+  gap: 0.5rem;
+  margin: 1rem 0 0;
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.settings legend {
+  padding: 0 0.3rem;
+  font-family: var(--font-heading);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--brass);
+}
+
+.settings label {
+  display: grid;
+  grid-template-columns: 9rem 1fr;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.settings select {
+  padding: 0.3rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg-raised);
+  color: var(--ink);
+  font: inherit;
+}
+
+.settings .check {
+  grid-template-columns: auto 1fr;
+}
+
+.helpGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem 1.5rem;
+}
+
+.helpGrid h3,
+.debriefGrid h3 {
+  margin: 0 0 0.4rem;
+  font-family: var(--font-heading);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--brass);
+}
+
+.helpGrid dl {
+  margin: 0;
+}
+
+.helpGrid dl div {
+  display: grid;
+  grid-template-columns: 8.5rem 1fr;
+  gap: 0.5rem;
+  padding: 0.2rem 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.helpGrid dd {
+  margin: 0;
+  color: var(--muted);
+}
+
+.helpGrid kbd {
+  font-family: var(--font-type);
+  font-size: 0.78rem;
+  color: var(--ink);
+}
+
+.tips {
+  margin: 1rem 0 0;
+  padding-left: 1.1rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.debriefText {
+  margin: 0 0 0.5rem;
+  max-width: 60ch;
+}
+
+.debriefReason {
+  margin: 0 0 0.75rem;
+  color: #f3a28c;
+}
+
+.debriefGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: 1rem 2rem;
+  margin-top: 0.75rem;
+}
+
+.breakdown {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.breakdown th,
+.breakdown td {
+  padding: 0.25rem 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  font-weight: 400;
+  text-align: left;
+}
+
+.breakdown td {
+  text-align: right;
+  font-family: var(--font-type);
+}
+
+.medals {
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.medals li {
+  padding: 0.2rem 0;
+  color: var(--muted);
+}
+
+.medals strong {
+  color: var(--brass-strong);
+  margin-right: 0.35rem;
+}
+
+.perf {
+  margin: 0;
+  padding: 0.15rem 0.5rem;
+  border-radius: 2px;
+  background: rgba(8, 10, 12, 0.7);
+  font-family: var(--font-type);
+  font-size: 0.75rem;
+  color: var(--muted);
+}

@@ -1,0 +1,871 @@
+{
+  "version": 1,
+  "model": "gemini-3.8-flash-tts",
+  "generatedAt": "2026-10-15T13:54:07.149Z",
+  "lines": {
+    "badger-ack-action-1": {
+      "file": "badger-ack-action-1.mp3",
+      "seconds": 2.69,
+      "voice": "Algenib",
+      "speaker": "BADGER",
+      "text": "Let Uncle Dez coax this lock open.",
+      "hash": "c3fe69d1e79f158e"
+    },
+    "badger-ack-action-2": {
+      "file": "badger-ack-action-2.mp3",
+      "seconds": 1.08,
+      "voice": "Algenib",
+      "speaker": "BADGER",
+      "text": "Leave it to me.",
+      "hash": "72b73caf4d18a670"
+    },
+    "badger-ack-action-3": {
+      "file": "badger-ack-action-3.mp3",
+      "seconds": 0.91,
+      "voice": "Algenib",
+      "speaker": "BADGER",
+      "text": "Tools out.",
+      "hash": "9c05f307ffb79933"
+    },
+    "badger-ack-move-1": {
+      "file": "badger-ack-move-1.mp3",
+      "seconds": 2.9,
+      "voice": "Algenib",
+      "speaker": "BADGER",
+      "text": "Moving my boots, nice and quiet.",
+      "hash": "7333dc11deca3820"
+    },
+    "badger-ack-move-2": {
+      "file": "badger-ack-move-2.mp3",
+      "seconds": 1.1,
+      "voice": "Algenib",
+      "speaker": "BADGER",
+      "text": "Right behind you.",
+      "hash": "7b0a722b5db83ec7"
+    },
+    "badger-ack-move-3": {
+      "file": "badger-ack-move-3.mp3",
+      "seconds": 1.06,
+      "voice": "Algenib",
+      "speaker": "BADGER",
+      "text": "On my way.",
+      "hash": "75a2052ddbebee6d"
+    },
+    "badger-downed-1": {
+      "file": "badger-downed-1.mp3",
+      "seconds": 2.06,
+      "voice": "Algenib",
+      "speaker": "BADGER",
+      "text": "Ah. That one got me.",
+      "hash": "7026a69d4e258212"
+    },
+    "badger-success-1": {
+      "file": "badger-success-1.mp3",
+      "seconds": 3.26,
+      "voice": "Algenib",
+      "speaker": "BADGER",
+      "text": "Beautiful girl, purring like a kitten now.",
+      "hash": "6de829b9e4cdf5f3"
+    },
+    "badger-success-2": {
+      "file": "badger-success-2.mp3",
+      "seconds": 2.18,
+      "voice": "Algenib",
+      "speaker": "BADGER",
+      "text": "Done. Sweet as you like.",
+      "hash": "3735af0657c76a39"
+    },
+    "badger-warn-1": {
+      "file": "badger-warn-1.mp3",
+      "seconds": 2.28,
+      "voice": "Algenib",
+      "speaker": "BADGER",
+      "text": "Heavy steps coming. Duck your heads.",
+      "hash": "e0b170199ff65e60"
+    },
+    "badger-warn-2": {
+      "file": "badger-warn-2.mp3",
+      "seconds": 2.21,
+      "voice": "Algenib",
+      "speaker": "BADGER",
+      "text": "Somebody is coming, mind yourselves.",
+      "hash": "91300baed687c40e"
+    },
+    "fox-ack-action-1": {
+      "file": "fox-ack-action-1.mp3",
+      "seconds": 3.02,
+      "voice": "Despina",
+      "speaker": "FOX",
+      "text": "Time for a little harmless misdirection.",
+      "hash": "364f1d5f0e4ae241"
+    },
+    "fox-ack-action-2": {
+      "file": "fox-ack-action-2.mp3",
+      "seconds": 1.34,
+      "voice": "Despina",
+      "speaker": "FOX",
+      "text": "Leave him to me.",
+      "hash": "829c7db7cbbf5ffa"
+    },
+    "fox-ack-action-3": {
+      "file": "fox-ack-action-3.mp3",
+      "seconds": 1.8,
+      "voice": "Despina",
+      "speaker": "FOX",
+      "text": "Watch and learn.",
+      "hash": "44d554d113563fbd"
+    },
+    "fox-ack-move-1": {
+      "file": "fox-ack-move-1.mp3",
+      "seconds": 2.95,
+      "voice": "Despina",
+      "speaker": "FOX",
+      "text": "Stepping onto my mark, darling.",
+      "hash": "7ed0fd0886796836"
+    },
+    "fox-ack-move-2": {
+      "file": "fox-ack-move-2.mp3",
+      "seconds": 2.4,
+      "voice": "Despina",
+      "speaker": "FOX",
+      "text": "Exit, stage left.",
+      "hash": "8711ccfbe2a2ce4a"
+    },
+    "fox-ack-move-3": {
+      "file": "fox-ack-move-3.mp3",
+      "seconds": 1.75,
+      "voice": "Despina",
+      "speaker": "FOX",
+      "text": "Moving, darling.",
+      "hash": "ce082821b79b1d72"
+    },
+    "fox-downed-1": {
+      "file": "fox-downed-1.mp3",
+      "seconds": 2.45,
+      "voice": "Despina",
+      "speaker": "FOX",
+      "text": "Not my best performance.",
+      "hash": "98d1f78a61855e7b"
+    },
+    "fox-success-1": {
+      "file": "fox-success-1.mp3",
+      "seconds": 3.07,
+      "voice": "Despina",
+      "speaker": "FOX",
+      "text": "And the gentleman takes his final bow.",
+      "hash": "19812b8e432869c3"
+    },
+    "fox-success-2": {
+      "file": "fox-success-2.mp3",
+      "seconds": 1.51,
+      "voice": "Despina",
+      "speaker": "FOX",
+      "text": "Applause can wait.",
+      "hash": "e7b47e24ed0e08fe"
+    },
+    "fox-warn-1": {
+      "file": "fox-warn-1.mp3",
+      "seconds": 4.3,
+      "voice": "Despina",
+      "speaker": "FOX",
+      "text": "Our audience approaches. Curtain down, everyone.",
+      "hash": "24830e23198ea59b"
+    },
+    "fox-warn-2": {
+      "file": "fox-warn-2.mp3",
+      "seconds": 2.26,
+      "voice": "Despina",
+      "speaker": "FOX",
+      "text": "Visitors. Look natural.",
+      "hash": "a29fcf1aa3283bb5"
+    },
+    "guard-alarm-1-a": {
+      "file": "guard-alarm-1-a.mp3",
+      "seconds": 3.65,
+      "voice": "Charon",
+      "speaker": "guard-a",
+      "text": "Intruders! Sound the alarm!",
+      "hash": "d9855790320eb24e"
+    },
+    "guard-alarm-1-b": {
+      "file": "guard-alarm-1-b.mp3",
+      "seconds": 2.23,
+      "voice": "Fenrir",
+      "speaker": "guard-b",
+      "text": "Intruders! Sound the alarm!",
+      "hash": "3a6cdd5e0be9dbce"
+    },
+    "guard-alarm-2-a": {
+      "file": "guard-alarm-2-a.mp3",
+      "seconds": 2.88,
+      "voice": "Charon",
+      "speaker": "guard-a",
+      "text": "Alarm! Alarm!",
+      "hash": "fdfb9df9beeb1e5b"
+    },
+    "guard-alarm-2-b": {
+      "file": "guard-alarm-2-b.mp3",
+      "seconds": 1.68,
+      "voice": "Fenrir",
+      "speaker": "guard-b",
+      "text": "Alarm! Alarm!",
+      "hash": "5d2b38bb3710a337"
+    },
+    "guard-all-clear-1-a": {
+      "file": "guard-all-clear-1-a.mp3",
+      "seconds": 1.39,
+      "voice": "Charon",
+      "speaker": "guard-a",
+      "text": "Just the wind.",
+      "hash": "9dcffc4cf717c6cf"
+    },
+    "guard-all-clear-1-b": {
+      "file": "guard-all-clear-1-b.mp3",
+      "seconds": 1.03,
+      "voice": "Fenrir",
+      "speaker": "guard-b",
+      "text": "Just the wind.",
+      "hash": "79ace2295de232ae"
+    },
+    "guard-all-clear-2-a": {
+      "file": "guard-all-clear-2-a.mp3",
+      "seconds": 1.66,
+      "voice": "Charon",
+      "speaker": "guard-a",
+      "text": "Rats again.",
+      "hash": "566ae19df7b3b58c"
+    },
+    "guard-all-clear-2-b": {
+      "file": "guard-all-clear-2-b.mp3",
+      "seconds": 1.63,
+      "voice": "Fenrir",
+      "speaker": "guard-b",
+      "text": "Rats again.",
+      "hash": "4f1ae9c81b69e9ac"
+    },
+    "guard-all-clear-3-a": {
+      "file": "guard-all-clear-3-a.mp3",
+      "seconds": 2.02,
+      "voice": "Charon",
+      "speaker": "guard-a",
+      "text": "Nothing. All quiet.",
+      "hash": "1022a0b8fa5d9950"
+    },
+    "guard-all-clear-3-b": {
+      "file": "guard-all-clear-3-b.mp3",
+      "seconds": 1.63,
+      "voice": "Fenrir",
+      "speaker": "guard-b",
+      "text": "Nothing. All quiet.",
+      "hash": "ea1a741279bde9dc"
+    },
+    "guard-chatter-1-a": {
+      "file": "guard-chatter-1-a.mp3",
+      "seconds": 8.38,
+      "voice": "Charon",
+      "speaker": "guard-a",
+      "text": "My fingers are frozen stiff, and the galley served us turnip paste that tasted like canal mud.",
+      "hash": "ee499c7f3c603d3d"
+    },
+    "guard-chatter-1-b": {
+      "file": "guard-chatter-1-b.mp3",
+      "seconds": 6.07,
+      "voice": "Fenrir",
+      "speaker": "guard-b",
+      "text": "My fingers are frozen stiff, and the galley served us turnip paste that tasted like canal mud.",
+      "hash": "21e4c5266e5c3c2c"
+    },
+    "guard-chatter-2-a": {
+      "file": "guard-chatter-2-a.mp3",
+      "seconds": 6.12,
+      "voice": "Charon",
+      "speaker": "guard-a",
+      "text": "Pull your greatcoat collar tight and stop whining, lad. The cold keeps you awake.",
+      "hash": "10055f34dceccd4e"
+    },
+    "guard-chatter-2-b": {
+      "file": "guard-chatter-2-b.mp3",
+      "seconds": 5.18,
+      "voice": "Fenrir",
+      "speaker": "guard-b",
+      "text": "Pull your greatcoat collar tight and stop whining, lad. The cold keeps you awake.",
+      "hash": "29b7e579114b08bd"
+    },
+    "guard-chatter-3-a": {
+      "file": "guard-chatter-3-a.mp3",
+      "seconds": 5.28,
+      "voice": "Charon",
+      "speaker": "guard-a",
+      "text": "They swear phantoms are slipping through the fog, snatching sentries off the line.",
+      "hash": "068741805ced6229"
+    },
+    "guard-chatter-3-b": {
+      "file": "guard-chatter-3-b.mp3",
+      "seconds": 4.85,
+      "voice": "Fenrir",
+      "speaker": "guard-b",
+      "text": "They swear phantoms are slipping through the fog, snatching sentries off the line.",
+      "hash": "afc52c48a8532dda"
+    },
+    "guard-chatter-4-a": {
+      "file": "guard-chatter-4-a.mp3",
+      "seconds": 5.81,
+      "voice": "Charon",
+      "speaker": "guard-a",
+      "text": "There are no ghosts in Varrow, only salt mist and drafty piers.",
+      "hash": "f2a44214e17a19df"
+    },
+    "guard-chatter-4-b": {
+      "file": "guard-chatter-4-b.mp3",
+      "seconds": 4.7,
+      "voice": "Fenrir",
+      "speaker": "guard-b",
+      "text": "There are no ghosts in Varrow, only salt mist and drafty piers.",
+      "hash": "a3f5e27936dfec0c"
+    },
+    "guard-found-body-1-a": {
+      "file": "guard-found-body-1-a.mp3",
+      "seconds": 2.33,
+      "voice": "Charon",
+      "speaker": "guard-a",
+      "text": "Man down! Over here!",
+      "hash": "73c537fe5b6ab97b"
+    },
+    "guard-found-body-1-b": {
+      "file": "guard-found-body-1-b.mp3",
+      "seconds": 1.66,
+      "voice": "Fenrir",
+      "speaker": "guard-b",
+      "text": "Man down! Over here!",
+      "hash": "d685912d77cb5d01"
+    },
+    "guard-found-body-2-a": {
+      "file": "guard-found-body-2-a.mp3",
+      "seconds": 1.9,
+      "voice": "Charon",
+      "speaker": "guard-a",
+      "text": "Someone got to him!",
+      "hash": "62ac18bfe7b80509"
+    },
+    "guard-found-body-2-b": {
+      "file": "guard-found-body-2-b.mp3",
+      "seconds": 1.49,
+      "voice": "Fenrir",
+      "speaker": "guard-b",
+      "text": "Someone got to him!",
+      "hash": "9cfd8e9a4aed880f"
+    },
+    "guard-halt-1-a": {
+      "file": "guard-halt-1-a.mp3",
+      "seconds": 2.64,
+      "voice": "Charon",
+      "speaker": "guard-a",
+      "text": "Halt! Hands where I can see them!",
+      "hash": "e691459e827a6490"
+    },
+    "guard-halt-1-b": {
+      "file": "guard-halt-1-b.mp3",
+      "seconds": 1.97,
+      "voice": "Fenrir",
+      "speaker": "guard-b",
+      "text": "Halt! Hands where I can see them!",
+      "hash": "7caf713d57208c9e"
+    },
+    "guard-halt-2-a": {
+      "file": "guard-halt-2-a.mp3",
+      "seconds": 2.5,
+      "voice": "Charon",
+      "speaker": "guard-a",
+      "text": "Stop right there!",
+      "hash": "91049b09a7e38ba9"
+    },
+    "guard-halt-2-b": {
+      "file": "guard-halt-2-b.mp3",
+      "seconds": 1.32,
+      "voice": "Fenrir",
+      "speaker": "guard-b",
+      "text": "Stop right there!",
+      "hash": "9ff4e4a2211c11e2"
+    },
+    "guard-investigate-1-a": {
+      "file": "guard-investigate-1-a.mp3",
+      "seconds": 2.81,
+      "voice": "Charon",
+      "speaker": "guard-a",
+      "text": "I will take a look.",
+      "hash": "f1d79471339ddb3a"
+    },
+    "guard-investigate-1-b": {
+      "file": "guard-investigate-1-b.mp3",
+      "seconds": 1.08,
+      "voice": "Fenrir",
+      "speaker": "guard-b",
+      "text": "I will take a look.",
+      "hash": "f142725ffca87592"
+    },
+    "guard-investigate-2-a": {
+      "file": "guard-investigate-2-a.mp3",
+      "seconds": 1.56,
+      "voice": "Charon",
+      "speaker": "guard-a",
+      "text": "Checking it.",
+      "hash": "06c4316188cce5cc"
+    },
+    "guard-investigate-2-b": {
+      "file": "guard-investigate-2-b.mp3",
+      "seconds": 0.72,
+      "voice": "Fenrir",
+      "speaker": "guard-b",
+      "text": "Checking it.",
+      "hash": "a74ee3c14ec296e5"
+    },
+    "guard-investigate-3-a": {
+      "file": "guard-investigate-3-a.mp3",
+      "seconds": 2.64,
+      "voice": "Charon",
+      "speaker": "guard-a",
+      "text": "Stay here, I am going over.",
+      "hash": "e2be4cdd6e07d7f6"
+    },
+    "guard-investigate-3-b": {
+      "file": "guard-investigate-3-b.mp3",
+      "seconds": 2.18,
+      "voice": "Fenrir",
+      "speaker": "guard-b",
+      "text": "Stay here, I am going over.",
+      "hash": "1f8a66e06f8367b3"
+    },
+    "guard-suspicious-1-a": {
+      "file": "guard-suspicious-1-a.mp3",
+      "seconds": 1.85,
+      "voice": "Charon",
+      "speaker": "guard-a",
+      "text": "Hm? Who is there?",
+      "hash": "d52c7929f8c5c21c"
+    },
+    "guard-suspicious-1-b": {
+      "file": "guard-suspicious-1-b.mp3",
+      "seconds": 1.44,
+      "voice": "Fenrir",
+      "speaker": "guard-b",
+      "text": "Hm? Who is there?",
+      "hash": "5a340d30141b6ada"
+    },
+    "guard-suspicious-2-a": {
+      "file": "guard-suspicious-2-a.mp3",
+      "seconds": 1.49,
+      "voice": "Charon",
+      "speaker": "guard-a",
+      "text": "Did something move?",
+      "hash": "b1540554b65b9fc7"
+    },
+    "guard-suspicious-2-b": {
+      "file": "guard-suspicious-2-b.mp3",
+      "seconds": 0.94,
+      "voice": "Fenrir",
+      "speaker": "guard-b",
+      "text": "Did something move?",
+      "hash": "616f6beded570173"
+    },
+    "guard-suspicious-3-a": {
+      "file": "guard-suspicious-3-a.mp3",
+      "seconds": 1.37,
+      "voice": "Charon",
+      "speaker": "guard-a",
+      "text": "Show yourself.",
+      "hash": "a89b1c905d8333a4"
+    },
+    "guard-suspicious-3-b": {
+      "file": "guard-suspicious-3-b.mp3",
+      "seconds": 1.13,
+      "voice": "Fenrir",
+      "speaker": "guard-b",
+      "text": "Show yourself.",
+      "hash": "ede8fb3fd449c266"
+    },
+    "heron-ack-action-1": {
+      "file": "heron-ack-action-1.mp3",
+      "seconds": 3.02,
+      "voice": "Schedar",
+      "speaker": "HERON",
+      "text": "Administering a gentle dose right now.",
+      "hash": "8851a71d92ae6682"
+    },
+    "heron-ack-action-2": {
+      "file": "heron-ack-action-2.mp3",
+      "seconds": 0.77,
+      "voice": "Schedar",
+      "speaker": "HERON",
+      "text": "Hold still.",
+      "hash": "446dd88121073bed"
+    },
+    "heron-ack-action-3": {
+      "file": "heron-ack-action-3.mp3",
+      "seconds": 1.3,
+      "voice": "Schedar",
+      "speaker": "HERON",
+      "text": "Steady hands.",
+      "hash": "b35b754fde4f6720"
+    },
+    "heron-ack-move-1": {
+      "file": "heron-ack-move-1.mp3",
+      "seconds": 2.74,
+      "voice": "Schedar",
+      "speaker": "HERON",
+      "text": "Moving up. Keep breathing, friends.",
+      "hash": "83f8c7f60834035e"
+    },
+    "heron-ack-move-2": {
+      "file": "heron-ack-move-2.mp3",
+      "seconds": 0.62,
+      "voice": "Schedar",
+      "speaker": "HERON",
+      "text": "Coming.",
+      "hash": "18b6ca542eac14c5"
+    },
+    "heron-ack-move-3": {
+      "file": "heron-ack-move-3.mp3",
+      "seconds": 1.03,
+      "voice": "Schedar",
+      "speaker": "HERON",
+      "text": "On my way.",
+      "hash": "dc5284ca8c7f0a39"
+    },
+    "heron-downed-1": {
+      "file": "heron-downed-1.mp3",
+      "seconds": 3.46,
+      "voice": "Schedar",
+      "speaker": "HERON",
+      "text": "I am down. Physician, heal thyself.",
+      "hash": "dd847c457c29ad3a"
+    },
+    "heron-success-1": {
+      "file": "heron-success-1.mp3",
+      "seconds": 3.84,
+      "voice": "Schedar",
+      "speaker": "HERON",
+      "text": "Patient is resting comfortably. No complications.",
+      "hash": "c2bdf01181d732f0"
+    },
+    "heron-success-2": {
+      "file": "heron-success-2.mp3",
+      "seconds": 1.94,
+      "voice": "Schedar",
+      "speaker": "HERON",
+      "text": "Sleeping like a child.",
+      "hash": "6ce23e5c801b8423"
+    },
+    "heron-warn-1": {
+      "file": "heron-warn-1.mp3",
+      "seconds": 4.08,
+      "voice": "Schedar",
+      "speaker": "HERON",
+      "text": "Footsteps approaching. Do not make a sound.",
+      "hash": "24bc91ae49de5d82"
+    },
+    "heron-warn-2": {
+      "file": "heron-warn-2.mp3",
+      "seconds": 2.21,
+      "voice": "Schedar",
+      "speaker": "HERON",
+      "text": "Someone is coming. Quiet now.",
+      "hash": "333db602a065ae63"
+    },
+    "moth-ack-action-1": {
+      "file": "moth-ack-action-1.mp3",
+      "seconds": 2.83,
+      "voice": "Enceladus",
+      "speaker": "MOTH",
+      "text": "Securing the anchor point.",
+      "hash": "a7ea8ff335678525"
+    },
+    "moth-ack-action-2": {
+      "file": "moth-ack-action-2.mp3",
+      "seconds": 1.27,
+      "voice": "Enceladus",
+      "speaker": "MOTH",
+      "text": "Consider it done.",
+      "hash": "8283dda0f7f703ce"
+    },
+    "moth-ack-action-3": {
+      "file": "moth-ack-action-3.mp3",
+      "seconds": 0.74,
+      "voice": "Enceladus",
+      "speaker": "MOTH",
+      "text": "On it.",
+      "hash": "b32434f22cb719e5"
+    },
+    "moth-ack-move-1": {
+      "file": "moth-ack-move-1.mp3",
+      "seconds": 2.06,
+      "voice": "Enceladus",
+      "speaker": "MOTH",
+      "text": "Shifting into the fog now.",
+      "hash": "568a0295c81e7d9d"
+    },
+    "moth-ack-move-2": {
+      "file": "moth-ack-move-2.mp3",
+      "seconds": 1.18,
+      "voice": "Enceladus",
+      "speaker": "MOTH",
+      "text": "Moving.",
+      "hash": "89fd8e94400ac09a"
+    },
+    "moth-ack-move-3": {
+      "file": "moth-ack-move-3.mp3",
+      "seconds": 1.58,
+      "voice": "Enceladus",
+      "speaker": "MOTH",
+      "text": "Quietly does it.",
+      "hash": "e7d44fa7e62dbeff"
+    },
+    "moth-downed-1": {
+      "file": "moth-downed-1.mp3",
+      "seconds": 2.74,
+      "voice": "Enceladus",
+      "speaker": "MOTH",
+      "text": "I am hit. Quietly, please.",
+      "hash": "2268de4a29e0ea48"
+    },
+    "moth-success-1": {
+      "file": "moth-success-1.mp3",
+      "seconds": 2.9,
+      "voice": "Enceladus",
+      "speaker": "MOTH",
+      "text": "Target sleeping. Path is clear.",
+      "hash": "ca4acfaf7c956fd3"
+    },
+    "moth-success-2": {
+      "file": "moth-success-2.mp3",
+      "seconds": 1.82,
+      "voice": "Enceladus",
+      "speaker": "MOTH",
+      "text": "He will wake with a headache.",
+      "hash": "09e44485acfdf797"
+    },
+    "moth-warn-1": {
+      "file": "moth-warn-1.mp3",
+      "seconds": 2.78,
+      "voice": "Enceladus",
+      "speaker": "MOTH",
+      "text": "Sentry pacing this way. Stay low.",
+      "hash": "9ac1e7f44d26c4df"
+    },
+    "moth-warn-2": {
+      "file": "moth-warn-2.mp3",
+      "seconds": 2.23,
+      "voice": "Enceladus",
+      "speaker": "MOTH",
+      "text": "Company. Keep still.",
+      "hash": "fc27895ba50bac90"
+    },
+    "otter-ack-action-1": {
+      "file": "otter-ack-action-1.mp3",
+      "seconds": 2.66,
+      "voice": "Zubenelgenubi",
+      "speaker": "OTTER",
+      "text": "Rigging the line fast and true.",
+      "hash": "ce6ee923adaa42d1"
+    },
+    "otter-ack-action-2": {
+      "file": "otter-ack-action-2.mp3",
+      "seconds": 0.91,
+      "voice": "Zubenelgenubi",
+      "speaker": "OTTER",
+      "text": "Aye aye.",
+      "hash": "9edcbba1641a056b"
+    },
+    "otter-ack-action-3": {
+      "file": "otter-ack-action-3.mp3",
+      "seconds": 1.2,
+      "voice": "Zubenelgenubi",
+      "speaker": "OTTER",
+      "text": "Leave it with me.",
+      "hash": "4e4ac90837e212cf"
+    },
+    "otter-ack-move-1": {
+      "file": "otter-ack-move-1.mp3",
+      "seconds": 2.74,
+      "voice": "Zubenelgenubi",
+      "speaker": "OTTER",
+      "text": "Swimming with the tide. On my way.",
+      "hash": "5723e4c191ef53c7"
+    },
+    "otter-ack-move-2": {
+      "file": "otter-ack-move-2.mp3",
+      "seconds": 1.51,
+      "voice": "Zubenelgenubi",
+      "speaker": "OTTER",
+      "text": "Aye, moving.",
+      "hash": "e6df80b6a5a92563"
+    },
+    "otter-ack-move-3": {
+      "file": "otter-ack-move-3.mp3",
+      "seconds": 1.1,
+      "voice": "Zubenelgenubi",
+      "speaker": "OTTER",
+      "text": "Easy does it.",
+      "hash": "39d0cc4d547ef6d9"
+    },
+    "otter-downed-1": {
+      "file": "otter-downed-1.mp3",
+      "seconds": 1.66,
+      "voice": "Zubenelgenubi",
+      "speaker": "OTTER",
+      "text": "Taking on water here.",
+      "hash": "affbda2ff3a3bf93"
+    },
+    "otter-success-1": {
+      "file": "otter-success-1.mp3",
+      "seconds": 3.55,
+      "voice": "Zubenelgenubi",
+      "speaker": "OTTER",
+      "text": "Clipped his fins. Sentry is out cold.",
+      "hash": "c66580e0a8f47093"
+    },
+    "otter-success-2": {
+      "file": "otter-success-2.mp3",
+      "seconds": 3.12,
+      "voice": "Zubenelgenubi",
+      "speaker": "OTTER",
+      "text": "Back in the water he goes. Figuratively.",
+      "hash": "cbe449c8421e7c38"
+    },
+    "otter-warn-1": {
+      "file": "otter-warn-1.mp3",
+      "seconds": 3,
+      "voice": "Zubenelgenubi",
+      "speaker": "OTTER",
+      "text": "Greycoats drifting our way, fast current.",
+      "hash": "e59730cd0c76ef54"
+    },
+    "otter-warn-2": {
+      "file": "otter-warn-2.mp3",
+      "seconds": 2.33,
+      "voice": "Zubenelgenubi",
+      "speaker": "OTTER",
+      "text": "Patrol off the bow. Heads down.",
+      "hash": "a1060705183af71f"
+    },
+    "owl-ack-action-1": {
+      "file": "owl-ack-action-1.mp3",
+      "seconds": 2.28,
+      "voice": "Erinome",
+      "speaker": "OWL",
+      "text": "Tagging target on the overlook now.",
+      "hash": "d8d56961396928cf"
+    },
+    "owl-ack-action-2": {
+      "file": "owl-ack-action-2.mp3",
+      "seconds": 1.22,
+      "voice": "Erinome",
+      "speaker": "OWL",
+      "text": "Target acquired.",
+      "hash": "6c07c19d2f455f6b"
+    },
+    "owl-ack-action-3": {
+      "file": "owl-ack-action-3.mp3",
+      "seconds": 1.73,
+      "voice": "Erinome",
+      "speaker": "OWL",
+      "text": "Copy. Executing.",
+      "hash": "fb7590fabd9ac99e"
+    },
+    "owl-ack-move-1": {
+      "file": "owl-ack-move-1.mp3",
+      "seconds": 3.07,
+      "voice": "Erinome",
+      "speaker": "OWL",
+      "text": "Repositioning to bearing zero-four-zero.",
+      "hash": "85eb6019a9685078"
+    },
+    "owl-ack-move-2": {
+      "file": "owl-ack-move-2.mp3",
+      "seconds": 1.7,
+      "voice": "Erinome",
+      "speaker": "OWL",
+      "text": "Moving to new position.",
+      "hash": "d5536c9382d98b21"
+    },
+    "owl-ack-move-3": {
+      "file": "owl-ack-move-3.mp3",
+      "seconds": 2.66,
+      "voice": "Erinome",
+      "speaker": "OWL",
+      "text": "Relocating. Thirty metres.",
+      "hash": "a753dda350ddd2b0"
+    },
+    "owl-downed-1": {
+      "file": "owl-downed-1.mp3",
+      "seconds": 2.14,
+      "voice": "Erinome",
+      "speaker": "OWL",
+      "text": "I am hit. Need a medic.",
+      "hash": "5d79e58c900994df"
+    },
+    "owl-success-1": {
+      "file": "owl-success-1.mp3",
+      "seconds": 2.78,
+      "voice": "Erinome",
+      "speaker": "OWL",
+      "text": "Dart struck home. Sentry is down.",
+      "hash": "868d2fc20abc297a"
+    },
+    "owl-success-2": {
+      "file": "owl-success-2.mp3",
+      "seconds": 1.7,
+      "voice": "Erinome",
+      "speaker": "OWL",
+      "text": "Clean. Next.",
+      "hash": "924a0acd04279008"
+    },
+    "owl-warn-1": {
+      "file": "owl-warn-1.mp3",
+      "seconds": 2.74,
+      "voice": "Erinome",
+      "speaker": "OWL",
+      "text": "Sentry closing from west, twenty paces.",
+      "hash": "cfb84320813e73df"
+    },
+    "owl-warn-2": {
+      "file": "owl-warn-2.mp3",
+      "seconds": 2.5,
+      "voice": "Erinome",
+      "speaker": "OWL",
+      "text": "Two hostiles. Bearing one-eight-zero.",
+      "hash": "e6316669554cefef"
+    },
+    "silent-tide-alarm": {
+      "file": "silent-tide-alarm.mp3",
+      "seconds": 4.06,
+      "voice": "Gacrux",
+      "speaker": "LANTERN",
+      "text": "They know you are there. Expect reinforcements on the cliff road.",
+      "hash": "84bec439d812e728"
+    },
+    "silent-tide-landing": {
+      "file": "silent-tide-landing.mp3",
+      "seconds": 6.48,
+      "voice": "Gacrux",
+      "speaker": "LANTERN",
+      "text": "Lantern to Shadow Section. You're ashore. The battery sits on the cliff to the east. Keep to the shadows.",
+      "hash": "e155c42ea8bf9ce7"
+    },
+    "silent-tide-radio-done": {
+      "file": "silent-tide-radio-done.mp3",
+      "seconds": 3.22,
+      "voice": "Gacrux",
+      "speaker": "LANTERN",
+      "text": "The battery is blind. Get back to the boat.",
+      "hash": "cdc7026e16c8a613"
+    },
+    "silent-tide-scout": {
+      "file": "silent-tide-scout.mp3",
+      "seconds": 11.04,
+      "voice": "Gacrux",
+      "speaker": "LANTERN",
+      "text": "New intelligence. A captured Coalition scout is held in the village lock-up. The battery is still your priority, but bringing him home would save an entire network.",
+      "hash": "38d6aac727874a64"
+    }
+  }
+}

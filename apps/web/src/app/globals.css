@@ -372,3 +372,24 @@ a {
   color: var(--muted);
   font-family: var(--font-type);
 }
+
+/* Mission loading screen (shown while the level is generated). */
+.game-loading {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 0.25rem;
+  background: radial-gradient(ellipse at center, #18222a, var(--bg) 70%);
+  text-align: center;
+}
+
+.game-loading__title {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}

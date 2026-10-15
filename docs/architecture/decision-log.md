@@ -19,3 +19,20 @@ Short records of implementation decisions made after the plan was approved. The 
 | D10 | Browser tests run in the Playwright image with `network_mode: service:app` | The browser uses the same origin the app is configured with (`http://localhost:3000`). That satisfies auth origin checks and avoids Chromium's HTTPS upgrade of non-localhost hostnames, which broke the first run |
 | D11 | Session-dependent pages declare `dynamic = 'force-dynamic'`, and `getSession()` reads request headers before touching auth | `next build` was otherwise trying to pre-render `/` and needed runtime secrets |
 | D12 | The production-like container listens on 3001 both inside and outside | Its auth base URL (`http://localhost:3001`) must equal the origin the browser uses |
+
+## M2 — Playable vertical slice (2026-10-15)
+
+| # | Decision | Why |
+|---|---|---|
+| D13 | Characters are procedural low-poly mannequins (`render/figure.ts`) with per-role looks, not CC0 rigged models | One consistent "miniature diorama" style, no licence risk, no asset pipeline needed yet. Swappable for authored models in M5 |
+| D14 | Boats and drivable vehicles are deferred. The Marine Operator swims and dives instead; rowboats are props. Watchtowers are guard posts operatives cannot climb | Keeps the slice focused on the core stealth loop. Both are listed in the M5 backlog |
+| D15 | The game does its own pointer picking every frame: a ray march over terrain, pier decks and the water surface, plus a raycast against tagged hitboxes | R3F pointer events only fire when the mouse moves, so hover went stale while units or the camera moved, and clicks on water landed on the sea bed |
+| D16 | The right-click context action never chooses a lethal ability; knife, rifle, pistol and harpoon are only used from the ability bar | "Non-lethal is equally viable" (Q6) and avoids accidental kills. Scoring never rewards kills |
+| D17 | Controls follow plan §6: left-click selects (Shift adds, drag box), right-click gives the context order (double right-click runs, Shift queues). Ability slots use R G V B Y H N J U K. All keys come from one binding table | Keys stay clear of camera keys (WASD, Q/E) and stances (Z/C/X). The table makes the M5 remapping screen a UI task only |
+| D18 | Sound effects and ambience are synthesised at runtime. Music uses the approved Lyria tracks with state crossfades. Voice lines are generated one per line by Gemini TTS at build time (`make voice-bank`), with a text-only fallback | No sample libraries to license. Per-line files let the dialogue director vary, cut and prioritise lines. 108 lines cost about $0.07 and take 1.8 MB |
+| D19 | The opening camera looks from the insertion point toward the primary objective, snapped to the nearest isometric diagonal | The first default faced the map corner and showed mostly void |
+| D20 | `react-hooks/immutability` is off for `game/render`, `game/input` and `game/camera` | R3F code creates three.js objects once and mutates them in `useFrame`, which is R3F's documented pattern. The React Compiler is not enabled |
+| D21 | Game settings (quality, volumes, subtitles, edge scroll, reduced shake, noise rings, FPS readout) live in per-browser storage for now | Account-level sync through `user_preferences` belongs to M4 (persistence) |
+| D22 | Added a transient `bell` game event | The audio needs to know when an alarm bell rings. Events are never saved, so saves and determinism are unaffected |
+| D23 | Mission entries declare their squad rules (`squad.required/min/max`) statically; a test keeps them equal to the built mission | The briefing and play pages validate a squad without generating the level on the server |
+| D24 | Browser tests read state through a read-only `window.__OS_GAME__` probe and drive the game with real mouse and keyboard input | Tests exercise the actual input path. The probe cannot issue orders, so it is not a cheat channel |

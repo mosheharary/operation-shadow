@@ -4,9 +4,9 @@ A browser-based 3D real-time tactical stealth game: command a six-person special
 in a fictional 1940s-inspired world. It is an original spiritual successor inspired by the gameplay principles of
 classic squad-stealth games.
 
-> **Status: Milestone 1 (Foundation) complete.** Accounts, database, Docker workflow and the 3D rendering pipeline
-> work end to end. The playable vertical slice is Milestone 2. See
-> [`docs/IMPLEMENTATION_CHECKLIST.md`](docs/IMPLEMENTATION_CHECKLIST.md).
+> **Status: Milestone 2 (playable vertical slice) complete.** Mission 1, *Silent Tide*, is playable end to end:
+> briefing and squad choice, the 3D night-raid map, all six specialists, guard AI, alarms, audio and the debrief.
+> Generated missions (Gemini) are Milestone 3. See [`docs/IMPLEMENTATION_CHECKLIST.md`](docs/IMPLEMENTATION_CHECKLIST.md).
 
 ## Quick start (local, Docker only)
 
@@ -21,6 +21,26 @@ make down      # stop (data is kept)
 Open <http://localhost:3000> and choose **Sign in as Test Operator A**. That dev-only login exists only in local and
 test environments. Production uses Google sign-in.
 
+## How to play
+
+From Field HQ, open **Operation: Silent Tide**, read the briefing, pick 3–4 specialists (the Combat Engineer is
+required) and a difficulty, then deploy.
+
+| Input | Action |
+|---|---|
+| Left-click / Shift-click / drag | Select one / add to selection / box-select squad members (or press 1–6) |
+| Right-click | Move, or the action shown under the cursor (open a door, knock out a sentry from behind, tie up, carry…) |
+| Double right-click / Shift + right-click | Run / queue the order |
+| Z · C · X | Stand · crouch · prone |
+| R G V B Y H N J U K | The selected specialist's ability slots (shown on the bar); left-click a target, right-click or Esc cancels |
+| Space | Tactical pause (orders still work) |
+| WASD / arrows, Q/E, wheel, middle-drag | Pan, rotate 45°, zoom, free rotate |
+| Click a soldier / hold Alt | Pin his view cone / show every cone |
+| F1 · F3 · Esc | Controls · frame-rate readout · pause menu (settings, restart) |
+
+Stay out of the bright inner part of a view cone, keep to shadows and grass, hide bodies and tie up unconscious
+sentries: they wake up. Noise rings on the ground show how far a sound carries.
+
 Run `make help` to list every command. Full guide: [`docs/operations/local-development.md`](docs/operations/local-development.md).
 
 ## Common commands
@@ -34,6 +54,7 @@ Run `make help` to list every command. Full guide: [`docs/operations/local-devel
 | `make test` | Unit and integration tests (integration uses a separate test database) |
 | `make e2e` / `make e2e-prod` | Playwright browser tests against the dev server / the production build |
 | `make prod` | Production-like standalone build on <http://localhost:3001> |
+| `make voice-bank` | Generate missing or changed voice lines with Gemini TTS (needs `GOOGLE_API_KEY`; `ARGS="--dry-run"` previews the cost) |
 | `make reset` | **Deletes all local data** (asks for confirmation first) |
 
 ## Tech stack
@@ -51,11 +72,13 @@ Run `make help` to list every command. Full guide: [`docs/operations/local-devel
 ## Repository layout
 
 ```
-apps/web/            Next.js app: pages, API routes, game client (render, input, audio, UI)
-packages/engine/     Deterministic simulation: rules, navigation, perception, AI, missions
+apps/web/            Next.js app: pages, API routes, game client (render, input, audio, HUD)
+packages/engine/     Deterministic simulation: rules, navigation, perception, AI, level generation
+packages/content/    Specialists, dialogue bank, abilities text and authored missions
 packages/schemas/    Versioned Zod schemas and API contracts
 packages/db/         Drizzle schema, SQL migrations, ownership-scoped repositories
 tools/samples/       Gemini sample generator used to approve art/music/dialogue direction
+tools/media/         Build-time media pipeline (voice bank)
 samples/             The approved art, music and dialogue samples (open samples/index.html)
 tests/               Integration and browser tests
 infra/docker/        Dockerfile and Postgres init scripts (compose.yaml at the root)

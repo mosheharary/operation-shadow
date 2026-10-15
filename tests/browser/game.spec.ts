@@ -1,0 +1,169 @@
+import { expect, type Page, test } from '@playwright/test';
+
+// Browser tests for the "Silent Tide" vertical slice. They drive the game with real mouse and
+// keyboard input and read state through the read-only window.__OS_GAME__ probe.
+
+const SQUAD = 'engineer,infiltrator,recon,marine';
+
+async function signIn(page: Page) {
+  await page.goto('/sign-in');
+  await page.getByRole('button', { name: 'Sign in as Test Operator A' }).click();
+  await expect(page).toHaveURL(/\/dashboard$/);
+}
+
+async function startMission(page: Page, seed = 42) {
+  await page.goto(`/play/silent-tide?squad=${SQUAD}&seed=${seed}`);
+  await expect.poll(() => page.evaluate(() => Boolean(window.__OS_GAME__)), { timeout: 60_000 }).toBe(true);
+  await expect.poll(() => page.evaluate(() => window.__OS_GAME__!.probe().tick), { timeout: 30_000 }).toBeGreaterThan(10);
+}
+
+const probe = (page: Page) => page.evaluate(() => window.__OS_GAME__!.probe());
+const screenOf = (page: Page, x: number, z: number) => page.evaluate(([px, pz]) => window.__OS_GAME__!.screenOf(px!, pz!), [x, z]);
+const entityScreen = (page: Page, id: string) => page.evaluate((entity) => window.__OS_GAME__!.entityScreen(entity), id);
+
+test.describe('Silent Tide', () => {
+  test.beforeEach(async ({ page }) => signIn(page));
+
+  test('briefing explains the mission and enforces the squad rules', async ({ page }) => {
+    await page.getByTestId('mission-silent-tide').click();
+    await expect(page).toHaveURL(/\/missions\/silent-tide$/);
+    await expect(page.getByRole('heading', { name: 'Operation Silent Tide' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Rules of engagement' })).toBeVisible();
+
+    // The Combat Engineer is required and locked in.
+    await expect(page.getByTestId('pick-engineer')).toBeChecked();
+    await expect(page.getByTestId('pick-engineer')).toBeDisabled();
+
+    // Too few specialists is refused with a reason.
+    await page.getByTestId('pick-recon').uncheck();
+    await page.getByTestId('pick-marine').uncheck();
+    await page.getByTestId('deploy').click();
+    await expect(page.getByRole('alert').filter({ hasText: 'Choose 3 to 4 specialists' })).toBeVisible();
+
+    await page.getByTestId('pick-medic').check();
+    await page.getByTestId('deploy').click();
+    await expect(page).toHaveURL(/\/play\/silent-tide\?squad=/);
+    await expect(page.getByTestId('game-root')).toBeVisible({ timeout: 60_000 });
+    await expect(page.getByTestId('portrait-medic')).toBeVisible();
+  });
+
+  test('an invalid squad in the URL returns to the briefing with the reason', async ({ page }) => {
+    await page.goto('/play/silent-tide?squad=recon,marine,medic');
+    await expect(page).toHaveURL(/\/missions\/silent-tide\?error=/);
+    await expect(page.getByRole('alert').filter({ hasText: 'requires the Combat Engineer' })).toBeVisible();
+  });
+
+  test('selection, orders, tactical pause and menus work with mouse and keyboard', async ({ page }) => {
+    await startMission(page);
+    expect((await probe(page)).selected).toEqual(['op:engineer']);
+
+    await page.keyboard.press('Digit2');
+    expect((await probe(page)).selected).toEqual(['op:infiltrator']);
+
+    // Right-click on open ground moves the selected operative.
+    const before = (await probe(page)).operatives.find((o) => o.id === 'op:infiltrator')!;
+    const target = (await screenOf(page, before.x + 7, before.z + 4))!;
+    await page.mouse.click(target.x, target.y, { button: 'right' });
+    await expect
+      .poll(async () => {
+        const moth = (await probe(page)).operatives.find((o) => o.id === 'op:infiltrator')!;
+        return Math.hypot(moth.x - before.x, moth.z - before.z);
+      })
+      .toBeGreaterThan(0.5);
+
+    // Space is a tactical pause: the clock stops, and resumes on the second press.
+    await page.keyboard.press('Space');
+    await expect(page.getByTestId('paused')).toBeVisible();
+    const frozen = (await probe(page)).tick;
+    await page.waitForTimeout(500);
+    expect((await probe(page)).tick).toBe(frozen);
+    await page.keyboard.press('Space');
+    await expect.poll(async () => (await probe(page)).tick).toBeGreaterThan(frozen);
+
+    // Escape opens the pause menu (which pauses), F1 the controls.
+    await page.keyboard.press('Escape');
+    await expect(page.getByTestId('pause-menu')).toBeVisible();
+    expect((await probe(page)).paused).toBe(true);
+    await page.keyboard.press('Escape');
+    await expect(page.getByTestId('pause-menu')).toBeHidden();
+    await page.keyboard.press('F1');
+    await expect(page.getByTestId('help')).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(page.getByTestId('help')).toBeHidden();
+    expect((await probe(page)).paused).toBe(false);
+  });
+
+  test('drag box selects the squad and a thrown stone uses one from the pouch', async ({ page }) => {
+    await startMission(page);
+    await page.keyboard.press('Space');
+    const points = [];
+    for (const op of (await probe(page)).operatives) points.push((await entityScreen(page, op.id))!);
+    const xs = points.map((p) => p.x);
+    const ys = points.map((p) => p.y);
+    await page.mouse.move(Math.min(...xs) - 30, Math.min(...ys) - 40);
+    await page.mouse.down();
+    await page.mouse.move(Math.max(...xs) + 30, Math.max(...ys) + 30, { steps: 6 });
+    await page.mouse.up();
+    expect((await probe(page)).selected).toHaveLength(4);
+    await page.keyboard.press('Space');
+
+    // BADGER's sixth slot (H) is the stone: aim at the ground, confirm with a left click.
+    await page.keyboard.press('Digit1');
+    await expect(page.getByTestId('ability-throw-stone')).toContainText('3');
+    await page.keyboard.press('KeyH');
+    const badger = (await probe(page)).operatives.find((o) => o.id === 'op:engineer')!;
+    const aim = (await screenOf(page, badger.x + 6, badger.z + 2))!;
+    await page.mouse.move(aim.x, aim.y);
+    await expect(page.getByTestId('context-hint')).toContainText('Throw stone: left-click to confirm');
+    await page.mouse.click(aim.x, aim.y);
+    await expect(page.getByTestId('ability-throw-stone')).toContainText('2');
+  });
+
+  test('view cones show for a hovered soldier, a pinned one and all soldiers with Alt', async ({ page }) => {
+    await startMission(page);
+    await page.keyboard.press('Space');
+    const guard = (await entityScreen(page, 'g:beach'))!;
+    await page.mouse.move(guard.x, guard.y - 6);
+    await expect.poll(async () => (await probe(page)).conesVisible).toBe(2);
+    await expect(page.getByTestId('enemy-info')).toContainText('Patrolling');
+
+    await page.mouse.click(guard.x, guard.y - 6);
+    await page.mouse.move(40, 400);
+    await expect.poll(async () => (await probe(page)).conesVisible).toBe(2);
+
+    await page.keyboard.down('Alt');
+    await expect.poll(async () => (await probe(page)).conesVisible).toBeGreaterThan(2);
+    await page.keyboard.up('Alt');
+  });
+
+  test('a squad that charges the garrison is lost and gets an honest debrief', async ({ page }) => {
+    test.slow();
+    await startMission(page);
+    await page.keyboard.press('Control+KeyA');
+    await page.keyboard.press('KeyZ');
+    for (let i = 0; i < 3; i += 1) await page.keyboard.press('BracketRight');
+    await expect
+      .poll(
+        async () => {
+          const p = await probe(page);
+          const free = p.operatives.filter((o) => o.status === 'active');
+          if (p.status === 'running' && free.length > 0 && free.every((o) => !o.busy)) {
+            await page.keyboard.press('Control+KeyA');
+            const target = await screenOf(page, Math.min(free[0]!.x + 10, 50), Math.min(free[0]!.z + 4, 30));
+            if (target) await page.mouse.dblclick(target.x, target.y, { button: 'right' });
+          }
+          return p.status;
+        },
+        { timeout: 200_000, intervals: [1500] },
+      )
+      .toBe('failed');
+    const debrief = page.getByTestId('debrief');
+    await expect(debrief).toBeVisible();
+    await expect(debrief).toHaveAttribute('data-outcome', 'failed');
+    await expect(debrief).toContainText('Mission failed');
+    await expect(debrief).toContainText('Field report');
+    await debrief.getByRole('button', { name: 'Retry mission' }).click();
+    await expect(debrief).toBeHidden();
+    await expect.poll(async () => (await probe(page)).status).toBe('running');
+  });
+});

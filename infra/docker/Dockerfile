@@ -16,6 +16,7 @@ WORKDIR /app
 FROM base AS deps
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/web/package.json apps/web/
+COPY packages/content/package.json packages/content/
 COPY packages/db/package.json packages/db/
 COPY packages/engine/package.json packages/engine/
 COPY packages/schemas/package.json packages/schemas/
@@ -29,6 +30,12 @@ RUN chmod +x /usr/local/bin/dev-entrypoint
 ENTRYPOINT ["dev-entrypoint"]
 EXPOSE 3000
 CMD ["pnpm", "dev"]
+
+# Build-time media tooling (voice bank): the dev image plus ffmpeg from Debian's archive.
+FROM dev AS media
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends ffmpeg \
+ && rm -rf /var/lib/apt/lists/*
 
 FROM deps AS build
 COPY . .

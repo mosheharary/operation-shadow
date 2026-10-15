@@ -90,6 +90,17 @@ services:
     profiles: ["test"]
     command: ["pnpm", "test"]
 
+  # Build-time media generation (needs GOOGLE_API_KEY in .env): `make voice-bank`
+  media:
+    <<: *tools
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile
+      target: media
+    image: operation-shadow/media:local
+    profiles: ["media"]
+    command: ["pnpm", "voice-bank"]
+
   # Production-like build (Next.js standalone) on http://localhost:3001
   app-prod:
     profiles: ["prod"]

@@ -1,0 +1,17 @@
+{
+  "name": "@operation-shadow/content",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Authored game content: specialists, missions, briefings and dialogue banks.",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@operation-shadow/engine": "workspace:*"
+  }
+}

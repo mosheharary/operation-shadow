@@ -12,7 +12,7 @@
     "build": "pnpm --filter @operation-shadow/web build",
     "start": "pnpm --filter @operation-shadow/web start",
     "lint": "eslint --max-warnings=0 .",
-    "typecheck": "pnpm -r typecheck && tsc -p tests/tsconfig.json",
+    "typecheck": "pnpm -r typecheck && tsc -p tests/tsconfig.json && tsc -p tools/tsconfig.json",
     "test": "vitest run",
     "test:unit": "vitest run --project unit",
     "test:integration": "vitest run --project integration",
@@ -20,7 +20,8 @@
     "db:generate": "pnpm --filter @operation-shadow/db generate",
     "db:migrate": "pnpm --filter @operation-shadow/db migrate",
     "db:seed": "pnpm --filter @operation-shadow/web seed",
-    "check": "pnpm lint && pnpm typecheck && pnpm test"
+    "check": "pnpm lint && pnpm typecheck && pnpm test",
+    "voice-bank": "tsx tools/media/voice-bank.ts"
   },
   "devDependencies": {
     "@playwright/test": "1.64.0",

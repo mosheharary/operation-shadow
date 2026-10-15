@@ -190,6 +190,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@operation-shadow/content':
+        specifier: workspace:*
+        version: link:../../packages/content
       '@operation-shadow/db':
         specifier: workspace:*
         version: link:../../packages/db
@@ -239,6 +242,12 @@ importers:
       '@types/three':
         specifier: 0.186.0
         version: 0.186.0
+
+  packages/content:
+    dependencies:
+      '@operation-shadow/engine':
+        specifier: workspace:*
+        version: link:../engine
 
   packages/db:
     dependencies:
