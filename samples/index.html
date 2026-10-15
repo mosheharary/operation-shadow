@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Operation Shadow — Samples</title>
+<style>
+  :root { --bg:#111519; --panel:#1a2026; --ink:#e6e1d6; --muted:#9aa3a8; --line:#2b333a; --accent:#c9a45c; --warn:#e07a5f; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.55 -apple-system, "Segoe UI", Roboto, sans-serif; }
+  header, main { max-width: 1280px; margin: 0 auto; padding: 24px 16px; }
+  header h1 { font-family: "Courier New", monospace; letter-spacing: .08em; margin: 0 0 4px; color: var(--accent); }
+  h2 { border-bottom: 1px solid var(--line); padding-bottom: 6px; margin-top: 40px; }
+  h3 { color: var(--accent); font-weight: 600; margin: 28px 0 12px; }
+  .note { background: var(--panel); border-left: 3px solid var(--accent); padding: 12px 16px; color: var(--muted); }
+  .note li { margin: 4px 0; }
+  .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); }
+  .grid.portraits { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); }
+  .grid.barks { grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; margin: 0; }
+  .card.pad { padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; }
+  .card img { display:block; width:100%; height:auto; background:#000; }
+  figcaption { padding: 10px 12px; display:flex; flex-direction:column; gap:4px; }
+  .meta { color: var(--muted); font-size: 12px; }
+  details summary { cursor: pointer; color: var(--muted); font-size: 12px; }
+  pre { white-space: pre-wrap; font-size: 12px; color: var(--muted); margin: 6px 0 0; }
+  audio { width: 100%; }
+  .lines { list-style: none; padding: 0; margin: 4px 0 0; display:flex; flex-direction:column; gap:8px; }
+  .lines li { display:grid; grid-template-columns: 84px 1fr; gap: 2px 10px; }
+  .lines .style { color: var(--muted); font-style: italic; font-size: 12px; grid-column: 2; }
+  .lines .text { grid-column: 2; }
+  .lines .who { grid-row: span 2; }
+  .who { font: 700 11px/1.8 "Courier New", monospace; letter-spacing:.06em; padding: 0 6px; border-radius: 3px; background:#2b333a; height: fit-content; text-align:center; }
+  .who-lantern { background:#5c4a1f; } .who-moth { background:#3a3f55; } .who-owl { background:#2f4f4a; }
+  .who-badger { background:#5a3b2a; } .who-fox { background:#5b2f3c; } .who-heron { background:#2f4a5c; }
+  .who-otter { background:#24505a; } .who-guard_a, .who-guard_b { background:#4a2323; }
+  table { width:100%; border-collapse: collapse; font-size: 13px; }
+  td { border-bottom: 1px solid var(--line); padding: 6px 8px; vertical-align: top; }
+  .warn { color: var(--warn); }
+  footer { color: var(--muted); font-size: 12px; max-width:1280px; margin:0 auto; padding: 24px 16px 48px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>OPERATION SHADOW</h1>
+  <div>Pre-production samples for art, music and dialogue direction. Please review and approve or request changes.</div>
+  <ul class="note">
+    <li>Generated on 2026-10-15 with Google models: gemini-3.8-flash, gemini-nano-banana-2.1, gemini-3.8-flash-tts, lyria-3.5, lyria-3-clip-preview. Every output carries Google's invisible SynthID watermark.</li>
+    <li><strong>Concept images show the target mood, palette and composition.</strong> The playable game renders a real-time 3D world from procedural and CC0 assets, so in-engine visuals will be simpler than these paintings.</li>
+    <li>Dialogue lines were written by gemini-3.8-flash from the cast and mission brief below, then voiced with prebuilt Gemini voices. Radio filtering, 3D positioning and mixing are added by the game's audio engine and are not applied here.</li>
+    <li>All names, factions and characters are original placeholders and can be changed.</li>
+  </ul>
+</header>
+<main>
+  <section><h2>Images</h2><h3>Environments</h3><div class="grid "><figure class="card ">
+  <a href="images/env_coastal_night.jpg" target="_blank" rel="noopener"><img src="images/env_coastal_night.jpg" alt="Coastal theme — Varrow Harbor at night" loading="lazy"></a>
+  <figcaption><strong>Coastal theme — Varrow Harbor at night</strong><span class="meta">gemini-nano-banana-2.1 · 16:9 · 2K</span><details><summary>Prompt</summary><pre>Art direction for &quot;Operation Shadow&quot;, an original 1940s-inspired tactical stealth game.
+Stylized-realistic miniature diorama look, as if a detailed hand-crafted tabletop model were photographed
+with a subtle tilt-shift lens. High-angle three-quarter isometric camera (about 50 degrees pitch).
+Physically based materials with hand-painted detail, soft global illumination, muted palette of slate blue,
+olive drab, weathered stone and rust red, accented by warm lamp light. Crisp, readable silhouettes.
+Game concept art quality. Fictional world: no real-world flags, insignia or symbols, no text.
+Scene: Varrow Harbor at night in light rain and fog. A small fishing village with stone quays, wooden piers and
+moored fishing boats; a fortified gun battery with concrete emplacements on the cliff above; two searchlights
+sweeping the dark water; enemy sentries in long slate-grey greatcoats patrolling with lanterns. One sentry&#39;s field
+of view is shown as a faint translucent two-tone green cone projected on the wet cobblestones (brighter near zone,
+darker far zone), like a tactical game overlay. Three tiny allied commandos crouch in shadow beside crates at the
+water&#39;s edge.</pre></details></figcaption>
+</figure>
+<figure class="card ">
+  <a href="images/env_alpine_day.jpg" target="_blank" rel="noopener"><img src="images/env_alpine_day.jpg" alt="Alpine theme — Whitecrown Ridge radar outpost" loading="lazy"></a>
+  <figcaption><strong>Alpine theme — Whitecrown Ridge radar outpost</strong><span class="meta">gemini-nano-banana-2.1 · 16:9 · 2K</span><details><summary>Prompt</summary><pre>Art direction for &quot;Operation Shadow&quot;, an original 1940s-inspired tactical stealth game.
+Stylized-realistic miniature diorama look, as if a detailed hand-crafted tabletop model were photographed
+with a subtle tilt-shift lens. High-angle three-quarter isometric camera (about 50 degrees pitch).
+Physically based materials with hand-painted detail, soft global illumination, muted palette of slate blue,
+olive drab, weathered stone and rust red, accented by warm lamp light. Crisp, readable silhouettes.
+Game concept art quality. Fictional world: no real-world flags, insignia or symbols, no text.
+Scene: a radar outpost on a snowy mountain saddle under overcast daylight. Timber barracks with snow-laden roofs, a
+steel lattice tower carrying a large radar dish, barbed-wire fences, a sandbagged machine-gun nest, a wooden
+watchtower with a searchlight, pine forest at the edges, and fresh footprint trails crossing the snow. A patrol of
+three enemy soldiers in grey greatcoats walks a perimeter path.</pre></details></figcaption>
+</figure>
+<figure class="card ">
+  <a href="images/env_rail_dusk.jpg" target="_blank" rel="noopener"><img src="images/env_rail_dusk.jpg" alt="Rail theme — Corvan Junction depot at dusk" loading="lazy"></a>
+  <figcaption><strong>Rail theme — Corvan Junction depot at dusk</strong><span class="meta">gemini-nano-banana-2.1 · 16:9 · 2K</span><details><summary>Prompt</summary><pre>Art direction for &quot;Operation Shadow&quot;, an original 1940s-inspired tactical stealth game.
+Stylized-realistic miniature diorama look, as if a detailed hand-crafted tabletop model were photographed
+with a subtle tilt-shift lens. High-angle three-quarter isometric camera (about 50 degrees pitch).
+Physically based materials with hand-painted detail, soft global illumination, muted palette of slate blue,
+olive drab, weathered stone and rust red, accented by warm lamp light. Crisp, readable silhouettes.
+Game concept art quality. Fictional world: no real-world flags, insignia or symbols, no text.
+Scene: a rail depot at dusk in drizzle. A black steam locomotive with freight wagons, a brick engine shed, a timber
+water tower, a fuel depot with rows of red barrels, warehouses, signal gantries, puddles reflecting warm sodium
+lamps, steam drifting through the yard. Sentries stand at a checkpoint barrier while a supply truck is unloaded.</pre></details></figcaption>
+</figure></div>
+<h3>Key art &amp; UI</h3><div class="grid "><figure class="card ">
+  <a href="images/key_art.jpg" target="_blank" rel="noopener"><img src="images/key_art.jpg" alt="Title key art" loading="lazy"></a>
+  <figcaption><strong>Title key art</strong><span class="meta">gemini-nano-banana-2.1 · 16:9 · 2K</span><details><summary>Prompt</summary><pre>Painterly cinematic key art for &quot;Operation Shadow&quot;, an original 1940s-inspired tactical stealth game.
+Six silhouetted commandos of Shadow Section stand on a rocky cliff above a fog-bound harbor at night, lit by
+moonlight and a distant sweeping searchlight, under a dramatic cloudy sky. Muted slate-blue palette with warm
+highlights. The game title &quot;OPERATION SHADOW&quot; appears in bold, weathered stencil lettering across the top.
+Fictional world: no real-world flags, insignia or symbols.</pre></details></figcaption>
+</figure>
+<figure class="card ">
+  <a href="images/hud_mockup.jpg" target="_blank" rel="noopener"><img src="images/hud_mockup.jpg" alt="In-game HUD concept mockup (target mood, not real engine output)" loading="lazy"></a>
+  <figcaption><strong>In-game HUD concept mockup (target mood, not real engine output)</strong><span class="meta">gemini-nano-banana-2.1 · 16:9 · 2K</span><details><summary>Prompt</summary><pre>Concept mockup of the in-game screen of &quot;Operation Shadow&quot;, an original 1940s-inspired tactical stealth game.
+The harbor at night seen from the high isometric tactical camera, rendered as a stylized-realistic miniature diorama.
+A clean, restrained military field-equipment style HUD sits around the screen edges only: six small character
+portraits with thin health bars along the top-left, a compact objectives panel at the top-right, an alarm-level
+indicator at the top-center, an ability bar with simple icons at the bottom-center, and a parchment-style tactical
+minimap at the bottom-right. On the ground, a translucent two-tone green vision cone from one guard; one selected
+commando with a subtle ring marker and a dotted path-preview line. No real-world insignia.</pre></details></figcaption>
+</figure></div>
+<h3>Characters</h3><div class="grid "><figure class="card ">
+  <a href="images/squad_lineup.jpg" target="_blank" rel="noopener"><img src="images/squad_lineup.jpg" alt="Shadow Section — character lineup" loading="lazy"></a>
+  <figcaption><strong>Shadow Section — character lineup</strong><span class="meta">gemini-nano-banana-2.1 · 16:9 · 2K</span><details><summary>Prompt</summary><pre>Character concept lineup sheet for &quot;Operation Shadow&quot;, an original 1940s-inspired stealth game, on a neutral
+warm-grey background. The six members of Shadow Section stand side by side, full body, front view, each with a
+distinct silhouette, with a small label plate under each figure reading MOTH, OWL, BADGER, FOX, HERON, OTTER:
+MOTH: lean man in his thirties, dark knit watch cap, charcoal wool sweater, climbing rope coiled over one shoulder, knife sheath, soft-soled boots, face streaked with dark camouflage cream.
+OWL: woman in her late twenties, olive field cap, olive smock with a leather map case, long scoped rifle slung across her back, binoculars on her chest.
+BADGER: broad-shouldered man in his forties, dented steel helmet, heavy canvas backpack bristling with tools, wire cutters on his belt, satchel charges, rolled-up sleeves.
+FOX: elegant woman in her thirties, belted trench coat over civilian clothes, dark beret, leather satchel, a folded grey enemy officer cap tucked under one arm.
+HERON: tall, thin man in his fifties, round wire spectacles, white armband with a green cross, worn medical satchel, rolled canvas stretcher on his back.
+OTTER: wiry man in his twenties, dark rubberized diving suit with the hood rolled down, swim fins clipped to his belt, short harpoon gun, coiled line, packed inflatable dinghy.
+Painted concept-art style, muted 1940s palette, consistent scale. No real-world insignia.</pre></details></figcaption>
+</figure>
+<figure class="card ">
+  <a href="images/enemy_uniforms.jpg" target="_blank" rel="noopener"><img src="images/enemy_uniforms.jpg" alt="Iron Dominion — uniform design sheet" loading="lazy"></a>
+  <figcaption><strong>Iron Dominion — uniform design sheet</strong><span class="meta">gemini-nano-banana-2.1 · 16:9 · 2K</span><details><summary>Prompt</summary><pre>Uniform design sheet for the fictional Iron Dominion army in &quot;Operation Shadow&quot;: an invented army that is
+deliberately not based on any real nation&#39;s uniforms. Painted concept-art style on a neutral background, with a
+distinctive silhouette that cannot be mistaken for any historical army. Three full-body figures:
+- a weary conscript sentry in a double-breasted slate-blue greatcoat with rust-red collar tabs and brass toggle
+  fastenings, wearing a tall rounded steel helmet with a raised central ridge running front to back and a narrow flat
+  brim all around, carrying a bolt-action rifle;
+- a sergeant in a short slate-blue field jacket with a rust-red sash, the same ridged helmet, carrying a lantern;
+- an officer in a long slate-blue cape-coat over a high-collared tunic, wearing a soft flat-topped kepi with a short
+  brim, with a small silver emblem of a stylized iron crown with three points.
+Add labelled close-up callouts of the iron-crown emblem, the rust-red collar tabs, the ridged helmet and the kepi.
+The iron crown is the only emblem anywhere on the sheet.</pre></details></figcaption>
+</figure></div>
+<h3>Squad portraits</h3><div class="grid portraits"><figure class="card square">
+  <a href="images/portrait_moth.jpg" target="_blank" rel="noopener"><img src="images/portrait_moth.jpg" alt="MOTH — Sgt. Elias Varga, Infiltrator" loading="lazy"></a>
+  <figcaption><strong>MOTH — Sgt. Elias Varga, Infiltrator</strong><span class="meta">gemini-nano-banana-2.1 · 1:1 · 1K</span><details><summary>Prompt</summary><pre>HUD character portrait for &quot;Operation Shadow&quot;, an original 1940s-inspired stealth game.
+Head and shoulders, three-quarter view, painted in a 1940s gouache illustration style with subtle film grain,
+muted palette, soft key light from the upper left, plain dark slate-blue background, consistent framing
+for a matching set of six portraits. No text, no frame, no real-world insignia.
+Subject: lean man in his thirties, dark knit watch cap, charcoal wool sweater, climbing rope coiled over one shoulder, knife sheath, soft-soled boots, face streaked with dark camouflage cream. Personality to convey: Former mountain guide. Soft-spoken, economical with words, bone-dry humor, never raises his voice.</pre></details></figcaption>
+</figure>
+<figure class="card square">
+  <a href="images/portrait_owl.jpg" target="_blank" rel="noopener"><img src="images/portrait_owl.jpg" alt="OWL — Lt. Hanna Brekke, Recon / Marksman" loading="lazy"></a>
+  <figcaption><strong>OWL — Lt. Hanna Brekke, Recon / Marksman</strong><span class="meta">gemini-nano-banana-2.1 · 1:1 · 1K</span><details><summary>Prompt</summary><pre>HUD character portrait for &quot;Operation Shadow&quot;, an original 1940s-inspired stealth game.
+Head and shoulders, three-quarter view, painted in a 1940s gouache illustration style with subtle film grain,
+muted palette, soft key light from the upper left, plain dark slate-blue background, consistent framing
+for a matching set of six portraits. No text, no frame, no real-world insignia.
+Subject: woman in her late twenties, olive field cap, olive smock with a leather map case, long scoped rifle slung across her back, binoculars on her chest. Personality to convey: Former cartographer. Precise, patient, clipped; reports numbers and bearings.</pre></details></figcaption>
+</figure>
+<figure class="card square">
+  <a href="images/portrait_badger.jpg" target="_blank" rel="noopener"><img src="images/portrait_badger.jpg" alt="BADGER — Cpl. Desmond &#39;Dez&#39; Okafor, Combat Engineer" loading="lazy"></a>
+  <figcaption><strong>BADGER — Cpl. Desmond &#39;Dez&#39; Okafor, Combat Engineer</strong><span class="meta">gemini-nano-banana-2.1 · 1:1 · 1K</span><details><summary>Prompt</summary><pre>HUD character portrait for &quot;Operation Shadow&quot;, an original 1940s-inspired stealth game.
+Head and shoulders, three-quarter view, painted in a 1940s gouache illustration style with subtle film grain,
+muted palette, soft key light from the upper left, plain dark slate-blue background, consistent framing
+for a matching set of six portraits. No text, no frame, no real-world insignia.
+Subject: broad-shouldered man in his forties, dented steel helmet, heavy canvas backpack bristling with tools, wire cutters on his belt, satchel charges, rolled-up sleeves. Personality to convey: Ex-shipyard welder. Big-hearted, gruff and cheerful; talks affectionately to machines and charges.</pre></details></figcaption>
+</figure>
+<figure class="card square">
+  <a href="images/portrait_fox.jpg" target="_blank" rel="noopener"><img src="images/portrait_fox.jpg" alt="FOX — Celeste Marchand, Deception Specialist" loading="lazy"></a>
+  <figcaption><strong>FOX — Celeste Marchand, Deception Specialist</strong><span class="meta">gemini-nano-banana-2.1 · 1:1 · 1K</span><details><summary>Prompt</summary><pre>HUD character portrait for &quot;Operation Shadow&quot;, an original 1940s-inspired stealth game.
+Head and shoulders, three-quarter view, painted in a 1940s gouache illustration style with subtle film grain,
+muted palette, soft key light from the upper left, plain dark slate-blue background, consistent framing
+for a matching set of six portraits. No text, no frame, no real-world insignia.
+Subject: elegant woman in her thirties, belted trench coat over civilian clothes, dark beret, leather satchel, a soft slate-blue enemy officer&#39;s kepi tucked under one arm whose only badge is a small silver three-pointed crown. Personality to convey: Former stage actress. Theatrical, charming, quick-witted; relishes playing a role.</pre></details></figcaption>
+</figure>
+<figure class="card square">
+  <a href="images/portrait_heron.jpg" target="_blank" rel="noopener"><img src="images/portrait_heron.jpg" alt="HERON — Dr. Ivo Lindqvist, Field Medic" loading="lazy"></a>
+  <figcaption><strong>HERON — Dr. Ivo Lindqvist, Field Medic</strong><span class="meta">gemini-nano-banana-2.1 · 1:1 · 1K</span><details><summary>Prompt</summary><pre>HUD character portrait for &quot;Operation Shadow&quot;, an original 1940s-inspired stealth game.
+Head and shoulders, three-quarter view, painted in a 1940s gouache illustration style with subtle film grain,
+muted palette, soft key light from the upper left, plain dark slate-blue background, consistent framing
+for a matching set of six portraits. No text, no frame, no real-world insignia.
+Subject: tall, thin man in his fifties, round wire spectacles, white armband with a green cross, worn medical satchel, rolled canvas stretcher on his back. Personality to convey: Former country doctor. Calm, compassionate, wry gallows humor, steady under fire.</pre></details></figcaption>
+</figure>
+<figure class="card square">
+  <a href="images/portrait_otter.jpg" target="_blank" rel="noopener"><img src="images/portrait_otter.jpg" alt="OTTER — PO Kai Rennick, Marine Operator" loading="lazy"></a>
+  <figcaption><strong>OTTER — PO Kai Rennick, Marine Operator</strong><span class="meta">gemini-nano-banana-2.1 · 1:1 · 1K</span><details><summary>Prompt</summary><pre>HUD character portrait for &quot;Operation Shadow&quot;, an original 1940s-inspired stealth game.
+Head and shoulders, three-quarter view, painted in a 1940s gouache illustration style with subtle film grain,
+muted palette, soft key light from the upper left, plain dark slate-blue background, consistent framing
+for a matching set of six portraits. No text, no frame, no real-world insignia.
+Subject: wiry man in his twenties, dark rubberized diving suit with the hood rolled down, swim fins clipped to his belt, short harpoon gun, coiled line, packed inflatable dinghy. Personality to convey: Fisherman&#39;s son. Laid-back, cocky, nautical slang, loves cold water.</pre></details></figcaption>
+</figure></div>
+<h3>Briefing</h3><div class="grid "><figure class="card ">
+  <a href="images/briefing_map.jpg" target="_blank" rel="noopener"><img src="images/briefing_map.jpg" alt="Briefing dossier — Operation Silent Tide" loading="lazy"></a>
+  <figcaption><strong>Briefing dossier — Operation Silent Tide</strong><span class="meta">gemini-nano-banana-2.1 · 4:3 · 2K</span><details><summary>Prompt</summary><pre>In-world mission briefing dossier for &quot;Operation Silent Tide&quot; in the original game &quot;Operation Shadow&quot;.
+A hand-drawn top-down tactical map of a fictional fishing harbor on aged paper: coastline, piers, village streets, a
+cliff-top gun battery, a radio hut, enemy patrol routes as dashed lines, a red insertion route arriving from the sea,
+and an extraction buoy marked with a circle. Pinned black-and-white reconnaissance photographs, a short typed
+objective list, a paperclip and a faint coffee stain. 1940s field-intelligence aesthetic. No real-world insignia.</pre></details></figcaption>
+</figure></div></section>
+  <section><h2>Soundtrack</h2><div class="grid"><div class="card pad"><strong>Main theme (menu)</strong><span class="meta">lyria-3.5</span><audio controls preload="none" src="music/music_main_theme.mp3"></audio><details><summary>Prompt</summary><pre>Original main menu theme for a 1940s-inspired tactical stealth game. D minor, 92 BPM. A solo muted trumpet
+states a heroic but melancholy melody over low strings and soft snare-drum rolls; it builds with French horns and
+timpani to a noble climax, then fades to a lone piano echo of the theme. Classic 1940s cinematic orchestral score with a
+warm vintage recording character. About two minutes. Instrumental only, no vocals, no choir, no lyrics.</pre></details><details><summary>Structure notes returned by the model</summary><pre>[[A0]]
+[[B1]]
+[[C2]]
+[[D3]]
+[[E4]]</pre></details></div>
+<div class="card pad"><strong>Stealth exploration (loopable)</strong><span class="meta">lyria-3.5</span><audio controls preload="none" src="music/music_stealth.mp3"></audio><details><summary>Prompt</summary><pre>Stealth exploration music for a 1940s-inspired tactical stealth game. D minor, 84 BPM. Sparse and tense:
+pizzicato basses, ticking rim clicks, low sustained string clusters, distant muted horn calls and occasional celesta
+motifs. Restrained dynamics so dialogue stays clear; no big climaxes; it ends quietly so it can loop. About two
+minutes. Instrumental only, no vocals, no choir, no lyrics.</pre></details><details><summary>Structure notes returned by the model</summary><pre>[[A0]]
+[[B1]]
+[[C2]]
+[[D3]]
+[[B4]]
+[[C5]]
+[[E6]]</pre></details></div>
+<div class="card pad"><strong>Alarm / combat</strong><span class="meta">lyria-3.5</span><audio controls preload="none" src="music/music_alert.mp3"></audio><details><summary>Prompt</summary><pre>Alarm and combat music for a 1940s-inspired tactical stealth game. D minor, 168 BPM. An urgent, driving
+snare and timpani ostinato, aggressive staccato strings, brass stabs and rising horn figures; the feeling of being
+hunted. Relentless energy with brief breathing points. About two minutes. Instrumental only, no vocals, no choir, no lyrics.</pre></details><details><summary>Structure notes returned by the model</summary><pre>[[A0]]
+[[B1]]
+[[C2]]
+[[D3]]
+[[B4]]
+[[E5]]</pre></details></div>
+<div class="card pad"><strong>Briefing underscore (30 s clip)</strong><span class="meta">lyria-3-clip-preview</span><audio controls preload="none" src="music/music_briefing.mp3"></audio><details><summary>Prompt</summary><pre>Mission briefing underscore for a 1940s-inspired tactical stealth game. D minor, 70 BPM. Subdued and
+focused: solo piano, soft sustained strings, a faint radio-room atmosphere and a distant military snare. Instrumental only, no vocals, no choir, no lyrics.</pre></details><details><summary>Structure notes returned by the model</summary><pre>&lt;instrumental&gt;</pre></details></div>
+<div class="card pad"><strong>Mission success sting (30 s clip)</strong><span class="meta">lyria-3-clip-preview</span><audio controls preload="none" src="music/music_victory.mp3"></audio><details><summary>Prompt</summary><pre>Mission success music for a 1940s-inspired tactical stealth game. D major, 80 BPM. Bittersweet relief: warm
+strings and a hopeful solo trumpet resolving a heroic theme, with gentle timpani. Instrumental only, no vocals, no choir, no lyrics.</pre></details><details><summary>Structure notes returned by the model</summary><pre>&lt;instrumental&gt;</pre></details></div></div></section>
+  <section><h2>Dialogue</h2>
+    <h3>Cast and voices</h3><div class="card pad"><table><tr><td><span class="who who-lantern">LANTERN</span></td><td>Colonel Ruth Ashdown</td><td>HQ handler (radio)</td><td>Gacrux</td><td>Seasoned intelligence officer. Measured, authoritative, dry wit, quietly protective of her team.</td></tr><tr><td><span class="who who-moth">MOTH</span></td><td>Sgt. Elias Varga</td><td>Infiltrator</td><td>Enceladus</td><td>Former mountain guide. Soft-spoken, economical with words, bone-dry humor, never raises his voice. Silent takedowns, climbing, restraints, noise lures.</td></tr><tr><td><span class="who who-owl">OWL</span></td><td>Lt. Hanna Brekke</td><td>Recon / Marksman</td><td>Erinome</td><td>Former cartographer. Precise, patient, clipped; reports numbers and bearings. Binoculars, tagging enemies, suppressed rifle with very few rounds, tranquilizer darts.</td></tr><tr><td><span class="who who-badger">BADGER</span></td><td>Cpl. Desmond &#39;Dez&#39; Okafor</td><td>Combat Engineer</td><td>Algenib</td><td>Ex-shipyard welder. Big-hearted, gruff and cheerful; talks affectionately to machines and charges. Wire cutters, lockpicks, demolition charges, sabotage.</td></tr><tr><td><span class="who who-fox">FOX</span></td><td>Celeste Marchand</td><td>Deception Specialist</td><td>Despina</td><td>Former stage actress. Theatrical, charming, quick-witted; relishes playing a role. Disguises, distracting guards with conversation, sedative syringe, forged papers.</td></tr><tr><td><span class="who who-heron">HERON</span></td><td>Dr. Ivo Lindqvist</td><td>Field Medic</td><td>Schedar</td><td>Former country doctor. Calm, compassionate, wry gallows humor, steady under fire. Revives and treats the wounded, chloroform, smoke canisters.</td></tr><tr><td><span class="who who-otter">OTTER</span></td><td>PO Kai Rennick</td><td>Marine Operator</td><td>Zubenelgenubi</td><td>Fisherman&#39;s son. Laid-back, cocky, nautical slang, loves cold water. Swimming and diving, inflatable boat, harpoon gun.</td></tr><tr><td><span class="who who-guard_a">GUARD_A</span></td><td>Iron Dominion sentry (veteran)</td><td>Enemy</td><td>Charon</td><td>Weary older sentry who has seen too many cold nights.</td></tr><tr><td><span class="who who-guard_b">GUARD_B</span></td><td>Iron Dominion sentry (conscript)</td><td>Enemy</td><td>Fenrir</td><td>Nervous young conscript, jumpy at every sound.</td></tr></table></div>
+    <h3>Operation Silent Tide Briefing</h3><div class="card pad"><span class="meta">LANTERN: Gacrux</span><audio controls preload="none" src="dialog/dialog_briefing.wav"></audio><ol class="lines"><li><span class="who who-lantern">LANTERN</span><span class="style">Measured, commanding over low-frequency radio crackle.</span><span class="text">Shadow Section, Varrow Harbor is cloaked in sea fog and rain. The Dominion garrison is hunkered down, which gives us our window.</span></li><li><span class="who who-lantern">LANTERN</span><span class="style">Clear, deliberate emphasis on the primary goal.</span><span class="text">Your objective is the fire-control radio inside the cliff-top battery. Disable that transmitter before dawn, or our approaching convoy will be torn to splinters in the strait.</span></li><li><span class="who who-lantern">LANTERN</span><span class="style">Cool and calculating.</span><span class="text">If opportunity permits, secure the harbor master&#39;s naval codebook from his desk. It will unlock Dominion coastal movements for months.</span></li><li><span class="who who-lantern">LANTERN</span><span class="style">Crisp operational instruction.</span><span class="text">Otter will ferry you ashore beneath the north quay. Once the battery is silent, rendezvous at the north navigation buoy for extraction.</span></li><li><span class="who who-lantern">LANTERN</span><span class="style">Firm, protective edge in her voice.</span><span class="text">Keep your heads down. If the battery raises the alarm, the barracks will pour reinforcements up that cliff road, and I expect all six of you back in one piece.</span></li><li><span class="who who-lantern">LANTERN</span><span class="style">Quiet, dry confidence.</span><span class="text">Bring them silence, Shadow Section. HQ out.</span></li></ol></div>
+<h3>Field Acknowledgements and Callouts</h3><div class="grid barks"><div class="card pad"><strong>MOTH — Sgt. Elias Varga</strong><span class="meta">Infiltrator · voice Enceladus</span><audio controls preload="none" src="dialog/dialog_barks_moth.wav"></audio><ol class="lines"><li><span class="who who-moth">MOTH</span><span class="style">Hushed, economical mountain whisper.</span><span class="text">Shifting into the fog now.</span></li><li><span class="who who-moth">MOTH</span><span class="style">Calm, focused, barely audible.</span><span class="text">Securing the anchor point.</span></li><li><span class="who who-moth">MOTH</span><span class="style">Tense whisper, urgent yet controlled.</span><span class="text">Sentry pacing this way. Stay low.</span></li><li><span class="who who-moth">MOTH</span><span class="style">Dry, understated satisfaction.</span><span class="text">Target sleeping. Path is clear.</span></li></ol></div><div class="card pad"><strong>OWL — Lt. Hanna Brekke</strong><span class="meta">Recon / Marksman · voice Erinome</span><audio controls preload="none" src="dialog/dialog_barks_owl.wav"></audio><ol class="lines"><li><span class="who who-owl">OWL</span><span class="style">Precise, clipped professional tone.</span><span class="text">Repositioning to bearing zero-four-zero.</span></li><li><span class="who who-owl">OWL</span><span class="style">Methodical, steady concentration.</span><span class="text">Tagging target on the overlook now.</span></li><li><span class="who who-owl">OWL</span><span class="style">Sharp, measured warning.</span><span class="text">Sentry closing from west, twenty paces.</span></li><li><span class="who who-owl">OWL</span><span class="style">Cool, dispassionate confirmation.</span><span class="text">Dart struck home. Sentry is down.</span></li></ol></div><div class="card pad"><strong>BADGER — Cpl. Desmond &#39;Dez&#39; Okafor</strong><span class="meta">Combat Engineer · voice Algenib</span><audio controls preload="none" src="dialog/dialog_barks_badger.wav"></audio><ol class="lines"><li><span class="who who-badger">BADGER</span><span class="style">Gruff, low-spirited cheer.</span><span class="text">Moving my boots, nice and quiet.</span></li><li><span class="who who-badger">BADGER</span><span class="style">Affectionate mutter to his tools.</span><span class="text">Let Uncle Dez coax this lock open.</span></li><li><span class="who who-badger">BADGER</span><span class="style">Gravelly, urgent hiss.</span><span class="text">Heavy steps coming. Duck your heads.</span></li><li><span class="who who-badger">BADGER</span><span class="style">Warm, proud murmur.</span><span class="text">Beautiful girl, purring like a kitten now.</span></li></ol></div><div class="card pad"><strong>FOX — Celeste Marchand</strong><span class="meta">Deception Specialist · voice Despina</span><audio controls preload="none" src="dialog/dialog_barks_fox.wav"></audio><ol class="lines"><li><span class="who who-fox">FOX</span><span class="style">Playful, theatrical whisper.</span><span class="text">Stepping onto my mark, darling.</span></li><li><span class="who who-fox">FOX</span><span class="style">Mischievous, self-assured relish.</span><span class="text">Time for a little harmless misdirection.</span></li><li><span class="who who-fox">FOX</span><span class="style">Hushed dramatic alarm.</span><span class="text">Our audience approaches. Curtain down, everyone.</span></li><li><span class="who who-fox">FOX</span><span class="style">Wry, elegant satisfaction.</span><span class="text">And the gentleman takes his final bow.</span></li></ol></div><div class="card pad"><strong>HERON — Dr. Ivo Lindqvist</strong><span class="meta">Field Medic · voice Schedar</span><audio controls preload="none" src="dialog/dialog_barks_heron.wav"></audio><ol class="lines"><li><span class="who who-heron">HERON</span><span class="style">Gentle, reassuring clinical murmur.</span><span class="text">Moving up. Keep breathing, friends.</span></li><li><span class="who who-heron">HERON</span><span class="style">Calm, steady bedside manner.</span><span class="text">Administering a gentle dose right now.</span></li><li><span class="who who-heron">HERON</span><span class="style">Sober, disciplined caution.</span><span class="text">Footsteps approaching. Do not make a sound.</span></li><li><span class="who who-heron">HERON</span><span class="style">Quiet, wry gallows humor.</span><span class="text">Patient is resting comfortably. No complications.</span></li></ol></div><div class="card pad"><strong>OTTER — PO Kai Rennick</strong><span class="meta">Marine Operator · voice Zubenelgenubi</span><audio controls preload="none" src="dialog/dialog_barks_otter.wav"></audio><ol class="lines"><li><span class="who who-otter">OTTER</span><span class="style">Breezy, confident low drawl.</span><span class="text">Swimming with the tide. On my way.</span></li><li><span class="who who-otter">OTTER</span><span class="style">Casual nautical focus.</span><span class="text">Rigging the line fast and true.</span></li><li><span class="who who-otter">OTTER</span><span class="style">Quick, alert maritime murmur.</span><span class="text">Greycoats drifting our way, fast current.</span></li><li><span class="who who-otter">OTTER</span><span class="style">Smug, cocky chuckle.</span><span class="text">Clipped his fins. Sentry is out cold.</span></li></ol></div></div>
+<h3>Night Watch at the Harbor Pier</h3><div class="card pad"><span class="meta">GUARD_A: Charon · GUARD_B: Fenrir</span><audio controls preload="none" src="dialog/dialog_guards.wav"></audio><ol class="lines"><li><span class="who who-guard_b">GUARD_B</span><span class="style">Shivering, petulant grumble.</span><span class="text">My fingers are frozen stiff, and the galley served us turnip paste that tasted like canal mud.</span></li><li><span class="who who-guard_a">GUARD_A</span><span class="style">Weary, cynical sigh.</span><span class="text">Pull your greatcoat collar tight and stop whining, lad. The cold keeps you awake, and awake keeps you breathing.</span></li><li><span class="who who-guard_b">GUARD_B</span><span class="style">Nervous, lowered voice.</span><span class="text">Did you hear the men from third watch? They swear phantoms are slipping through the fog, snatching sentries off the line.</span></li><li><span class="who who-guard_a">GUARD_A</span><span class="style">Dismissive scoff.</span><span class="text">Campfire drivel meant to frighten green conscripts. There are no ghosts in Varrow, only salt mist and drafty piers.</span></li><li><span class="who who-guard_b">GUARD_B</span><span class="style">Sudden, panicked whisper.</span><span class="text">Wait. By the freight crates past the slipway. I heard wood creak.</span></li><li><span class="who who-guard_a">GUARD_A</span><span class="style">Irritated, heavy-booted shuffle.</span><span class="text">It is harbor rats chewing tallow, like every other night. Stay by the lantern. I will check the crates.</span></li><li><span class="who who-guard_b">GUARD_B</span><span class="style">Trembling, squinting into the mist.</span><span class="text">Do you see anything? Do not go too far into the dark.</span></li><li><span class="who who-guard_a">GUARD_A</span><span class="style">Shocked, sudden shout of pure alarm.</span><span class="text">Brandt is down in the ditch, bound and gagged! Alarm! Intruders on the north quay!</span></li></ol></div>
+<h3>Urgent Intel: Captured Scout</h3><div class="card pad"><span class="meta">LANTERN: Gacrux</span><audio controls preload="none" src="dialog/dialog_radio_event.wav"></audio><ol class="lines"><li><span class="who who-lantern">LANTERN</span><span class="style">Urgent, hushed tone breaking radio silence.</span><span class="text">Shadow Section, hold your breath. HQ just intercepted an encrypted dispatch from the Dominion harbor garrison.</span></li><li><span class="who who-lantern">LANTERN</span><span class="style">Grim, concise delivery.</span><span class="text">They picked up a lone Coalition scout along the bluffs an hour ago. He is being held inside the harbor master&#39;s office for interrogation.</span></li><li><span class="who who-lantern">LANTERN</span><span class="style">Pragmatic, trusting her squad&#39;s judgment.</span><span class="text">The battery remains your priority, but bringing that scout home will save an entire network. I leave the call to you.</span></li></ol></div>
+<h3>Whispers Behind the Nets</h3><div class="card pad"><span class="meta">FOX: Despina · BADGER: Algenib</span><audio controls preload="none" src="dialog/dialog_banter.wav"></audio><ol class="lines"><li><span class="who who-fox">FOX</span><span class="style">Disgusted, delicate theatrical whisper.</span><span class="text">I have played drafty provincial theaters, Dez, but crouching in rotten herring nets pushes my artistic limits.</span></li><li><span class="who who-badger">BADGER</span><span class="style">Rough, muffled chuckle.</span><span class="text">Quit fidgeting, Celeste. A whiff of salted mackerel never killed anyone. Dominion machine gun fire certainly will.</span></li><li><span class="who who-fox">FOX</span><span class="style">Dry theatrical critique.</span><span class="text">At least machine fire has dramatic presence. This smell will take root in my wool coat until next winter.</span></li><li><span class="who who-badger">BADGER</span><span class="style">Low, focused hiss.</span><span class="text">Hunker down. Sentry patrol is three paces away. Listen to those heavy hobnails crushing the gravel.</span></li><li><span class="who who-fox">FOX</span><span class="style">Amused, supercilious stage whisper.</span><span class="text">His posture is appalling. If I were staging this scene, he would be demoted to stagehand before the first act closed.</span></li><li><span class="who who-badger">BADGER</span><span class="style">Gruff, suppressed smirk.</span><span class="text">Save the review for the morning papers, actress. Let him pass the net first.</span></li></ol></div>
+<h3>Mission Accomplished: Debriefing</h3><div class="card pad"><span class="meta">LANTERN: Gacrux</span><audio controls preload="none" src="dialog/dialog_debrief.wav"></audio><ol class="lines"><li><span class="who who-lantern">LANTERN</span><span class="style">Warm satisfaction beneath a crisp exterior.</span><span class="text">Convoy Vanguard just cleared the strait without facing a single round from the cliffs. The guns remained blind and deaf.</span></li><li><span class="who who-lantern">LANTERN</span><span class="style">Professional commendation.</span><span class="text">Our decoders already have the harbor master&#39;s codebook in hand. The Dominion still has no idea how their cipher went missing.</span></li><li><span class="who who-lantern">LANTERN</span><span class="style">Soft, maternal pride veiled in dry military wit.</span><span class="text">Otter brought you all out clean, without leaving so much as an oil slick behind. Outstanding work, the lot of you.</span></li><li><span class="who who-lantern">LANTERN</span><span class="style">Dry, forward-looking closer.</span><span class="text">Get some dry clothes and warm rations. Command is eyeing an alpine rail bridge in the high passes, and we move at dusk.</span></li></ol></div>
+  </section>
+  
+</main>
+<footer>31 items · estimated API cost $0.95 (published prices; the Lyria 3 Clip price is not published and is excluded) · manifest: manifest.json</footer>
+</body>
+</html>

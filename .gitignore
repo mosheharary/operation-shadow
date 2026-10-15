@@ -1,0 +1,31 @@
+# dependencies
+node_modules/
+.pnpm-store/
+
+# build output
+.next/
+out/
+dist/
+build/
+coverage/
+*.tsbuildinfo
+
+# environment (never commit secrets)
+.env
+.env.*
+!.env.example
+
+# test artifacts
+playwright-report/
+test-results/
+blob-report/
+
+# logs, OS and editor files
+*.log
+.DS_Store
+.vscode/
+.idea/
+
+# tool state
+.turbo/
+.vercel/

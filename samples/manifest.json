@@ -1,0 +1,1109 @@
+{
+  "createdAt": "2026-10-15T11:34:50.587Z",
+  "items": {
+    "dialog_script": {
+      "id": "dialog_script",
+      "type": "dialog-script",
+      "title": "Dialogue script",
+      "model": "gemini-3.8-flash",
+      "prompt": "You are the narrative writer for a video game.\n\nWORLD\nOperation Shadow is an original tactical stealth game set in a fictional 1940s-inspired world.\nThe Free Coalition resists the Iron Dominion, an authoritarian power occupying the Northern Reach:\na cold land of fjords, fishing harbors, alpine passes and rail junctions. The player commands\nShadow Section, a six-person special-operations team guided over the radio by HQ, call-sign\nLANTERN (Colonel Ruth Ashdown, a seasoned, dry-witted intelligence officer). Iron Dominion soldiers\nwear slate-grey greatcoats with rust-red collar tabs; most sentries are cold, bored conscripts;\nofficers are procedural and severe.\n\nCAST\n- LANTERN — Colonel Ruth Ashdown, HQ handler (radio). Seasoned intelligence officer. Measured, authoritative, dry wit, quietly protective of her team.\n- MOTH — Sgt. Elias Varga, Infiltrator. Former mountain guide. Soft-spoken, economical with words, bone-dry humor, never raises his voice. Silent takedowns, climbing, restraints, noise lures.\n- OWL — Lt. Hanna Brekke, Recon / Marksman. Former cartographer. Precise, patient, clipped; reports numbers and bearings. Binoculars, tagging enemies, suppressed rifle with very few rounds, tranquilizer darts.\n- BADGER — Cpl. Desmond 'Dez' Okafor, Combat Engineer. Ex-shipyard welder. Big-hearted, gruff and cheerful; talks affectionately to machines and charges. Wire cutters, lockpicks, demolition charges, sabotage.\n- FOX — Celeste Marchand, Deception Specialist. Former stage actress. Theatrical, charming, quick-witted; relishes playing a role. Disguises, distracting guards with conversation, sedative syringe, forged papers.\n- HERON — Dr. Ivo Lindqvist, Field Medic. Former country doctor. Calm, compassionate, wry gallows humor, steady under fire. Revives and treats the wounded, chloroform, smoke canisters.\n- OTTER — PO Kai Rennick, Marine Operator. Fisherman's son. Laid-back, cocky, nautical slang, loves cold water. Swimming and diving, inflatable boat, harpoon gun.\n- GUARD_A — Iron Dominion sentry (veteran), Enemy. Weary older sentry who has seen too many cold nights.\n- GUARD_B — Iron Dominion sentry (conscript), Enemy. Nervous young conscript, jumpy at every sound.\n\nMISSION\nOperation \"Silent Tide\". Night, light rain and fog over Varrow Harbor.\nObjective: disable the fire-control radio inside the cliff-top gun battery so a Coalition convoy can pass the\nstrait at dawn. Optional: recover the harbor master's codebook. Insertion: OTTER brings the team ashore by\ninflatable boat beneath the north quay. Extraction: the north buoy, where OTTER's boat waits. Warnings: if the\nbattery raises the alarm, reinforcements from the harbor barracks will flood the cliff road; losing any operative\nfails the operation.\n\nWrite these six scenes, in this order:\n1. id \"briefing\" (Mission briefing): 6 lines, all LANTERN. Lay out the situation, objective, optional objective, insertion, extraction and warnings; end with a memorable sign-off.\n2. id \"barks\" (Squad acknowledgements & callouts): Exactly 4 lines for EACH of MOTH, OWL, BADGER, FOX, HERON, OTTER (24 lines), grouped by speaker in that order. For each: (1) acknowledging a move order, (2) acknowledging an action order, (3) warning that a patrol is approaching, (4) reacting to a successful silent takedown or completed task. Each at most 9 words, strongly in character, no two lines alike.\n3. id \"guards\" (Enemy sentries on night watch): 8 lines alternating GUARD_A and GUARD_B on night watch at the harbor: grumbling about the cold and the rations, rumors of \"shadows\" taking sentries, GUARD_B hears a noise near the crates, GUARD_A reluctantly checks, and the final line is GUARD_A raising the alarm after finding an unconscious comrade.\n4. id \"radio_event\" (Dynamic radio event — new intel): 3 lines, all LANTERN: urgent new intelligence mid-mission. A captured Coalition scout is being held in the harbor master's office; rescuing them is optional but valuable.\n5. id \"banter\" (Squad banter while hiding): 6 lines alternating FOX and BADGER, whispering while hidden behind fishing nets waiting for a patrol to pass. Light and characterful; reveals their personalities.\n6. id \"debrief\" (Mission debrief): 4 lines, all LANTERN, after a clean success: battery silenced, codebook recovered, nobody detected, convoy safe. Dry warmth; tease the next operation.\n\nRules:\n- Every line is original. No real-world nations, leaders, slogans or symbols.\n- No foreign-language words and no imitated real-world accents for anyone; everyone speaks plain English.\n- Mild language at most. No gore.\n- \"text\" contains only the spoken words: no markdown, no quotation marks around the line, no stage directions.\n- Put delivery directions in \"style\" (at most 80 characters).\n- Barks are at most 9 words; every other line is at most 220 characters.\n\nReturn JSON only, matching the provided schema.",
+      "status": "ok",
+      "file": "dialog/script.json",
+      "usage": [
+        {
+          "total_tokens": 7876,
+          "total_input_tokens": 1165,
+          "total_cached_tokens": 0,
+          "total_output_tokens": 2803,
+          "total_tool_use_tokens": 0,
+          "total_thought_tokens": 3908
+        }
+      ],
+      "elapsedMs": 40420,
+      "createdAt": "2026-10-15T11:38:11.655Z"
+    },
+    "portrait_moth": {
+      "id": "portrait_moth",
+      "type": "image",
+      "group": "Squad portraits",
+      "title": "MOTH — Sgt. Elias Varga, Infiltrator",
+      "model": "gemini-nano-banana-2.1",
+      "prompt": "HUD character portrait for \"Operation Shadow\", an original 1940s-inspired stealth game.\nHead and shoulders, three-quarter view, painted in a 1940s gouache illustration style with subtle film grain,\nmuted palette, soft key light from the upper left, plain dark slate-blue background, consistent framing\nfor a matching set of six portraits. No text, no frame, no real-world insignia.\nSubject: lean man in his thirties, dark knit watch cap, charcoal wool sweater, climbing rope coiled over one shoulder, knife sheath, soft-soled boots, face streaked with dark camouflage cream. Personality to convey: Former mountain guide. Soft-spoken, economical with words, bone-dry humor, never raises his voice.",
+      "settings": {
+        "aspect": "1:1",
+        "size": "1K"
+      },
+      "status": "ok",
+      "file": "images/portrait_moth.jpg",
+      "bytes": 790160,
+      "mime": "image/jpeg",
+      "durationSec": null,
+      "usage": {
+        "total_tokens": 2818,
+        "total_input_tokens": 160,
+        "total_cached_tokens": 0,
+        "total_output_tokens": 1566,
+        "total_tool_use_tokens": 0,
+        "total_thought_tokens": 1092
+      },
+      "elapsedMs": 17191,
+      "modelText": "Here is the 1940s-inspired character portrait of the mountain guide for your stealth game \"Operation Shadow,\" featuring the requested gouache painterly style, watch cap, camo cream, rope, and knife.",
+      "createdAt": "2026-10-15T11:38:28.851Z"
+    },
+    "music_briefing": {
+      "id": "music_briefing",
+      "type": "music",
+      "title": "Briefing underscore (30 s clip)",
+      "model": "lyria-3-clip-preview",
+      "prompt": "Mission briefing underscore for a 1940s-inspired tactical stealth game. D minor, 70 BPM. Subdued and\nfocused: solo piano, soft sustained strings, a faint radio-room atmosphere and a distant military snare. Instrumental only, no vocals, no choir, no lyrics.",
+      "status": "ok",
+      "file": "music/music_briefing.mp3",
+      "bytes": 744655,
+      "mime": "audio/mpeg",
+      "durationSec": null,
+      "usage": {
+        "total_tokens": 389,
+        "total_input_tokens": 63,
+        "total_cached_tokens": 0,
+        "total_output_tokens": 326,
+        "total_tool_use_tokens": 0,
+        "total_thought_tokens": 0
+      },
+      "elapsedMs": 8854,
+      "modelText": "<instrumental>",
+      "createdAt": "2026-10-15T11:36:07.580Z"
+    },
+    "dialog_barks_moth": {
+      "id": "dialog_barks_moth",
+      "type": "dialog",
+      "scene": "barks",
+      "title": "MOTH — Infiltrator",
+      "model": "gemini-3.8-flash-tts",
+      "settings": {
+        "voices": {
+          "MOTH": "Enceladus"
+        }
+      },
+      "lines": [
+        {
+          "speaker": "MOTH",
+          "style": "Hushed, economical mountain whisper.",
+          "text": "Shifting into the fog now."
+        },
+        {
+          "speaker": "MOTH",
+          "style": "Calm, focused, barely audible.",
+          "text": "Securing the anchor point."
+        },
+        {
+          "speaker": "MOTH",
+          "style": "Tense whisper, urgent yet controlled.",
+          "text": "Sentry pacing this way. Stay low."
+        },
+        {
+          "speaker": "MOTH",
+          "style": "Dry, understated satisfaction.",
+          "text": "Target sleeping. Path is clear."
+        }
+      ],
+      "status": "ok",
+      "file": "dialog/dialog_barks_moth.wav",
+      "bytes": 1736032,
+      "mime": "audio/wav",
+      "durationSec": 36,
+      "usage": {
+        "total_tokens": 943,
+        "total_input_tokens": 42,
+        "total_cached_tokens": 0,
+        "total_output_tokens": 901,
+        "total_tool_use_tokens": 0,
+        "total_thought_tokens": 0
+      },
+      "elapsedMs": 11464,
+      "createdAt": "2026-10-15T11:38:23.126Z"
+    },
+    "env_alpine_day": {
+      "id": "env_alpine_day",
+      "type": "image",
+      "group": "Environments",
+      "title": "Alpine theme — Whitecrown Ridge radar outpost",
+      "model": "gemini-nano-banana-2.1",
+      "prompt": "Art direction for \"Operation Shadow\", an original 1940s-inspired tactical stealth game.\nStylized-realistic miniature diorama look, as if a detailed hand-crafted tabletop model were photographed\nwith a subtle tilt-shift lens. High-angle three-quarter isometric camera (about 50 degrees pitch).\nPhysically based materials with hand-painted detail, soft global illumination, muted palette of slate blue,\nolive drab, weathered stone and rust red, accented by warm lamp light. Crisp, readable silhouettes.\nGame concept art quality. Fictional world: no real-world flags, insignia or symbols, no text.\nScene: a radar outpost on a snowy mountain saddle under overcast daylight. Timber barracks with snow-laden roofs, a\nsteel lattice tower carrying a large radar dish, barbed-wire fences, a sandbagged machine-gun nest, a wooden\nwatchtower with a searchlight, pine forest at the edges, and fresh footprint trails crossing the snow. A patrol of\nthree enemy soldiers in grey greatcoats walks a perimeter path.",
+      "settings": {
+        "aspect": "16:9",
+        "size": "2K"
+      },
+      "status": "ok",
+      "file": "images/env_alpine_day.jpg",
+      "bytes": 3062352,
+      "mime": "image/jpeg",
+      "durationSec": null,
+      "usage": {
+        "total_tokens": 3051,
+        "total_input_tokens": 222,
+        "total_cached_tokens": 0,
+        "total_output_tokens": 2164,
+        "total_tool_use_tokens": 0,
+        "total_thought_tokens": 665
+      },
+      "elapsedMs": 22592,
+      "modelText": "Here is an art direction concept image for \"Operation Shadow,\" designed as a stylized-realistic miniature diorama of a 1940s-inspired snowy radar outpost. It captures a hand-crafted, tabletop-model look with a tilt-shift camera angle, soft global illumination, and rich, weathered details.",
+      "createdAt": "2026-10-15T11:39:12.989Z"
+    },
+    "env_coastal_night": {
+      "id": "env_coastal_night",
+      "type": "image",
+      "group": "Environments",
+      "title": "Coastal theme — Varrow Harbor at night",
+      "model": "gemini-nano-banana-2.1",
+      "prompt": "Art direction for \"Operation Shadow\", an original 1940s-inspired tactical stealth game.\nStylized-realistic miniature diorama look, as if a detailed hand-crafted tabletop model were photographed\nwith a subtle tilt-shift lens. High-angle three-quarter isometric camera (about 50 degrees pitch).\nPhysically based materials with hand-painted detail, soft global illumination, muted palette of slate blue,\nolive drab, weathered stone and rust red, accented by warm lamp light. Crisp, readable silhouettes.\nGame concept art quality. Fictional world: no real-world flags, insignia or symbols, no text.\nScene: Varrow Harbor at night in light rain and fog. A small fishing village with stone quays, wooden piers and\nmoored fishing boats; a fortified gun battery with concrete emplacements on the cliff above; two searchlights\nsweeping the dark water; enemy sentries in long slate-grey greatcoats patrolling with lanterns. One sentry's field\nof view is shown as a faint translucent two-tone green cone projected on the wet cobblestones (brighter near zone,\ndarker far zone), like a tactical game overlay. Three tiny allied commandos crouch in shadow beside crates at the\nwater's edge.",
+      "settings": {
+        "aspect": "16:9",
+        "size": "2K"
+      },
+      "status": "ok",
+      "file": "images/env_coastal_night.jpg",
+      "bytes": 2787453,
+      "mime": "image/jpeg",
+      "durationSec": null,
+      "usage": {
+        "total_tokens": 3600,
+        "total_input_tokens": 266,
+        "total_cached_tokens": 0,
+        "total_output_tokens": 2116,
+        "total_tool_use_tokens": 0,
+        "total_thought_tokens": 1218
+      },
+      "elapsedMs": 22998,
+      "createdAt": "2026-10-15T11:39:13.391Z"
+    },
+    "env_rail_dusk": {
+      "id": "env_rail_dusk",
+      "type": "image",
+      "group": "Environments",
+      "title": "Rail theme — Corvan Junction depot at dusk",
+      "model": "gemini-nano-banana-2.1",
+      "prompt": "Art direction for \"Operation Shadow\", an original 1940s-inspired tactical stealth game.\nStylized-realistic miniature diorama look, as if a detailed hand-crafted tabletop model were photographed\nwith a subtle tilt-shift lens. High-angle three-quarter isometric camera (about 50 degrees pitch).\nPhysically based materials with hand-painted detail, soft global illumination, muted palette of slate blue,\nolive drab, weathered stone and rust red, accented by warm lamp light. Crisp, readable silhouettes.\nGame concept art quality. Fictional world: no real-world flags, insignia or symbols, no text.\nScene: a rail depot at dusk in drizzle. A black steam locomotive with freight wagons, a brick engine shed, a timber\nwater tower, a fuel depot with rows of red barrels, warehouses, signal gantries, puddles reflecting warm sodium\nlamps, steam drifting through the yard. Sentries stand at a checkpoint barrier while a supply truck is unloaded.",
+      "settings": {
+        "aspect": "16:9",
+        "size": "2K"
+      },
+      "status": "ok",
+      "file": "images/env_rail_dusk.jpg",
+      "bytes": 3520301,
+      "mime": "image/jpeg",
+      "durationSec": null,
+      "usage": {
+        "total_tokens": 3444,
+        "total_input_tokens": 207,
+        "total_cached_tokens": 0,
+        "total_output_tokens": 2103,
+        "total_tool_use_tokens": 0,
+        "total_thought_tokens": 1134
+      },
+      "elapsedMs": 23604,
+      "modelText": "Here is the art direction and concept art for \"Operation Shadow\":",
+      "createdAt": "2026-10-15T11:39:13.979Z"
+    },
+    "key_art": {
+      "id": "key_art",
+      "type": "image",
+      "group": "Key art & UI",
+      "title": "Title key art",
+      "model": "gemini-nano-banana-2.1",
+      "prompt": "Painterly cinematic key art for \"Operation Shadow\", an original 1940s-inspired tactical stealth game.\nSix silhouetted commandos of Shadow Section stand on a rocky cliff above a fog-bound harbor at night, lit by\nmoonlight and a distant sweeping searchlight, under a dramatic cloudy sky. Muted slate-blue palette with warm\nhighlights. The game title \"OPERATION SHADOW\" appears in bold, weathered stencil lettering across the top.\nFictional world: no real-world flags, insignia or symbols.",
+      "settings": {
+        "aspect": "16:9",
+        "size": "2K"
+      },
+      "status": "ok",
+      "file": "images/key_art.jpg",
+      "bytes": 3288110,
+      "mime": "image/jpeg",
+      "durationSec": null,
+      "usage": {
+        "total_tokens": 3469,
+        "total_input_tokens": 113,
+        "total_cached_tokens": 0,
+        "total_output_tokens": 2434,
+        "total_tool_use_tokens": 0,
+        "total_thought_tokens": 922
+      },
+      "elapsedMs": 31233,
+      "createdAt": "2026-10-15T11:39:21.627Z"
+    },
+    "enemy_uniforms": {
+      "id": "enemy_uniforms",
+      "type": "image",
+      "group": "Characters",
+      "title": "Iron Dominion — uniform design sheet",
+      "model": "gemini-nano-banana-2.1",
+      "prompt": "Uniform design sheet for the fictional Iron Dominion army in \"Operation Shadow\": an invented army that is\ndeliberately not based on any real nation's uniforms. Painted concept-art style on a neutral background, with a\ndistinctive silhouette that cannot be mistaken for any historical army. Three full-body figures:\n- a weary conscript sentry in a double-breasted slate-blue greatcoat with rust-red collar tabs and brass toggle\n  fastenings, wearing a tall rounded steel helmet with a raised central ridge running front to back and a narrow flat\n  brim all around, carrying a bolt-action rifle;\n- a sergeant in a short slate-blue field jacket with a rust-red sash, the same ridged helmet, carrying a lantern;\n- an officer in a long slate-blue cape-coat over a high-collared tunic, wearing a soft flat-topped kepi with a short\n  brim, with a small silver emblem of a stylized iron crown with three points.\nAdd labelled close-up callouts of the iron-crown emblem, the rust-red collar tabs, the ridged helmet and the kepi.\nThe iron crown is the only emblem anywhere on the sheet.",
+      "settings": {
+        "aspect": "16:9",
+        "size": "2K"
+      },
+      "status": "ok",
+      "file": "images/enemy_uniforms.jpg",
+      "bytes": 2929997,
+      "mime": "image/jpeg",
+      "durationSec": null,
+      "usage": {
+        "total_tokens": 4210,
+        "total_input_tokens": 257,
+        "total_cached_tokens": 0,
+        "total_output_tokens": 2264,
+        "total_tool_use_tokens": 0,
+        "total_thought_tokens": 1689
+      },
+      "elapsedMs": 27068,
+      "modelText": "Here is the uniform design sheet for the fictional Iron Dominion army:",
+      "createdAt": "2026-10-15T11:43:15.818Z"
+    },
+    "squad_lineup": {
+      "id": "squad_lineup",
+      "type": "image",
+      "group": "Characters",
+      "title": "Shadow Section — character lineup",
+      "model": "gemini-nano-banana-2.1",
+      "prompt": "Character concept lineup sheet for \"Operation Shadow\", an original 1940s-inspired stealth game, on a neutral\nwarm-grey background. The six members of Shadow Section stand side by side, full body, front view, each with a\ndistinct silhouette, with a small label plate under each figure reading MOTH, OWL, BADGER, FOX, HERON, OTTER:\nMOTH: lean man in his thirties, dark knit watch cap, charcoal wool sweater, climbing rope coiled over one shoulder, knife sheath, soft-soled boots, face streaked with dark camouflage cream.\nOWL: woman in her late twenties, olive field cap, olive smock with a leather map case, long scoped rifle slung across her back, binoculars on her chest.\nBADGER: broad-shouldered man in his forties, dented steel helmet, heavy canvas backpack bristling with tools, wire cutters on his belt, satchel charges, rolled-up sleeves.\nFOX: elegant woman in her thirties, belted trench coat over civilian clothes, dark beret, leather satchel, a folded grey enemy officer cap tucked under one arm.\nHERON: tall, thin man in his fifties, round wire spectacles, white armband with a green cross, worn medical satchel, rolled canvas stretcher on his back.\nOTTER: wiry man in his twenties, dark rubberized diving suit with the hood rolled down, swim fins clipped to his belt, short harpoon gun, coiled line, packed inflatable dinghy.\nPainted concept-art style, muted 1940s palette, consistent scale. No real-world insignia.",
+      "settings": {
+        "aspect": "16:9",
+        "size": "2K"
+      },
+      "status": "ok",
+      "file": "images/squad_lineup.jpg",
+      "bytes": 2687724,
+      "mime": "image/jpeg",
+      "durationSec": null,
+      "usage": {
+        "total_tokens": 3137,
+        "total_input_tokens": 339,
+        "total_cached_tokens": 0,
+        "total_output_tokens": 2285,
+        "total_tool_use_tokens": 0,
+        "total_thought_tokens": 513
+      },
+      "elapsedMs": 19112,
+      "createdAt": "2026-10-15T11:39:32.507Z"
+    },
+    "portrait_owl": {
+      "id": "portrait_owl",
+      "type": "image",
+      "group": "Squad portraits",
+      "title": "OWL — Lt. Hanna Brekke, Recon / Marksman",
+      "model": "gemini-nano-banana-2.1",
+      "prompt": "HUD character portrait for \"Operation Shadow\", an original 1940s-inspired stealth game.\nHead and shoulders, three-quarter view, painted in a 1940s gouache illustration style with subtle film grain,\nmuted palette, soft key light from the upper left, plain dark slate-blue background, consistent framing\nfor a matching set of six portraits. No text, no frame, no real-world insignia.\nSubject: woman in her late twenties, olive field cap, olive smock with a leather map case, long scoped rifle slung across her back, binoculars on her chest. Personality to convey: Former cartographer. Precise, patient, clipped; reports numbers and bearings.",
+      "settings": {
+        "aspect": "1:1",
+        "size": "1K"
+      },
+      "status": "ok",
+      "file": "images/portrait_owl.jpg",
+      "bytes": 708210,
+      "mime": "image/jpeg",
+      "durationSec": null,
+      "usage": {
+        "total_tokens": 2685,
+        "total_input_tokens": 147,
+        "total_cached_tokens": 0,
+        "total_output_tokens": 1512,
+        "total_tool_use_tokens": 0,
+        "total_thought_tokens": 1026
+      },
+      "elapsedMs": 13973,
+      "modelText": "Here is a 1940s gouache-style character portrait for \"Operation Shadow.\" It depicts the former cartographer in a three-quarter head-and-shoulders view with a precise, patient expression, complete with her olive cap, slung rifle, binoculars, and map case strap against a muted slate-blue background.",
+      "createdAt": "2026-10-15T11:39:35.606Z"
+    },
+    "hud_mockup": {
+      "id": "hud_mockup",
+      "type": "image",
+      "group": "Key art & UI",
+      "title": "In-game HUD concept mockup (target mood, not real engine output)",
+      "model": "gemini-nano-banana-2.1",
+      "prompt": "Concept mockup of the in-game screen of \"Operation Shadow\", an original 1940s-inspired tactical stealth game.\nThe harbor at night seen from the high isometric tactical camera, rendered as a stylized-realistic miniature diorama.\nA clean, restrained military field-equipment style HUD sits around the screen edges only: six small character\nportraits with thin health bars along the top-left, a compact objectives panel at the top-right, an alarm-level\nindicator at the top-center, an ability bar with simple icons at the bottom-center, and a parchment-style tactical\nminimap at the bottom-right. On the ground, a translucent two-tone green vision cone from one guard; one selected\ncommando with a subtle ring marker and a dotted path-preview line. No real-world insignia.",
+      "settings": {
+        "aspect": "16:9",
+        "size": "2K"
+      },
+      "status": "ok",
+      "file": "images/hud_mockup.jpg",
+      "bytes": 3206537,
+      "mime": "image/jpeg",
+      "durationSec": null,
+      "usage": {
+        "total_tokens": 3460,
+        "total_input_tokens": 174,
+        "total_cached_tokens": 0,
+        "total_output_tokens": 2184,
+        "total_tool_use_tokens": 0,
+        "total_thought_tokens": 1102
+      },
+      "elapsedMs": 22987,
+      "createdAt": "2026-10-15T11:39:35.982Z"
+    },
+    "portrait_badger": {
+      "id": "portrait_badger",
+      "type": "image",
+      "group": "Squad portraits",
+      "title": "BADGER — Cpl. Desmond 'Dez' Okafor, Combat Engineer",
+      "model": "gemini-nano-banana-2.1",
+      "prompt": "HUD character portrait for \"Operation Shadow\", an original 1940s-inspired stealth game.\nHead and shoulders, three-quarter view, painted in a 1940s gouache illustration style with subtle film grain,\nmuted palette, soft key light from the upper left, plain dark slate-blue background, consistent framing\nfor a matching set of six portraits. No text, no frame, no real-world insignia.\nSubject: broad-shouldered man in his forties, dented steel helmet, heavy canvas backpack bristling with tools, wire cutters on his belt, satchel charges, rolled-up sleeves. Personality to convey: Ex-shipyard welder. Big-hearted, gruff and cheerful; talks affectionately to machines and charges.",
+      "settings": {
+        "aspect": "1:1",
+        "size": "1K"
+      },
+      "status": "ok",
+      "file": "images/portrait_badger.jpg",
+      "bytes": 713221,
+      "mime": "image/jpeg",
+      "durationSec": null,
+      "usage": {
+        "total_tokens": 2385,
+        "total_input_tokens": 159,
+        "total_cached_tokens": 0,
+        "total_output_tokens": 1489,
+        "total_tool_use_tokens": 0,
+        "total_thought_tokens": 737
+      },
+      "elapsedMs": 15738,
+      "createdAt": "2026-10-15T11:39:42.941Z"
+    },
+    "portrait_otter": {
+      "id": "portrait_otter",
+      "type": "image",
+      "group": "Squad portraits",
+      "title": "OTTER — PO Kai Rennick, Marine Operator",
+      "model": "gemini-nano-banana-2.1",
+      "prompt": "HUD character portrait for \"Operation Shadow\", an original 1940s-inspired stealth game.\nHead and shoulders, three-quarter view, painted in a 1940s gouache illustration style with subtle film grain,\nmuted palette, soft key light from the upper left, plain dark slate-blue background, consistent framing\nfor a matching set of six portraits. No text, no frame, no real-world insignia.\nSubject: wiry man in his twenties, dark rubberized diving suit with the hood rolled down, swim fins clipped to his belt, short harpoon gun, coiled line, packed inflatable dinghy. Personality to convey: Fisherman's son. Laid-back, cocky, nautical slang, loves cold water.",
+      "settings": {
+        "aspect": "1:1",
+        "size": "1K"
+      },
+      "status": "ok",
+      "file": "images/portrait_otter.jpg",
+      "bytes": 753771,
+      "mime": "image/jpeg",
+      "durationSec": null,
+      "usage": {
+        "total_tokens": 2383,
+        "total_input_tokens": 156,
+        "total_cached_tokens": 0,
+        "total_output_tokens": 1493,
+        "total_tool_use_tokens": 0,
+        "total_thought_tokens": 734
+      },
+      "elapsedMs": 13826,
+      "createdAt": "2026-10-15T11:39:49.814Z"
+    },
+    "portrait_heron": {
+      "id": "portrait_heron",
+      "type": "image",
+      "group": "Squad portraits",
+      "title": "HERON — Dr. Ivo Lindqvist, Field Medic",
+      "model": "gemini-nano-banana-2.1",
+      "prompt": "HUD character portrait for \"Operation Shadow\", an original 1940s-inspired stealth game.\nHead and shoulders, three-quarter view, painted in a 1940s gouache illustration style with subtle film grain,\nmuted palette, soft key light from the upper left, plain dark slate-blue background, consistent framing\nfor a matching set of six portraits. No text, no frame, no real-world insignia.\nSubject: tall, thin man in his fifties, round wire spectacles, white armband with a green cross, worn medical satchel, rolled canvas stretcher on his back. Personality to convey: Former country doctor. Calm, compassionate, wry gallows humor, steady under fire.",
+      "settings": {
+        "aspect": "1:1",
+        "size": "1K"
+      },
+      "status": "ok",
+      "file": "images/portrait_heron.jpg",
+      "bytes": 708691,
+      "mime": "image/jpeg",
+      "durationSec": null,
+      "usage": {
+        "total_tokens": 2708,
+        "total_input_tokens": 147,
+        "total_cached_tokens": 0,
+        "total_output_tokens": 1530,
+        "total_tool_use_tokens": 0,
+        "total_thought_tokens": 1031
+      },
+      "elapsedMs": 15560,
+      "modelText": "Here is the HUD character portrait, painted in a 1940s-inspired gouache illustration style, featuring the \"former country doctor\" in his fifties with all requested details like the wire spectacles, white armband with a green cross, medical satchel strap, and rolled canvas stretcher. Let me know if you would like any adjustments to this character or style!",
+      "createdAt": "2026-10-15T11:39:51.171Z"
+    },
+    "music_main_theme": {
+      "id": "music_main_theme",
+      "type": "music",
+      "title": "Main theme (menu)",
+      "model": "lyria-3.5",
+      "prompt": "Original main menu theme for a 1940s-inspired tactical stealth game. D minor, 92 BPM. A solo muted trumpet\nstates a heroic but melancholy melody over low strings and soft snare-drum rolls; it builds with French horns and\ntimpani to a noble climax, then fades to a lone piano echo of the theme. Classic 1940s cinematic orchestral score with a\nwarm vintage recording character. About two minutes. Instrumental only, no vocals, no choir, no lyrics.",
+      "status": "ok",
+      "file": "music/music_main_theme.mp3",
+      "bytes": 2923268,
+      "mime": "audio/mpeg",
+      "durationSec": null,
+      "usage": {
+        "total_tokens": 1256,
+        "total_input_tokens": 107,
+        "total_cached_tokens": 0,
+        "total_output_tokens": 1149,
+        "total_tool_use_tokens": 0,
+        "total_thought_tokens": 0
+      },
+      "elapsedMs": 26902,
+      "modelText": "[[A0]]\n[[B1]]\n[[C2]]\n[[D3]]\n[[E4]]",
+      "createdAt": "2026-10-15T11:41:34.824Z"
+    },
+    "portrait_fox": {
+      "id": "portrait_fox",
+      "type": "image",
+      "group": "Squad portraits",
+      "title": "FOX — Celeste Marchand, Deception Specialist",
+      "model": "gemini-nano-banana-2.1",
+      "prompt": "HUD character portrait for \"Operation Shadow\", an original 1940s-inspired stealth game.\nHead and shoulders, three-quarter view, painted in a 1940s gouache illustration style with subtle film grain,\nmuted palette, soft key light from the upper left, plain dark slate-blue background, consistent framing\nfor a matching set of six portraits. No text, no frame, no real-world insignia.\nSubject: elegant woman in her thirties, belted trench coat over civilian clothes, dark beret, leather satchel, a soft slate-blue enemy officer's kepi tucked under one arm whose only badge is a small silver three-pointed crown. Personality to convey: Former stage actress. Theatrical, charming, quick-witted; relishes playing a role.",
+      "settings": {
+        "aspect": "1:1",
+        "size": "1K"
+      },
+      "status": "ok",
+      "file": "images/portrait_fox.jpg",
+      "bytes": 762101,
+      "mime": "image/jpeg",
+      "durationSec": null,
+      "usage": {
+        "total_tokens": 2454,
+        "total_input_tokens": 167,
+        "total_cached_tokens": 0,
+        "total_output_tokens": 1473,
+        "total_tool_use_tokens": 0,
+        "total_thought_tokens": 814
+      },
+      "elapsedMs": 14770,
+      "createdAt": "2026-10-15T11:43:03.502Z"
+    },
+    "briefing_map": {
+      "id": "briefing_map",
+      "type": "image",
+      "group": "Briefing",
+      "title": "Briefing dossier — Operation Silent Tide",
+      "model": "gemini-nano-banana-2.1",
+      "prompt": "In-world mission briefing dossier for \"Operation Silent Tide\" in the original game \"Operation Shadow\".\nA hand-drawn top-down tactical map of a fictional fishing harbor on aged paper: coastline, piers, village streets, a\ncliff-top gun battery, a radio hut, enemy patrol routes as dashed lines, a red insertion route arriving from the sea,\nand an extraction buoy marked with a circle. Pinned black-and-white reconnaissance photographs, a short typed\nobjective list, a paperclip and a faint coffee stain. 1940s field-intelligence aesthetic. No real-world insignia.",
+      "settings": {
+        "aspect": "4:3",
+        "size": "2K"
+      },
+      "status": "ok",
+      "file": "images/briefing_map.jpg",
+      "bytes": 3889260,
+      "mime": "image/jpeg",
+      "durationSec": null,
+      "usage": {
+        "total_tokens": 3882,
+        "total_input_tokens": 128,
+        "total_cached_tokens": 0,
+        "total_output_tokens": 2191,
+        "total_tool_use_tokens": 0,
+        "total_thought_tokens": 1563
+      },
+      "elapsedMs": 26555,
+      "createdAt": "2026-10-15T11:40:09.502Z"
+    },
+    "music_victory": {
+      "id": "music_victory",
+      "type": "music",
+      "title": "Mission success sting (30 s clip)",
+      "model": "lyria-3-clip-preview",
+      "prompt": "Mission success music for a 1940s-inspired tactical stealth game. D major, 80 BPM. Bittersweet relief: warm\nstrings and a hopeful solo trumpet resolving a heroic theme, with gentle timpani. Instrumental only, no vocals, no choir, no lyrics.",
+      "status": "ok",
+      "file": "music/music_victory.mp3",
+      "bytes": 715816,
+      "mime": "audio/mpeg",
+      "durationSec": null,
+      "usage": {
+        "total_tokens": 377,
+        "total_input_tokens": 61,
+        "total_cached_tokens": 0,
+        "total_output_tokens": 316,
+        "total_tool_use_tokens": 0,
+        "total_thought_tokens": 0
+      },
+      "elapsedMs": 9979,
+      "modelText": "<instrumental>",
+      "createdAt": "2026-10-15T11:40:09.783Z"
+    },
+    "dialog_barks_owl": {
+      "id": "dialog_barks_owl",
+      "type": "dialog",
+      "scene": "barks",
+      "title": "OWL — Recon / Marksman",
+      "model": "gemini-3.8-flash-tts",
+      "settings": {
+        "voices": {
+          "OWL": "Erinome"
+        }
+      },
+      "lines": [
+        {
+          "speaker": "OWL",
+          "style": "Precise, clipped professional tone.",
+          "text": "Repositioning to bearing zero-four-zero."
+        },
+        {
+          "speaker": "OWL",
+          "style": "Methodical, steady concentration.",
+          "text": "Tagging target on the overlook now."
+        },
+        {
+          "speaker": "OWL",
+          "style": "Sharp, measured warning.",
+          "text": "Sentry closing from west, twenty paces."
+        },
+        {
+          "speaker": "OWL",
+          "style": "Cool, dispassionate confirmation.",
+          "text": "Dart struck home. Sentry is down."
+        }
+      ],
+      "status": "ok",
+      "file": "dialog/dialog_barks_owl.wav",
+      "bytes": 852832,
+      "mime": "audio/wav",
+      "durationSec": 17.6,
+      "usage": {
+        "total_tokens": 491,
+        "total_input_tokens": 50,
+        "total_cached_tokens": 0,
+        "total_output_tokens": 441,
+        "total_tool_use_tokens": 0,
+        "total_thought_tokens": 0
+      },
+      "elapsedMs": 6640,
+      "createdAt": "2026-10-15T11:40:16.432Z"
+    },
+    "music_alert": {
+      "id": "music_alert",
+      "type": "music",
+      "title": "Alarm / combat",
+      "model": "lyria-3.5",
+      "prompt": "Alarm and combat music for a 1940s-inspired tactical stealth game. D minor, 168 BPM. An urgent, driving\nsnare and timpani ostinato, aggressive staccato strings, brass stabs and rising horn figures; the feeling of being\nhunted. Relentless energy with brief breathing points. About two minutes. Instrumental only, no vocals, no choir, no lyrics.",
+      "status": "ok",
+      "file": "music/music_alert.mp3",
+      "bytes": 2915118,
+      "mime": "audio/mpeg",
+      "durationSec": null,
+      "usage": {
+        "total_tokens": 1683,
+        "total_input_tokens": 88,
+        "total_cached_tokens": 0,
+        "total_output_tokens": 1595,
+        "total_tool_use_tokens": 0,
+        "total_thought_tokens": 0
+      },
+      "elapsedMs": 26140,
+      "modelText": "[[A0]]\n[[B1]]\n[[C2]]\n[[D3]]\n[[B4]]\n[[E5]]",
+      "createdAt": "2026-10-15T11:40:22.566Z"
+    },
+    "music_stealth": {
+      "id": "music_stealth",
+      "type": "music",
+      "title": "Stealth exploration (loopable)",
+      "model": "lyria-3.5",
+      "prompt": "Stealth exploration music for a 1940s-inspired tactical stealth game. D minor, 84 BPM. Sparse and tense:\npizzicato basses, ticking rim clicks, low sustained string clusters, distant muted horn calls and occasional celesta\nmotifs. Restrained dynamics so dialogue stays clear; no big climaxes; it ends quietly so it can loop. About two\nminutes. Instrumental only, no vocals, no choir, no lyrics.",
+      "status": "ok",
+      "file": "music/music_stealth.mp3",
+      "bytes": 2814180,
+      "mime": "audio/mpeg",
+      "durationSec": null,
+      "usage": {
+        "total_tokens": 3074,
+        "total_input_tokens": 96,
+        "total_cached_tokens": 0,
+        "total_output_tokens": 2978,
+        "total_tool_use_tokens": 0,
+        "total_thought_tokens": 0
+      },
+      "elapsedMs": 31944,
+      "modelText": "[[A0]]\n[[B1]]\n[[C2]]\n[[D3]]\n[[B4]]\n[[C5]]\n[[E6]]",
+      "createdAt": "2026-10-15T11:40:23.121Z"
+    },
+    "dialog_briefing": {
+      "id": "dialog_briefing",
+      "type": "dialog",
+      "scene": "briefing",
+      "title": "Operation Silent Tide Briefing",
+      "model": "gemini-3.8-flash-tts",
+      "settings": {
+        "voices": {
+          "LANTERN": "Gacrux"
+        }
+      },
+      "lines": [
+        {
+          "speaker": "LANTERN",
+          "style": "Measured, commanding over low-frequency radio crackle.",
+          "text": "Shadow Section, Varrow Harbor is cloaked in sea fog and rain. The Dominion garrison is hunkered down, which gives us our window."
+        },
+        {
+          "speaker": "LANTERN",
+          "style": "Clear, deliberate emphasis on the primary goal.",
+          "text": "Your objective is the fire-control radio inside the cliff-top battery. Disable that transmitter before dawn, or our approaching convoy will be torn to splinters in the strait."
+        },
+        {
+          "speaker": "LANTERN",
+          "style": "Cool and calculating.",
+          "text": "If opportunity permits, secure the harbor master's naval codebook from his desk. It will unlock Dominion coastal movements for months."
+        },
+        {
+          "speaker": "LANTERN",
+          "style": "Crisp operational instruction.",
+          "text": "Otter will ferry you ashore beneath the north quay. Once the battery is silent, rendezvous at the north navigation buoy for extraction."
+        },
+        {
+          "speaker": "LANTERN",
+          "style": "Firm, protective edge in her voice.",
+          "text": "Keep your heads down. If the battery raises the alarm, the barracks will pour reinforcements up that cliff road, and I expect all six of you back in one piece."
+        },
+        {
+          "speaker": "LANTERN",
+          "style": "Quiet, dry confidence.",
+          "text": "Bring them silence, Shadow Section. HQ out."
+        }
+      ],
+      "status": "ok",
+      "file": "dialog/dialog_briefing.wav",
+      "bytes": 2384992,
+      "mime": "audio/wav",
+      "durationSec": 49.6,
+      "usage": {
+        "total_tokens": 1400,
+        "total_input_tokens": 161,
+        "total_cached_tokens": 0,
+        "total_output_tokens": 1239,
+        "total_tool_use_tokens": 0,
+        "total_thought_tokens": 0
+      },
+      "elapsedMs": 13938,
+      "createdAt": "2026-10-15T11:40:23.444Z"
+    },
+    "dialog_barks_badger": {
+      "id": "dialog_barks_badger",
+      "type": "dialog",
+      "scene": "barks",
+      "title": "BADGER — Combat Engineer",
+      "model": "gemini-3.8-flash-tts",
+      "settings": {
+        "voices": {
+          "BADGER": "Algenib"
+        }
+      },
+      "lines": [
+        {
+          "speaker": "BADGER",
+          "style": "Gruff, low-spirited cheer.",
+          "text": "Moving my boots, nice and quiet."
+        },
+        {
+          "speaker": "BADGER",
+          "style": "Affectionate mutter to his tools.",
+          "text": "Let Uncle Dez coax this lock open."
+        },
+        {
+          "speaker": "BADGER",
+          "style": "Gravelly, urgent hiss.",
+          "text": "Heavy steps coming. Duck your heads."
+        },
+        {
+          "speaker": "BADGER",
+          "style": "Warm, proud murmur.",
+          "text": "Beautiful girl, purring like a kitten now."
+        }
+      ],
+      "status": "ok",
+      "file": "dialog/dialog_barks_badger.wav",
+      "bytes": 1213792,
+      "mime": "audio/wav",
+      "durationSec": 25.2,
+      "usage": {
+        "total_tokens": 676,
+        "total_input_tokens": 47,
+        "total_cached_tokens": 0,
+        "total_output_tokens": 629,
+        "total_tool_use_tokens": 0,
+        "total_thought_tokens": 0
+      },
+      "elapsedMs": 7851,
+      "createdAt": "2026-10-15T11:40:24.288Z"
+    },
+    "dialog_barks_fox": {
+      "id": "dialog_barks_fox",
+      "type": "dialog",
+      "scene": "barks",
+      "title": "FOX — Deception Specialist",
+      "model": "gemini-3.8-flash-tts",
+      "settings": {
+        "voices": {
+          "FOX": "Despina"
+        }
+      },
+      "lines": [
+        {
+          "speaker": "FOX",
+          "style": "Playful, theatrical whisper.",
+          "text": "Stepping onto my mark, darling."
+        },
+        {
+          "speaker": "FOX",
+          "style": "Mischievous, self-assured relish.",
+          "text": "Time for a little harmless misdirection."
+        },
+        {
+          "speaker": "FOX",
+          "style": "Hushed dramatic alarm.",
+          "text": "Our audience approaches. Curtain down, everyone."
+        },
+        {
+          "speaker": "FOX",
+          "style": "Wry, elegant satisfaction.",
+          "text": "And the gentleman takes his final bow."
+        }
+      ],
+      "status": "ok",
+      "file": "dialog/dialog_barks_fox.wav",
+      "bytes": 1096672,
+      "mime": "audio/wav",
+      "durationSec": 22.7,
+      "usage": {
+        "total_tokens": 614,
+        "total_input_tokens": 46,
+        "total_cached_tokens": 0,
+        "total_output_tokens": 568,
+        "total_tool_use_tokens": 0,
+        "total_thought_tokens": 0
+      },
+      "elapsedMs": 7993,
+      "createdAt": "2026-10-15T11:40:30.563Z"
+    },
+    "dialog_barks_otter": {
+      "id": "dialog_barks_otter",
+      "type": "dialog",
+      "scene": "barks",
+      "title": "OTTER — Marine Operator",
+      "model": "gemini-3.8-flash-tts",
+      "settings": {
+        "voices": {
+          "OTTER": "Zubenelgenubi"
+        }
+      },
+      "lines": [
+        {
+          "speaker": "OTTER",
+          "style": "Breezy, confident low drawl.",
+          "text": "Swimming with the tide. On my way."
+        },
+        {
+          "speaker": "OTTER",
+          "style": "Casual nautical focus.",
+          "text": "Rigging the line fast and true."
+        },
+        {
+          "speaker": "OTTER",
+          "style": "Quick, alert maritime murmur.",
+          "text": "Greycoats drifting our way, fast current."
+        },
+        {
+          "speaker": "OTTER",
+          "style": "Smug, cocky chuckle.",
+          "text": "Clipped his fins. Sentry is out cold."
+        }
+      ],
+      "status": "ok",
+      "file": "dialog/dialog_barks_otter.wav",
+      "bytes": 1087072,
+      "mime": "audio/wav",
+      "durationSec": 22.5,
+      "usage": {
+        "total_tokens": 613,
+        "total_input_tokens": 50,
+        "total_cached_tokens": 0,
+        "total_output_tokens": 563,
+        "total_tool_use_tokens": 0,
+        "total_thought_tokens": 0
+      },
+      "elapsedMs": 7966,
+      "createdAt": "2026-10-15T11:40:31.414Z"
+    },
+    "dialog_barks_heron": {
+      "id": "dialog_barks_heron",
+      "type": "dialog",
+      "scene": "barks",
+      "title": "HERON — Field Medic",
+      "model": "gemini-3.8-flash-tts",
+      "settings": {
+        "voices": {
+          "HERON": "Schedar"
+        }
+      },
+      "lines": [
+        {
+          "speaker": "HERON",
+          "style": "Gentle, reassuring clinical murmur.",
+          "text": "Moving up. Keep breathing, friends."
+        },
+        {
+          "speaker": "HERON",
+          "style": "Calm, steady bedside manner.",
+          "text": "Administering a gentle dose right now."
+        },
+        {
+          "speaker": "HERON",
+          "style": "Sober, disciplined caution.",
+          "text": "Footsteps approaching. Do not make a sound."
+        },
+        {
+          "speaker": "HERON",
+          "style": "Quiet, wry gallows humor.",
+          "text": "Patient is resting comfortably. No complications."
+        }
+      ],
+      "status": "ok",
+      "file": "dialog/dialog_barks_heron.wav",
+      "bytes": 1190752,
+      "mime": "audio/wav",
+      "durationSec": 24.7,
+      "usage": {
+        "total_tokens": 665,
+        "total_input_tokens": 48,
+        "total_cached_tokens": 0,
+        "total_output_tokens": 617,
+        "total_tool_use_tokens": 0,
+        "total_thought_tokens": 0
+      },
+      "elapsedMs": 8325,
+      "createdAt": "2026-10-15T11:40:31.449Z"
+    },
+    "dialog_radio_event": {
+      "id": "dialog_radio_event",
+      "type": "dialog",
+      "scene": "radio_event",
+      "title": "Urgent Intel: Captured Scout",
+      "model": "gemini-3.8-flash-tts",
+      "settings": {
+        "voices": {
+          "LANTERN": "Gacrux"
+        }
+      },
+      "lines": [
+        {
+          "speaker": "LANTERN",
+          "style": "Urgent, hushed tone breaking radio silence.",
+          "text": "Shadow Section, hold your breath. HQ just intercepted an encrypted dispatch from the Dominion harbor garrison."
+        },
+        {
+          "speaker": "LANTERN",
+          "style": "Grim, concise delivery.",
+          "text": "They picked up a lone Coalition scout along the bluffs an hour ago. He is being held inside the harbor master's office for interrogation."
+        },
+        {
+          "speaker": "LANTERN",
+          "style": "Pragmatic, trusting her squad's judgment.",
+          "text": "The battery remains your priority, but bringing that scout home will save an entire network. I leave the call to you."
+        }
+      ],
+      "status": "ok",
+      "file": "dialog/dialog_radio_event.wav",
+      "bytes": 1083232,
+      "mime": "audio/wav",
+      "durationSec": 22.4,
+      "usage": {
+        "total_tokens": 634,
+        "total_input_tokens": 73,
+        "total_cached_tokens": 0,
+        "total_output_tokens": 561,
+        "total_tool_use_tokens": 0,
+        "total_thought_tokens": 0
+      },
+      "elapsedMs": 8835,
+      "createdAt": "2026-10-15T11:40:39.404Z"
+    },
+    "dialog_guards": {
+      "id": "dialog_guards",
+      "type": "dialog",
+      "scene": "guards",
+      "title": "Night Watch at the Harbor Pier",
+      "model": "gemini-3.8-flash-tts",
+      "settings": {
+        "voices": {
+          "GUARD_A": "Charon",
+          "GUARD_B": "Fenrir"
+        }
+      },
+      "lines": [
+        {
+          "speaker": "GUARD_B",
+          "style": "Shivering, petulant grumble.",
+          "text": "My fingers are frozen stiff, and the galley served us turnip paste that tasted like canal mud."
+        },
+        {
+          "speaker": "GUARD_A",
+          "style": "Weary, cynical sigh.",
+          "text": "Pull your greatcoat collar tight and stop whining, lad. The cold keeps you awake, and awake keeps you breathing."
+        },
+        {
+          "speaker": "GUARD_B",
+          "style": "Nervous, lowered voice.",
+          "text": "Did you hear the men from third watch? They swear phantoms are slipping through the fog, snatching sentries off the line."
+        },
+        {
+          "speaker": "GUARD_A",
+          "style": "Dismissive scoff.",
+          "text": "Campfire drivel meant to frighten green conscripts. There are no ghosts in Varrow, only salt mist and drafty piers."
+        },
+        {
+          "speaker": "GUARD_B",
+          "style": "Sudden, panicked whisper.",
+          "text": "Wait. By the freight crates past the slipway. I heard wood creak."
+        },
+        {
+          "speaker": "GUARD_A",
+          "style": "Irritated, heavy-booted shuffle.",
+          "text": "It is harbor rats chewing tallow, like every other night. Stay by the lantern. I will check the crates."
+        },
+        {
+          "speaker": "GUARD_B",
+          "style": "Trembling, squinting into the mist.",
+          "text": "Do you see anything? Do not go too far into the dark."
+        },
+        {
+          "speaker": "GUARD_A",
+          "style": "Shocked, sudden shout of pure alarm.",
+          "text": "Brandt is down in the ditch, bound and gagged! Alarm! Intruders on the north quay!"
+        }
+      ],
+      "status": "ok",
+      "file": "dialog/dialog_guards.wav",
+      "bytes": 2580832,
+      "mime": "audio/wav",
+      "durationSec": 53.6,
+      "usage": {
+        "total_tokens": 1517,
+        "total_input_tokens": 176,
+        "total_cached_tokens": 0,
+        "total_output_tokens": 1341,
+        "total_tool_use_tokens": 0,
+        "total_thought_tokens": 0
+      },
+      "elapsedMs": 15568,
+      "createdAt": "2026-10-15T11:40:39.861Z"
+    },
+    "dialog_debrief": {
+      "id": "dialog_debrief",
+      "type": "dialog",
+      "scene": "debrief",
+      "title": "Mission Accomplished: Debriefing",
+      "model": "gemini-3.8-flash-tts",
+      "settings": {
+        "voices": {
+          "LANTERN": "Gacrux"
+        }
+      },
+      "lines": [
+        {
+          "speaker": "LANTERN",
+          "style": "Warm satisfaction beneath a crisp exterior.",
+          "text": "Convoy Vanguard just cleared the strait without facing a single round from the cliffs. The guns remained blind and deaf."
+        },
+        {
+          "speaker": "LANTERN",
+          "style": "Professional commendation.",
+          "text": "Our decoders already have the harbor master's codebook in hand. The Dominion still has no idea how their cipher went missing."
+        },
+        {
+          "speaker": "LANTERN",
+          "style": "Soft, maternal pride veiled in dry military wit.",
+          "text": "Otter brought you all out clean, without leaving so much as an oil slick behind. Outstanding work, the lot of you."
+        },
+        {
+          "speaker": "LANTERN",
+          "style": "Dry, forward-looking closer.",
+          "text": "Get some dry clothes and warm rations. Command is eyeing an alpine rail bridge in the high passes, and we move at dusk."
+        }
+      ],
+      "status": "ok",
+      "file": "dialog/dialog_debrief.wav",
+      "bytes": 1599712,
+      "mime": "audio/wav",
+      "durationSec": 33.2,
+      "usage": {
+        "total_tokens": 934,
+        "total_input_tokens": 103,
+        "total_cached_tokens": 0,
+        "total_output_tokens": 831,
+        "total_tool_use_tokens": 0,
+        "total_thought_tokens": 0
+      },
+      "elapsedMs": 11931,
+      "createdAt": "2026-10-15T11:40:43.387Z"
+    },
+    "dialog_banter": {
+      "id": "dialog_banter",
+      "type": "dialog",
+      "scene": "banter",
+      "title": "Whispers Behind the Nets",
+      "model": "gemini-3.8-flash-tts",
+      "settings": {
+        "voices": {
+          "FOX": "Despina",
+          "BADGER": "Algenib"
+        }
+      },
+      "lines": [
+        {
+          "speaker": "FOX",
+          "style": "Disgusted, delicate theatrical whisper.",
+          "text": "I have played drafty provincial theaters, Dez, but crouching in rotten herring nets pushes my artistic limits."
+        },
+        {
+          "speaker": "BADGER",
+          "style": "Rough, muffled chuckle.",
+          "text": "Quit fidgeting, Celeste. A whiff of salted mackerel never killed anyone. Dominion machine gun fire certainly will."
+        },
+        {
+          "speaker": "FOX",
+          "style": "Dry theatrical critique.",
+          "text": "At least machine fire has dramatic presence. This smell will take root in my wool coat until next winter."
+        },
+        {
+          "speaker": "BADGER",
+          "style": "Low, focused hiss.",
+          "text": "Hunker down. Sentry patrol is three paces away. Listen to those heavy hobnails crushing the gravel."
+        },
+        {
+          "speaker": "FOX",
+          "style": "Amused, supercilious stage whisper.",
+          "text": "His posture is appalling. If I were staging this scene, he would be demoted to stagehand before the first act closed."
+        },
+        {
+          "speaker": "BADGER",
+          "style": "Gruff, suppressed smirk.",
+          "text": "Save the review for the morning papers, actress. Let him pass the net first."
+        }
+      ],
+      "status": "ok",
+      "file": "dialog/dialog_banter.wav",
+      "bytes": 2121952,
+      "mime": "audio/wav",
+      "durationSec": 44.1,
+      "usage": {
+        "total_tokens": 1232,
+        "total_input_tokens": 130,
+        "total_cached_tokens": 0,
+        "total_output_tokens": 1102,
+        "total_tool_use_tokens": 0,
+        "total_thought_tokens": 0
+      },
+      "elapsedMs": 13730,
+      "createdAt": "2026-10-15T11:40:45.149Z"
+    }
+  },
+  "models": {
+    "text": "gemini-3.8-flash",
+    "image": "gemini-nano-banana-2.1",
+    "tts": "gemini-3.8-flash-tts",
+    "song": "lyria-3.5",
+    "clip": "lyria-3-clip-preview"
+  },
+  "updatedAt": "2026-10-15T11:43:15.818Z"
+}
