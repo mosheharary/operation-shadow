@@ -399,7 +399,11 @@ export interface SimState {
   smoke: SmokeCloud[];
   alarm: AlarmState;
   objectives: ObjectiveState[];
-  director: { fired: string[] };
+  director: {
+    fired: string[];
+    /** Dynamic-event deck: next draw, complications played (budgeted per difficulty), own RNG stream. */
+    deck?: { nextTick: number; drawn: number; complications: number; rng: RngState };
+  };
   stats: MissionStats;
   log: LogEntry[];
   nextId: number;

@@ -24,7 +24,7 @@ export { COASTAL_GENERATOR_VERSION, COASTAL_TEMPLATE_ID, generateCoastal, type C
 export { levelHash } from './levelgen/hash';
 export { validateMission, type MissionValidationReport, type ValidationIssue } from './levelgen/validate';
 export * from './missions/spec';
-export { compileAndValidate, compileMission, fallbackSpec, impliedRoles, specIssues, type CompiledMission } from './missions/compile';
+export { compileAndValidate, compileMission, deckFor, fallbackSpec, impliedRoles, specIssues, type CompiledMission } from './missions/compile';
 export { ALPINE_TEMPLATE, COASTAL_TEMPLATE, GENERATOR_TEMPLATES, getTemplate, RAIL_TEMPLATE, TEMPLATES, TRAINING_TEMPLATE } from './missions/templates/index';
 export { ALPINE_GENERATOR_VERSION, ALPINE_TEMPLATE_ID, generateAlpine } from './levelgen/alpine';
 export { generateRail, RAIL_GENERATOR_VERSION, RAIL_TEMPLATE_ID } from './levelgen/rail';

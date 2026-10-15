@@ -39,7 +39,7 @@ describe('migrations', () => {
       "select table_name from information_schema.tables where table_schema = 'public' order by table_name",
     );
     expect(rows.map((r) => r.table_name)).toEqual(
-      expect.arrayContaining(['account', 'audit_events', 'rate_limit', 'session', 'user', 'user_preferences', 'verification']),
+      expect.arrayContaining(['account', 'ai_usage', 'audit_events', 'generation_jobs', 'missions', 'rate_limit', 'session', 'user', 'user_preferences', 'verification']),
     );
   });
 

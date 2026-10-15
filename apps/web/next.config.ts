@@ -16,7 +16,7 @@ const nextConfig: NextConfig = {
   output: 'standalone',
   outputFileTracingRoot: workspaceRoot,
   turbopack: { root: workspaceRoot },
-  transpilePackages: ['@operation-shadow/content', '@operation-shadow/db', '@operation-shadow/engine', '@operation-shadow/schemas', 'three'],
+  transpilePackages: ['@operation-shadow/ai', '@operation-shadow/content', '@operation-shadow/db', '@operation-shadow/engine', '@operation-shadow/schemas', 'three'],
   poweredByHeader: false,
   reactStrictMode: true,
   experimental: {

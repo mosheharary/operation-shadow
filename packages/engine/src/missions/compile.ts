@@ -1,7 +1,7 @@
 import { Rng } from '../core/rng';
 import type { LevelData } from '../level/types';
 import { validateMission, type MissionValidationReport } from '../levelgen/validate';
-import type { DirectorEventDef, GuardSpawn, MissionRuntime, ObjectiveDef, ObjectSpawn } from '../sim/mission';
+import type { DeckCard, DirectorDeck, DirectorEventDef, GuardSpawn, MissionRuntime, ObjectiveDef, ObjectSpawn } from '../sim/mission';
 import { SPECIALISTS, type SpecialistId, type Weather } from '../sim/types';
 import { type GuardDensity, MISSION_SPEC_VERSION, type MissionSpec, OBJECTIVE_SLOT_TAG, type ObjectiveSpec, type TemplateDef } from './spec';
 
@@ -123,11 +123,28 @@ export function compileMission(spec: MissionSpec, template: TemplateDef): Compil
     failAtAlarm: spec.failAtAlarm,
     parSeconds: spec.parSeconds,
     reinforcementSpawns: template.reinforcements.map((r) => ({ ...r, pos: { ...r.pos } })),
+    ...(spec.dynamicEvents ? { deck: deckFor(template) } : {}),
   };
   return { level, mission };
 }
 
 /** Compiles and runs the mission validator (reachability, stealth route, entity sanity). */
+const DECK_WEATHER: Record<TemplateDef['theme'], Weather[]> = { coastal: ['fog', 'rain', 'clear'], alpine: ['snow', 'fog', 'clear'], rail: ['rain', 'fog', 'clear'], training: [] };
+
+/** The template's dynamic-event deck: patrols from its reinforcement points, weather shifts, intel. */
+export function deckFor(template: TemplateDef): DirectorDeck {
+  return {
+    firstAtSeconds: 150,
+    intervalSeconds: [120, 200],
+    cards: [
+      ...template.reinforcements.map((r): DeckCard => ({ kind: 'patrol', sector: r.sector, pos: { ...r.pos }, count: Math.min(2, r.count) })),
+      ...DECK_WEATHER[template.theme].map((weather): DeckCard => ({ kind: 'weather', weather })),
+      { kind: 'intel', text: 'The garrison changes shifts on the hour. Fresh sentries look around more.' },
+      { kind: 'intel', text: 'Bodies left in the open will be found. Hide them before you move on.' },
+    ],
+  };
+}
+
 export function compileAndValidate(spec: MissionSpec, template: TemplateDef): CompiledMission & { report: MissionValidationReport } {
   const compiled = compileMission(spec, template);
   return { ...compiled, report: validateMission(compiled.level, compiled.mission) };

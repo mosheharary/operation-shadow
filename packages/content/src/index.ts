@@ -4,6 +4,7 @@ import type { MissionEntry } from './missions/types';
 
 export * from './abilities';
 export * from './dialogue';
+export * from './missions/generated';
 export * from './missions/squad';
 export * from './missions/types';
 export { BOOT_CAMP, FROZEN_LEDGER, IRON_JUNCTION, LAST_LIGHT, WHITE_SILENCE } from './missions/campaign';

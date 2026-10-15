@@ -1,4 +1,4 @@
-import { getMission, type MissionEntry } from '@operation-shadow/content';
+import { type GeneratedMissionData, generatedMissionEntry, getMission, type MissionEntry } from '@operation-shadow/content';
 import {
   type Command,
   type CommandResult,
@@ -17,6 +17,8 @@ export interface GameSetup {
   squad: SpecialistId[];
   difficulty: DifficultyId;
   seed: number;
+  /** A generated operation (its key starts with `op-`), already validated by the server. */
+  generated?: GeneratedMissionData;
 }
 
 type EventListener = (events: GameEvent[]) => void;
@@ -47,7 +49,7 @@ export class GameController {
   private lastHud = 0;
 
   constructor(readonly setup: GameSetup) {
-    const entry = getMission(setup.missionKey);
+    const entry = setup.generated ? generatedMissionEntry(setup.generated) : getMission(setup.missionKey);
     if (!entry) throw new Error(`Unknown mission ${setup.missionKey}`);
     this.entry = entry;
     const built = entry.build();

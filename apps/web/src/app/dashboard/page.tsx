@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { MISSIONS } from '@operation-shadow/content';
-import { checkReadiness } from '@operation-shadow/db';
+import { checkReadiness, listOwnedMissions } from '@operation-shadow/db';
 import { getDb } from '@/server/db';
 import { requireSession } from '@/server/session';
 import { SignOutButton } from './sign-out-button';
@@ -18,7 +18,8 @@ const statusClass = (value: string) =>
 const ROADMAP = [
   { label: 'Foundation: accounts, database, 3D pipeline', state: 'ok' },
   { label: 'Vertical slice: playable mission "Silent Tide"', state: 'ok' },
-  { label: 'Generated operations (Gemini)', state: 'pending' },
+  { label: 'Campaign of six missions with a guided tutorial', state: 'ok' },
+  { label: 'Generated operations (Gemini, with offline fallback)', state: 'ok' },
   { label: 'Campaigns and saved games', state: 'pending' },
   { label: 'Full campaign, planning mode, polish', state: 'pending' },
 ] as const;
@@ -26,6 +27,7 @@ const ROADMAP = [
 export default async function DashboardPage() {
   const session = await requireSession();
   const readiness = await checkReadiness(getDb().pool).catch(() => ({ database: 'error', migrations: 'error' }) as const);
+  const generated = await listOwnedMissions(getDb().db, session.user.id, 6).catch(() => []);
 
   return (
     <main className="hq">
@@ -49,6 +51,18 @@ export default async function DashboardPage() {
               <Link key={mission.key} className="menu__item" href={`/missions/${mission.key}`} data-testid={`mission-${mission.key}`}>
                 <span className="menu__title">Operation: {mission.title}</span>
                 <span className="menu__desc">{mission.summary}</span>
+              </Link>
+            ))}
+            <Link className="menu__item menu__item--accent" href="/operations/new" data-testid="new-operation">
+              <span className="menu__title">Request a generated operation</span>
+              <span className="menu__desc">Lantern drafts a fresh mission on any map, checked to be winnable without being seen.</span>
+            </Link>
+            {generated.map((m) => (
+              <Link key={m.id} className="menu__item" href={`/missions/op-${m.id}`} data-testid="generated-mission">
+                <span className="menu__title">Operation: {m.title}</span>
+                <span className="menu__desc">
+                  Generated {m.createdAt.toISOString().slice(0, 10)} · {m.source === 'fallback' ? 'offline generator' : 'drafted by Lantern (AI)'}
+                </span>
               </Link>
             ))}
             <Link className="menu__item" href="/test-range">

@@ -2,6 +2,7 @@ import { getMission, SPECIALIST_PROFILES } from '@operation-shadow/content';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { resolveMission } from '@/server/missions';
 import { requireSession } from '@/server/session';
 import { SquadPicker } from './squad-picker';
 import styles from './briefing.module.css';
@@ -14,14 +15,14 @@ type Search = Promise<{ error?: string }>;
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { key } = await params;
-  return { title: getMission(key)?.title ?? 'Mission' };
+  return { title: getMission(key)?.title ?? (key.startsWith('op-') ? 'Generated operation' : 'Mission') };
 }
 
 export default async function BriefingPage({ params, searchParams }: { params: Params; searchParams: Search }) {
-  await requireSession();
+  const session = await requireSession();
   const { key } = await params;
   const { error } = await searchParams;
-  const entry = getMission(key);
+  const entry = (await resolveMission(key, session.user.id))?.entry;
   if (!entry) notFound();
   const b = entry.briefing;
 
@@ -36,6 +37,11 @@ export default async function BriefingPage({ params, searchParams }: { params: P
             {b.location} · {b.time} · {b.weather}
           </p>
           <h1 className="title">{b.codename}</h1>
+          {entry.generated && (
+            <p className={styles.source} data-testid="mission-source">
+              {entry.generated === 'fallback' ? 'Prepared by the offline generator' : 'Drafted by Lantern · AI-generated'}
+            </p>
+          )}
         </header>
 
         <div className={styles.grid}>

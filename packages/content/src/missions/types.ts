@@ -30,4 +30,6 @@ export interface MissionEntry {
   spec?: MissionSpec;
   /** The guided tutorial (Boot Camp). */
   tutorial?: boolean;
+  /** Set for generated operations: who drafted it. */
+  generated?: 'gemini' | 'mock' | 'fallback';
 }

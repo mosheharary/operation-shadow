@@ -23,6 +23,20 @@ export interface MissionRuntime {
   failAtAlarm: AlarmLevel | null;
   parSeconds: number;
   reinforcementSpawns: { sector: string; pos: Vec2; count: number }[];
+  /** Dynamic events drawn during play (generated operations). Absent = scripted timeline only. */
+  deck?: DirectorDeck;
+}
+
+/** A dynamic event; each is checked against the live state before it is played. */
+export type DeckCard =
+  | { kind: 'patrol'; sector: string; pos: Vec2; count: number }
+  | { kind: 'weather'; weather: Weather }
+  | { kind: 'intel'; text: string };
+
+export interface DirectorDeck {
+  firstAtSeconds: number;
+  intervalSeconds: [number, number];
+  cards: DeckCard[];
 }
 
 export interface GuardSpawn {

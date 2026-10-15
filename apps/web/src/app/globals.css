@@ -232,6 +232,10 @@ a {
   transition: border-color 120ms ease, background 120ms ease;
 }
 
+.menu__item--accent {
+  border-color: var(--brass);
+}
+
 .menu__item:hover {
   border-color: var(--brass);
   background: rgba(34, 44, 51, 0.95);

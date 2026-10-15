@@ -215,6 +215,29 @@ Decisions D32–D37.
 | Unit tests | ✅ 128 / 128 (each template validates across seeds; every campaign mission has a stealth route; the tutorial script played to extraction with 0 detections) |
 | Browser tests vs. dev server | ✅ 15 / 15 (tutorial steps with real input; each new mission loads without console errors) |
 
-## Milestones 3–6
+## Milestone 3 — Mission generation ✅ (2026-10-15)
+
+Decisions D38–D44.
+
+- [x] Shared Zod contracts: generation request (enumerated choices plus an optional sanitized codename), model plan, stored spec and briefing, job DTO
+- [x] `packages/ai`: providers `gemini` (Interactions API, 45 s timeout, 2 retries on 429/5xx, key only in a header and redacted from errors), `mock` (valid, malformed, repairable, invalid, unsafe, error), `disabled`
+- [x] Prompt from the template catalog only; validation, one repair, content blocklist, offline fallback that honours the player's choices
+- [x] Database: `missions`, `generation_jobs`, `ai_usage` (migration `0001_generated_operations`)
+- [x] API: `POST /api/v1/generation-jobs` (Idempotency-Key, quotas, budget), `GET /:id`, `POST /:id/advance`, `POST /:id/cancel`; same-origin check, size limits, error envelope, owner-only (others get 404)
+- [x] Generated Operation screen with real stage progress, cancel and "use the offline generator" at any time; briefing marks AI-drafted or offline; dashboard lists generated operations for replay
+- [x] Generated missions play through the same compile path as the campaign (`op-<uuid>` keys)
+- [x] Director deck of dynamic events for generated operations
+- [ ] Runtime AI event proposals (plan §8.4): deferred, see D44
+
+### Verification (ran 2026-10-15)
+
+| Check | Result |
+|---|---|
+| `pnpm lint` / `pnpm typecheck` | ✅ |
+| Unit + integration tests | ✅ 152 / 152 (AI pipeline with every mock scenario, offline generator over many seeds and requests, provider retries and key redaction; job leases, idempotency, atomic completion, cancellation, ownership, spend tracking against Postgres) |
+| Browser tests vs. dev server | ✅ 17 / 17 (request an operation in the UI, read the briefing, deploy into it; API idempotency, validation, cross-site refusal, other user gets 404, signed-out gets 401) |
+| Live Gemini path | ✅ once from a script and once through the UI (2026-10-15): validated alpine rescue mission, no repair needed, about 13 s, about $0.0026 |
+
+## Milestones 4–6
 
 See `docs/architecture/implementation-plan.md` §13.

@@ -11,6 +11,7 @@
     "seed": "tsx scripts/seed.ts"
   },
   "dependencies": {
+    "@operation-shadow/ai": "workspace:*",
     "@operation-shadow/content": "workspace:*",
     "@operation-shadow/db": "workspace:*",
     "@operation-shadow/engine": "workspace:*",

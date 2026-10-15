@@ -2,7 +2,7 @@ import { ALPINE_TEMPLATE, compileMission, COASTAL_TEMPLATE, impliedRoles, MISSIO
 import type { Briefing, MissionEntry } from './types';
 
 /** Wraps a spec as a playable mission entry; the squad rules include what the objectives imply. */
-function specMission(
+export function specMission(
   template: TemplateDef,
   spec: MissionSpec,
   meta: { summary: string; briefing: Briefing; debrief: MissionEntry['debrief']; tutorial?: boolean },

@@ -16,6 +16,21 @@ const serverEnvSchema = z.object({
   GOOGLE_CLIENT_SECRET: optional,
   ALLOW_DEV_LOGIN: z.enum(['true', 'false']).optional(),
   DEV_LOGIN_PASSWORD: optional,
+  // Mission generation (server-only). Without a key the offline generator is used.
+  GOOGLE_API_KEY: optional,
+  AI_PROVIDER: z
+    .string()
+    .optional()
+    .transform((v) => (v ? v : undefined))
+    .pipe(z.enum(['gemini', 'mock', 'disabled']).optional()),
+  AI_MOCK_SCENARIO: z
+    .string()
+    .optional()
+    .transform((v) => (v ? v : undefined))
+    .pipe(z.enum(['valid', 'malformed', 'repairable', 'invalid', 'error', 'unsafe']).optional()),
+  GEMINI_TEXT_MODEL: z.string().regex(/^[a-z0-9.-]+$/).default('gemini-3.8-flash'),
+  AI_MONTHLY_BUDGET_USD: z.coerce.number().min(0).default(5),
+  AI_DAILY_JOBS_PER_USER: z.coerce.number().int().min(0).default(20),
 });
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>;

@@ -217,3 +217,12 @@
 .diffOption strong {
   color: var(--ink);
 }
+
+.source {
+  margin: 0.3rem 0 0;
+  font-family: var(--font-type);
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--brass);
+}

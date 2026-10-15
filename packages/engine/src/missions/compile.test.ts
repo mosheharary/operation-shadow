@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { levelHash } from '../levelgen/hash';
 import type { MissionRuntime } from '../sim/mission';
 import type { SpecialistId } from '../sim/types';
+import { stateHash } from '../sim/snapshot';
 import { World } from '../sim/world';
 import { runUntil } from '../testing/scenario';
 import { compileAndValidate, compileMission, fallbackSpec, specIssues } from './compile';
@@ -123,5 +124,43 @@ describe('spec checks', () => {
     const spec = fallbackSpec(RAIL_TEMPLATE, 4, 'x');
     const { mission } = compileMission({ ...spec, events: [], squad: { required: [], min: 1, max: 4 }, objectives: [{ id: 'p', kind: 'sabotage', slot: 'ammo-train', title: 't', description: 'd', required: true }] }, RAIL_TEMPLATE);
     expect(mission.requiredRoles).toContain('engineer');
+  });
+});
+
+describe('dynamic-event deck', () => {
+  const run = (squadFar: boolean, difficulty: 'standard' | 'veteran' = 'standard', seed = 5) => {
+    const spec = { ...fallbackSpec(RAIL_TEMPLATE, 31, 'deck-test'), dynamicEvents: true };
+    const { level, mission } = compileMission(spec, RAIL_TEMPLATE);
+    const world = World.create(level, mission, { seed, squad: ['engineer', 'infiltrator', 'recon'], difficulty });
+    // Keep the squad still (and hidden by distance or not): stand them on a reinforcement point.
+    if (!squadFar) for (const op of world.state.operatives) op.pos = { ...RAIL_TEMPLATE.reinforcements[0]!.pos };
+    const messages: string[] = [];
+    for (let i = 0; i < 20 * 900; i += 1) for (const e of world.step()) if (e.type === 'message') messages.push(e.text);
+    return { world, messages };
+  };
+
+  it('plays patrols, weather and intel within the difficulty budget, deterministically', () => {
+    const a = run(true);
+    const b = run(true);
+    expect(stateHash(a.world.state)).toBe(stateHash(b.world.state));
+    const deck = a.world.state.director.deck!;
+    expect(deck.drawn).toBeGreaterThanOrEqual(3);
+    const runs = [1, 2, 3, 4, 5, 6].map((seed) => run(true, 'standard', seed));
+    for (const r of runs) expect(r.world.state.director.deck!.complications).toBeLessThanOrEqual(2);
+    const all = runs.flatMap((r) => r.messages);
+    expect(all.some((m) => m.includes('patrol is sweeping'))).toBe(true);
+    expect(all.some((m) => /Rain|Fog|sky/.test(m))).toBe(true);
+    expect(run(true, 'veteran').world.state.director.deck!.complications).toBeLessThanOrEqual(3);
+  });
+
+  it('never spawns a patrol next to the squad', () => {
+    const { messages } = run(false);
+    expect(messages.filter((m) => m.includes(`sweeping the ${RAIL_TEMPLATE.reinforcements[0]!.sector}`))).toEqual([]);
+  });
+
+  it('is absent from campaign missions without the flag', () => {
+    const { level, mission } = compileMission(fallbackSpec(RAIL_TEMPLATE, 31, 'no-deck'), RAIL_TEMPLATE);
+    expect(mission.deck).toBeUndefined();
+    expect(World.create(level, mission, { seed: 5, squad: ['engineer', 'infiltrator'], difficulty: 'standard' }).state.director.deck).toBeUndefined();
   });
 });

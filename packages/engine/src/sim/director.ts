@@ -1,6 +1,8 @@
+import { distance } from '../core/math';
+import { Rng } from '../core/rng';
 import { ambientLightAt, WEATHER_NOISE_FLOOR } from './rules';
-import type { DirectorEventDef, DirectorTrigger } from './mission';
-import { seconds } from './types';
+import type { DeckCard, DirectorEventDef, DirectorTrigger } from './mission';
+import { seconds, type Weather } from './types';
 import type { World } from './world';
 
 function triggered(world: World, trigger: DirectorTrigger): boolean {
@@ -44,16 +46,93 @@ function fire(world: World, event: DirectorEventDef): void {
         }
         break;
       case 'weather':
-        s.env.weather = action.weather;
-        s.env.ambientLight = ambientLightAt(s.env.timeOfDay, action.weather);
-        s.env.noiseFloor = WEATHER_NOISE_FLOOR[action.weather] ?? 28;
-        world.log('info', `Weather: ${action.weather}`);
+        setWeather(world, action.weather);
         break;
     }
   }
 }
 
-/** Fires each scripted mission event once, when its trigger is first met. */
+function setWeather(world: World, weather: Weather): void {
+  const s = world.state;
+  s.env.weather = weather;
+  s.env.ambientLight = ambientLightAt(s.env.timeOfDay, weather);
+  s.env.noiseFloor = WEATHER_NOISE_FLOOR[weather] ?? 28;
+  world.log('info', `Weather: ${weather}`);
+}
+
+/** Complications (extra patrols) each difficulty allows per mission. */
+const COMPLICATION_BUDGET = { standard: 2, veteran: 3 } as const;
+/** Patrols never appear this close to an active squad member. */
+const SPAWN_CLEARANCE = 25;
+const WEATHER_TEXT: Record<Weather, string> = {
+  clear: 'The sky is clearing. Visibility will improve.',
+  rain: 'Rain is coming in. It will cover your footsteps.',
+  fog: 'Fog is rolling in. Sentries will not see far.',
+  snow: 'Snow is starting to fall. Mind your tracks.',
+};
+
+const hq = (world: World, lineKey: string, text: string) => {
+  world.emit({ type: 'message', speaker: 'LANTERN', lineKey, text });
+  world.log('info', `LANTERN: ${text}`);
+};
+
+/** Whether a card can be played now (plan §3.11 precondition checks). */
+function playable(world: World, card: DeckCard, index: number, complications: number): boolean {
+  const s = world.state;
+  switch (card.kind) {
+    case 'patrol':
+      return (
+        complications < COMPLICATION_BUDGET[s.difficulty] &&
+        s.alarm.level < 3 &&
+        s.operatives.every((op) => op.status !== 'active' || distance(op.pos, card.pos) >= SPAWN_CLEARANCE)
+      );
+    case 'weather':
+      return card.weather !== s.env.weather;
+    case 'intel':
+      return !s.director.fired.includes(`deck:intel:${index}`);
+  }
+}
+
+function play(world: World, card: DeckCard, index: number): void {
+  const s = world.state;
+  switch (card.kind) {
+    case 'patrol':
+      for (let i = 0; i < card.count; i += 1) world.spawnReinforcement(card.sector, { x: card.pos.x + i * 0.8, z: card.pos.z }, card.pos);
+      s.director.deck!.complications += 1;
+      hq(world, `deck-patrol-${card.sector}`, `A Dominion patrol is sweeping the ${card.sector}. Keep clear of it.`);
+      break;
+    case 'weather':
+      setWeather(world, card.weather);
+      hq(world, `deck-weather-${card.weather}`, WEATHER_TEXT[card.weather]);
+      break;
+    case 'intel':
+      s.director.fired.push(`deck:intel:${index}`);
+      hq(world, `deck-intel-${index}`, card.text);
+      break;
+  }
+}
+
+/** Draws from the mission's dynamic-event deck at intervals; skips cards whose preconditions fail. */
+function updateDeck(world: World): void {
+  const deck = world.mission.deck;
+  const state = world.state.director.deck;
+  if (!deck || !state || world.state.tick < state.nextTick || deck.cards.length === 0) return;
+  const rng = new Rng(state.rng);
+  const start = rng.int(0, deck.cards.length);
+  for (let i = 0; i < deck.cards.length; i += 1) {
+    const index = (start + i) % deck.cards.length;
+    const card = deck.cards[index]!;
+    if (playable(world, card, index, state.complications)) {
+      play(world, card, index);
+      break;
+    }
+  }
+  state.drawn += 1;
+  state.nextTick = world.state.tick + seconds(rng.range(deck.intervalSeconds[0], deck.intervalSeconds[1]));
+  state.rng = rng.state;
+}
+
+/** Fires each scripted mission event once, when its trigger is first met, then the dynamic deck. */
 export function updateDirector(world: World): void {
   const s = world.state;
   for (const event of world.mission.director) {
@@ -62,4 +141,5 @@ export function updateDirector(world: World): void {
     s.director.fired.push(event.id);
     fire(world, event);
   }
+  updateDeck(world);
 }

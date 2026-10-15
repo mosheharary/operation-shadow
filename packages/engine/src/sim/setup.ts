@@ -4,7 +4,7 @@ import { Grid } from '../level/grid';
 import type { LevelData } from '../level/types';
 import type { GuardSpawn, MissionRuntime, ObjectSpawn } from './mission';
 import { ambientLightAt, SPECIALIST_RULES, WEATHER_NOISE_FLOOR } from './rules';
-import type { DifficultyId, Guard, Operative, SimState, SpecialistId, WorldObject } from './types';
+import { type DifficultyId, type Guard, type Operative, seconds, type SimState, type SpecialistId, type WorldObject } from './types';
 
 export interface WorldSetup {
   seed: number;
@@ -193,7 +193,11 @@ export function createInitialState(level: LevelData, mission: MissionRuntime, se
     smoke: [],
     alarm: { level: 0, persistent: 0, since: 0, peak: 0, floor: 0, lastEscalationTick: 0, reinforcementsSent: 0, sirens: false },
     objectives: mission.objectives.map((o) => ({ id: o.id, status: o.hidden ? 'hidden' : 'active', completedTick: null })),
-    director: { fired: [] },
+    director: {
+      fired: [],
+      // A separate stream, so a mission with a deck leaves the main simulation's randomness untouched.
+      ...(mission.deck ? { deck: { nextTick: seconds(mission.deck.firstAtSeconds), drawn: 0, complications: 0, rng: seedRng((setup.seed ^ 0xdec4) >>> 0) } } : {}),
+    },
     stats: {
       detections: 0,
       alarmsRaised: 0,

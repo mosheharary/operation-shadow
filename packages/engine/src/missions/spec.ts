@@ -58,6 +58,8 @@ export interface MissionSpec {
   failAtAlarm: AlarmLevel | null;
   parSeconds: number;
   events: EventSpec[];
+  /** Draw dynamic events (patrols, weather shifts, intel) during play. Generated operations use it. */
+  dynamicEvents?: boolean;
 }
 
 /** A guard position offered by a template; the density picks how many are manned. */
