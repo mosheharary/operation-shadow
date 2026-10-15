@@ -19,6 +19,11 @@ const nextConfig: NextConfig = {
   transpilePackages: ['@operation-shadow/content', '@operation-shadow/db', '@operation-shadow/engine', '@operation-shadow/schemas', 'three'],
   poweredByHeader: false,
   reactStrictMode: true,
+  experimental: {
+    // The persistent dev cache goes stale across restarts on Docker bind mounts and sends the
+    // browser into a reload loop ("HMR hash mismatch"); dev compiles from scratch instead.
+    turbopackFileSystemCacheForDev: false,
+  },
   async headers() {
     return [{ source: '/:path*', headers: securityHeaders }];
   },

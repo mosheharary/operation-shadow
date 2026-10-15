@@ -6,7 +6,7 @@ import { bakeStaticLight } from './lighting';
 import { fbm, smoothstep, valueNoise } from './noise';
 
 export const COASTAL_TEMPLATE_ID = 'coastal-harbor';
-export const COASTAL_GENERATOR_VERSION = 'coastal@1';
+export const COASTAL_GENERATOR_VERSION = 'coastal@2';
 
 const W = 160;
 const D = 120;
@@ -438,6 +438,50 @@ export function generateCoastal(options: CoastalOptions): LevelData {
   route('compound-north', [vec(127, 21.5), vec(152, 21.5), vec(152, 35), vec(127, 35)], [2, 3, 2, 3]);
   route('compound-south', [vec(141, 38.5), vec(153, 47), vec(141, 55.5), vec(131, 55.5)], [2, 2, 3, 2]);
   route('forest-edge', [vec(68, 65.5), vec(108, 65.5)], [5, 5]);
+
+  // ── Dressing: barrels and crates against walls, gear along the quay (solid cover) ─────────
+  const segmentDistance = (p: Vec2, a: Vec2, q: Vec2) => {
+    const dx = q.x - a.x;
+    const dz = q.z - a.z;
+    const t = Math.max(0, Math.min(1, ((p.x - a.x) * dx + (p.z - a.z) * dz) / (dx * dx + dz * dz || 1)));
+    return distance(p, vec(a.x + dx * t, a.z + dz * t));
+  };
+  const nearRoute = (p: Vec2) =>
+    b.level.routes.some((r) => r.points.some((pt, i) => segmentDistance(p, pt, r.points[(i + 1) % r.points.length]!) < 1.7));
+  const dressable = (p: Vec2) =>
+    doorFronts.every((d) => distance(d, p) > 2.4) &&
+    !nearRoute(p) &&
+    b.level.posts.every((pt) => distance(pt.pos, p) > 1.6) &&
+    b.level.props.every((pr) => distance(pr.pos, p) > 1.1);
+  for (const s of b.level.structures) {
+    if (s.kind !== 'house' && s.kind !== 'office' && s.kind !== 'warehouse' && s.kind !== 'barracks') continue;
+    const hx = s.size.x / 2;
+    const hz = s.size.z / 2;
+    for (let i = 0; i < 4; i += 1) {
+      const side = rng.int(0, 4);
+      const t = rng.range(-0.7, 0.7);
+      const p =
+        side === 0
+          ? vec(s.pos.x + t * hx, s.pos.z - hz - 0.7)
+          : side === 1
+            ? vec(s.pos.x + hx + 0.7, s.pos.z + t * hz)
+            : side === 2
+              ? vec(s.pos.x + t * hx, s.pos.z + hz + 0.7)
+              : vec(s.pos.x - hx - 0.7, s.pos.z + t * hz);
+      if (!dressable(p)) continue;
+      const kind: PropKind = rng.chance(0.55) ? 'barrel' : 'crate';
+      b.addProp({ id: `dress-${propId++}`, kind, pos: p, rotation: rng.range(0, Math.PI * 2), scale: rng.range(0.82, 1), height: 1.1, solid: true }, 0.45);
+    }
+  }
+  for (const anchor of [vec(84, 19.4), vec(95.5, 19.4), vec(110, 19.4), vec(72.5, 19.4)]) {
+    for (let i = 0; i < 3; i += 1) {
+      const p = vec(anchor.x + rng.range(-1.4, 1.4), anchor.z + rng.range(-0.3, 0.5));
+      if (!dressable(p)) continue;
+      const kind: PropKind = i === 0 ? 'net' : rng.chance(0.5) ? 'crate' : 'barrel';
+      const solid = kind !== 'net';
+      b.addProp({ id: `dress-${propId++}`, kind, pos: p, rotation: rng.range(0, Math.PI * 2), scale: rng.range(0.8, 1), height: solid ? 1.1 : 0.4, solid }, solid ? 0.45 : 0);
+    }
+  }
 
   // ── Zones and slots ───────────────────────────────────────────────────────────────────────
   b.addZone({ id: 'insertion', kind: 'insertion', min: vec(6, 15.5), max: vec(18, 22), label: 'Landing beach' });

@@ -1,0 +1,274 @@
+{
+  "version": 1,
+  "size": 512,
+  "sets": {
+    "cobble": {
+      "source": "Poly Haven",
+      "id": "cobblestone_01",
+      "name": "Cobblestone 01",
+      "url": "https://polyhaven.com/a/cobblestone_01",
+      "authors": [
+        "Rob Tuytel"
+      ],
+      "license": "CC0-1.0",
+      "tileMeters": [
+        2.4,
+        2.4
+      ],
+      "files": {
+        "color": "cobble/color.webp",
+        "normal": "cobble/normal.webp",
+        "rough": "cobble/rough.webp"
+      }
+    },
+    "rock": {
+      "source": "Poly Haven",
+      "id": "mossy_rock",
+      "name": "Mossy Rock",
+      "url": "https://polyhaven.com/a/mossy_rock",
+      "authors": [
+        "Rob Tuytel"
+      ],
+      "license": "CC0-1.0",
+      "tileMeters": [
+        3,
+        3
+      ],
+      "files": {
+        "color": "rock/color.webp",
+        "normal": "rock/normal.webp",
+        "rough": "rock/rough.webp"
+      }
+    },
+    "grass": {
+      "source": "Poly Haven",
+      "id": "sparse_grass",
+      "name": "Sparse Grass",
+      "url": "https://polyhaven.com/a/sparse_grass",
+      "authors": [
+        "Amal Kumar"
+      ],
+      "license": "CC0-1.0",
+      "tileMeters": [
+        2,
+        2
+      ],
+      "files": {
+        "color": "grass/color.webp",
+        "normal": "grass/normal.webp",
+        "rough": "grass/rough.webp"
+      }
+    },
+    "forest": {
+      "source": "Poly Haven",
+      "id": "forest_ground_04",
+      "name": "Forest Ground 04",
+      "url": "https://polyhaven.com/a/forest_ground_04",
+      "authors": [
+        "Rob Tuytel",
+        "Rico Cilliers"
+      ],
+      "license": "CC0-1.0",
+      "tileMeters": [
+        3.15,
+        3.15
+      ],
+      "files": {
+        "color": "forest/color.webp",
+        "normal": "forest/normal.webp",
+        "rough": "forest/rough.webp"
+      }
+    },
+    "sand": {
+      "source": "Poly Haven",
+      "id": "coast_sand_01",
+      "name": "Coast Sand 01",
+      "url": "https://polyhaven.com/a/coast_sand_01",
+      "authors": [
+        "Rob Tuytel"
+      ],
+      "license": "CC0-1.0",
+      "tileMeters": [
+        15,
+        15
+      ],
+      "files": {
+        "color": "sand/color.webp",
+        "normal": "sand/normal.webp",
+        "rough": "sand/rough.webp"
+      }
+    },
+    "gravel": {
+      "source": "Poly Haven",
+      "id": "gravel_floor",
+      "name": "Gravel Floor",
+      "url": "https://polyhaven.com/a/gravel_floor",
+      "authors": [
+        "Jenelle van Heerden",
+        "Matterfield"
+      ],
+      "license": "CC0-1.0",
+      "tileMeters": [
+        2.25,
+        2.25
+      ],
+      "files": {
+        "color": "gravel/color.webp",
+        "normal": "gravel/normal.webp",
+        "rough": "gravel/rough.webp"
+      }
+    },
+    "planks": {
+      "source": "Poly Haven",
+      "id": "dark_wooden_planks",
+      "name": "Dark Wooden Planks",
+      "url": "https://polyhaven.com/a/dark_wooden_planks",
+      "authors": [
+        "Amal Kumar"
+      ],
+      "license": "CC0-1.0",
+      "tileMeters": [
+        2,
+        2
+      ],
+      "files": {
+        "color": "planks/color.webp",
+        "normal": "planks/normal.webp",
+        "rough": "planks/rough.webp"
+      }
+    },
+    "planks-light": {
+      "source": "Poly Haven",
+      "id": "brown_planks_09",
+      "name": "Brown Planks 09",
+      "url": "https://polyhaven.com/a/brown_planks_09",
+      "authors": [
+        "Rob Tuytel"
+      ],
+      "license": "CC0-1.0",
+      "tileMeters": [
+        1,
+        1
+      ],
+      "files": {
+        "color": "planks-light/color.webp",
+        "normal": "planks-light/normal.webp",
+        "rough": "planks-light/rough.webp"
+      }
+    },
+    "plaster": {
+      "source": "Poly Haven",
+      "id": "worn_mossy_plasterwall",
+      "name": "Worn Mossy Plasterwall",
+      "url": "https://polyhaven.com/a/worn_mossy_plasterwall",
+      "authors": [
+        "Amal Kumar"
+      ],
+      "license": "CC0-1.0",
+      "tileMeters": [
+        1.8,
+        1.8
+      ],
+      "files": {
+        "color": "plaster/color.webp",
+        "normal": "plaster/normal.webp",
+        "rough": "plaster/rough.webp"
+      }
+    },
+    "stone-wall": {
+      "source": "Poly Haven",
+      "id": "old_stone_wall",
+      "name": "Old Stone Wall",
+      "url": "https://polyhaven.com/a/old_stone_wall",
+      "authors": [
+        "Charlotte Baglioni"
+      ],
+      "license": "CC0-1.0",
+      "tileMeters": [
+        2,
+        2
+      ],
+      "files": {
+        "color": "stone-wall/color.webp",
+        "normal": "stone-wall/normal.webp",
+        "rough": "stone-wall/rough.webp"
+      }
+    },
+    "roof-slate": {
+      "source": "Poly Haven",
+      "id": "grey_roof_tiles",
+      "name": "Grey Roof Tiles",
+      "url": "https://polyhaven.com/a/grey_roof_tiles",
+      "authors": [
+        "Rob Tuytel"
+      ],
+      "license": "CC0-1.0",
+      "tileMeters": [
+        3,
+        3
+      ],
+      "files": {
+        "color": "roof-slate/color.webp",
+        "normal": "roof-slate/normal.webp",
+        "rough": "roof-slate/rough.webp"
+      }
+    },
+    "roof-clay": {
+      "source": "Poly Haven",
+      "id": "clay_roof_tiles",
+      "name": "Clay Roof Tiles",
+      "url": "https://polyhaven.com/a/clay_roof_tiles",
+      "authors": [
+        "Amal Kumar"
+      ],
+      "license": "CC0-1.0",
+      "tileMeters": [
+        4,
+        4
+      ],
+      "files": {
+        "color": "roof-clay/color.webp",
+        "normal": "roof-clay/normal.webp",
+        "rough": "roof-clay/rough.webp"
+      }
+    },
+    "concrete": {
+      "source": "Poly Haven",
+      "id": "chipped_concrete",
+      "name": "Chipped Concrete",
+      "url": "https://polyhaven.com/a/chipped_concrete",
+      "authors": [
+        "Amal Kumar"
+      ],
+      "license": "CC0-1.0",
+      "tileMeters": [
+        2.002,
+        2.002
+      ],
+      "files": {
+        "color": "concrete/color.webp",
+        "normal": "concrete/normal.webp",
+        "rough": "concrete/rough.webp"
+      }
+    },
+    "metal": {
+      "source": "Poly Haven",
+      "id": "rusty_metal_02",
+      "name": "Rusty Metal 02",
+      "url": "https://polyhaven.com/a/rusty_metal_02",
+      "authors": [
+        "Rob Tuytel"
+      ],
+      "license": "CC0-1.0",
+      "tileMeters": [
+        1,
+        1
+      ],
+      "files": {
+        "color": "metal/color.webp",
+        "normal": "metal/normal.webp",
+        "rough": "metal/rough.webp"
+      }
+    }
+  }
+}

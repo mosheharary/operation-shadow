@@ -30,17 +30,22 @@ export function PerfProbe({ onSample }: { onSample: (sample: RenderSample) => vo
   const windowStart = useRef<number | null>(null);
 
   useFrame(() => {
+    // Post-processing renders several passes per frame; count them all and reset once per frame.
+    gl.info.autoReset = false;
     const now = performance.now();
     windowStart.current ??= now;
     frames.current += 1;
     windowFrames.current += 1;
     const elapsed = now - windowStart.current;
+    const calls = gl.info.render.calls;
+    const triangles = gl.info.render.triangles;
+    gl.info.reset();
     if (elapsed < SAMPLE_INTERVAL_MS) return;
 
     const sample: RenderSample = {
       fps: Math.round((windowFrames.current * 1000) / elapsed),
-      drawCalls: gl.info.render.calls,
-      triangles: gl.info.render.triangles,
+      drawCalls: calls,
+      triangles,
       frames: frames.current,
     };
     windowFrames.current = 0;

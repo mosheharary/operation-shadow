@@ -36,3 +36,18 @@ Short records of implementation decisions made after the plan was approved. The 
 | D22 | Added a transient `bell` game event | The audio needs to know when an alarm bell rings. Events are never saved, so saves and determinism are unaffected |
 | D23 | Mission entries declare their squad rules (`squad.required/min/max`) statically; a test keeps them equal to the built mission | The briefing and play pages validate a squad without generating the level on the server |
 | D24 | Browser tests read state through a read-only `window.__OS_GAME__` probe and drive the game with real mouse and keyboard input | Tests exercise the actual input path. The probe cannot issue orders, so it is not a cheat channel |
+
+## Art pass toward the approved concept (2026-10-15, after M2)
+
+The first M2 build rendered flat-coloured primitives; the user expected the look of the approved concept
+`samples/images/env_coastal_night.jpg`. Comparison sheet: `docs/art/art-pass-2026-10-15.jpg`.
+
+| # | Decision | Why |
+|---|---|---|
+| D25 | Turbopack's persistent dev cache is off (`experimental.turbopackFileSystemCacheForDev: false`) | On the Docker bind mount it goes stale on every dev-server restart and sends the browser into a reload loop ("HMR hash mismatch"). Costs a slower first compile |
+| D26 | Surfaces use 14 CC0 texture sets from Poly Haven (512 px WebP, fetched and MD5-verified by `make textures`) through world-space triplanar materials | Q2 approved "procedural + CC0". World-space projection textures procedural geometry without UV work. Roofs alone use UV-mapped slabs so the tiles follow the slope |
+| D27 | The terrain blends eight surface layers from two array textures, weighted per vertex from the level's surface map, with triplanar rock on steep ground, wet shorelines and render-only crag noise on cliffs (0.5 m render mesh) | Two samplers for eight materials keeps the shader cheap. Gameplay still uses the 1 m heightfield; the crags only displace impassable cliff faces |
+| D28 | Post-processing on the High preset: N8AO ambient occlusion, bloom, a gentle tilt-shift, vignette and ACES tone mapping (`@react-three/postprocessing` 3.1.3, `postprocessing` 6.39.5). The Performance preset has none | This finish is most of the concept's "miniature diorama" look. 3.2.0 was too new for the 7-day release rule |
+| D29 | Harbour details (stone quay walls with coping, plank piers on braced posts, ladders), faceted mossy rocks, detailed props, textured buildings, lamp halos and the water (wave normals, fresnel sheen, moon glints, shore foam, diorama cut edge) are all generated from level data at load | Every coastal layout gets them without hand-placed art |
+| D30 | Coastal generator v2 adds solid barrels, crates and nets against building walls and along the quay, kept clear of doors, routes, posts and other props | The concept's clutter doubles as cover. Mission validation (stealth route, objective chain) still passes |
+| D31 | Browser tests run on the Performance preset | SwiftShader renders post-processing at about 1 FPS, which would slow the simulation clock far below real time |

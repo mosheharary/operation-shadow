@@ -2,7 +2,7 @@
 COMPOSE := docker compose
 
 .DEFAULT_GOAL := help
-.PHONY: help up down logs ps migrate seed shell lint typecheck test test-unit test-integration e2e e2e-prod check prod prod-down build rebuild reset voice-bank
+.PHONY: help up down logs ps migrate seed shell lint typecheck test test-unit test-integration e2e e2e-prod check prod prod-down build rebuild reset voice-bank textures
 
 help: ## Show this help
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[33m%-18s\033[0m %s\n", $$1, $$2}'
@@ -31,6 +31,9 @@ shell: ## Open a shell in the tools container
 
 voice-bank: ## Generate missing or changed voice lines with Gemini TTS (ARGS="--dry-run" to preview cost)
 	$(COMPOSE) --profile media run --rm --build media pnpm voice-bank $(ARGS)
+
+textures: ## Fetch the CC0 surface textures from Poly Haven (verified, downsized to WebP)
+	$(COMPOSE) --profile media run --rm --build media pnpm textures $(ARGS)
 
 lint: ## Run ESLint
 	$(COMPOSE) run --rm --no-deps tools pnpm lint

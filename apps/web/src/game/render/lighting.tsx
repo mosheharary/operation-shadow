@@ -102,13 +102,14 @@ export function Lighting({ controller, shadows = true }: { controller: GameContr
     <>
       <fogExp2 attach="fog" args={[fogColor, fogDensity]} />
       <color attach="background" args={[background.r, background.g, background.b]} />
-      <hemisphereLight args={['#5a6f94', '#211c15', 0.85 + daylight * 0.5]} />
-      <ambientLight intensity={0.18 + daylight * 0.25} />
+      {/* Moonlit night: a cool blue sky fill keeps the diorama readable, warm lamps do the rest. */}
+      <hemisphereLight args={['#7d93b8', '#2b2a24', 1.45 + daylight * 0.4]} />
+      <ambientLight color="#9fb2cc" intensity={0.32 + daylight * 0.2} />
       <directionalLight
         ref={sun}
         castShadow={shadows}
         color={sunColor}
-        intensity={1.6 + daylight * 1.8}
+        intensity={2.5 + daylight * 1.2}
         shadow-mapSize={[2048, 2048]}
         shadow-camera-left={-46}
         shadow-camera-right={46}

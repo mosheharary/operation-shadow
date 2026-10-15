@@ -99,7 +99,40 @@ export function Overlay({ controller }: { controller: GameController }) {
   const smokeGeo = useMemo(() => new THREE.SphereGeometry(1, 10, 8), []);
   const smokeMeshes = useMemo(() => Array.from({ length: 18 }, () => new THREE.Mesh(smokeGeo, new THREE.MeshStandardMaterial({ color: '#9aa0a2', transparent: true, opacity: 0.55, depthWrite: false, roughness: 1 }))), [smokeGeo]);
   const beam = useRef<THREE.Mesh>(null);
-  const beamGeometry = useMemo(() => new THREE.ConeGeometry(4.5, 46, 20, 1, true).translate(0, -23, 0).rotateX(-Math.PI / 2), []);
+  const beamGeometry = useMemo(() => new THREE.ConeGeometry(4.5, 46, 28, 8, true).translate(0, -23, 0).rotateX(-Math.PI / 2), []);
+  // Soft volumetric look: bright near the lamp, fading along the beam and toward its silhouette.
+  const beamMaterial = useMemo(
+    () =>
+      new THREE.ShaderMaterial({
+        transparent: true,
+        depthWrite: false,
+        side: THREE.DoubleSide,
+        blending: THREE.AdditiveBlending,
+        uniforms: { uColor: { value: new THREE.Color('#f4efd6') } },
+        vertexShader: `
+          varying float vAlong;
+          varying vec3 vNormalView;
+          varying vec3 vViewDir;
+          void main() {
+            vAlong = clamp(length(position) / 46.0, 0.0, 1.0);
+            vec4 mv = modelViewMatrix * vec4(position, 1.0);
+            vNormalView = normalize(normalMatrix * normal);
+            vViewDir = normalize(-mv.xyz);
+            gl_Position = projectionMatrix * mv;
+          }`,
+        fragmentShader: `
+          uniform vec3 uColor;
+          varying float vAlong;
+          varying vec3 vNormalView;
+          varying vec3 vViewDir;
+          void main() {
+            float facing = abs(dot(normalize(vNormalView), normalize(vViewDir)));
+            float alpha = pow(1.0 - vAlong, 1.6) * smoothstep(0.05, 0.75, facing) * 0.16;
+            gl_FragColor = vec4(uColor * alpha, alpha);
+          }`,
+      }),
+    [],
+  );
   const markerGeo = useMemo(() => new THREE.OctahedronGeometry(0.32), []);
   const markers = useMemo(() => Array.from({ length: 6 }, () => new THREE.Mesh(markerGeo, new THREE.MeshBasicMaterial({ color: '#e7c35a' }))), [markerGeo]);
   const extraction = useMemo(() => {
@@ -305,9 +338,7 @@ export function Overlay({ controller }: { controller: GameController }) {
       {smokeMeshes.map((mesh, i) => (
         <primitive key={i} object={mesh} />
       ))}
-      <mesh ref={beam} geometry={beamGeometry} renderOrder={4}>
-        <meshBasicMaterial color="#f4f1dc" transparent opacity={0.07} depthWrite={false} blending={THREE.AdditiveBlending} side={THREE.DoubleSide} />
-      </mesh>
+      <mesh ref={beam} geometry={beamGeometry} material={beamMaterial} renderOrder={4} />
       {markers.map((mesh, i) => (
         <primitive key={i} object={mesh} />
       ))}

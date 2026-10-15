@@ -6,6 +6,14 @@ import { expect, type Page, test } from '@playwright/test';
 const SQUAD = 'engineer,infiltrator,recon,marine';
 
 async function signIn(page: Page) {
+  // SwiftShader renders in software: the Performance preset (no post-processing) keeps the clock moving.
+  await page.addInitScript(() => {
+    try {
+      window.localStorage.setItem('operation-shadow:settings', JSON.stringify({ quality: 'low' }));
+    } catch {
+      // storage unavailable: the game falls back to defaults
+    }
+  });
   await page.goto('/sign-in');
   await page.getByRole('button', { name: 'Sign in as Test Operator A' }).click();
   await expect(page).toHaveURL(/\/dashboard$/);

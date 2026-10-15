@@ -1,41 +1,101 @@
 'use client';
 
-import { CellFlag, type LevelData, type Surface } from '@operation-shadow/engine';
-import type { ThreeEvent } from '@react-three/fiber';
+import { CellFlag, Grid, type LevelData, Surface } from '@operation-shadow/engine';
 import { useMemo } from 'react';
 import * as THREE from 'three';
-import { jitter, ROCK_COLOR, SURFACE_COLORS } from './palette';
+import { surfaceMaterial } from './materials/surface';
+import { createTerrainMaterial, ROCK_LAYER } from './materials/terrain-material';
+import { fbm2 } from './noise';
+
+/** Render mesh resolution (the gameplay heightfield is 1 m; the extra vertices carry cliff detail). */
+const STEP = 0.5;
+
+/** Engine surface → terrain texture layer (see TERRAIN_LAYERS). */
+const SURFACE_LAYER: Record<Surface, number> = {
+  [Surface.Grass]: 0,
+  [Surface.Sand]: 1,
+  [Surface.ShallowWater]: 1,
+  [Surface.DeepWater]: 1,
+  [Surface.Snow]: 1,
+  [Surface.Stone]: 2,
+  [Surface.Gravel]: 3,
+  [Surface.Dirt]: 4,
+  [Surface.Mud]: 4,
+  [Surface.Rock]: ROCK_LAYER,
+  [Surface.Concrete]: 6,
+  [Surface.Metal]: 6,
+  [Surface.Wood]: 7,
+};
+
+const BUILT: ReadonlySet<Surface> = new Set([Surface.Stone, Surface.Concrete, Surface.Wood, Surface.Metal]);
 
 function buildTerrainGeometry(level: LevelData): THREE.BufferGeometry {
-  const step = level.heightfieldStep;
-  const vx = Math.floor(level.width / step) + 1;
-  const vz = Math.floor(level.depth / step) + 1;
+  const grid = new Grid(level);
+  const vx = Math.round(level.width / STEP) + 1;
+  const vz = Math.round(level.depth / STEP) + 1;
   const positions = new Float32Array(vx * vz * 3);
-  const colors = new Float32Array(vx * vz * 3);
+  const splatA = new Float32Array(vx * vz * 4);
+  const splatB = new Float32Array(vx * vz * 4);
   const light = new Float32Array(vx * vz);
-  const color = new THREE.Color();
-  const rock = new THREE.Color(ROCK_COLOR);
-  const cs = level.cellSize;
+  const weights = new Float32Array(8);
+  const H = (x: number, z: number) => grid.heightAt({ x, z });
 
-  for (let z = 0; z < vz; z += 1) {
-    for (let x = 0; x < vx; x += 1) {
-      const i = z * vx + x;
-      const wx = x * step;
-      const wz = z * step;
-      positions[i * 3] = wx;
-      positions[i * 3 + 1] = level.heightfield[i]!;
-      positions[i * 3 + 2] = wz;
-      const col = Math.min(level.cols - 1, Math.floor(wx / cs));
-      const row = Math.min(level.rows - 1, Math.floor(wz / cs));
-      const cell = row * level.cols + col;
-      const surface = level.surface[cell] as Surface;
-      color.set(SURFACE_COLORS[surface]);
-      if ((level.flags[cell]! & CellFlag.Steep) !== 0) color.copy(rock);
-      const shade = 1 + jitter(wx, wz) * 0.07;
-      colors[i * 3] = color.r * shade;
-      colors[i * 3 + 1] = color.g * shade;
-      colors[i * 3 + 2] = color.b * shade;
-      light[i] = level.staticLight[cell]! / 255;
+  for (let iz = 0; iz < vz; iz += 1) {
+    for (let ix = 0; ix < vx; ix += 1) {
+      const i = iz * vx + ix;
+      const x = ix * STEP;
+      const z = iz * STEP;
+      let y = H(x, z);
+      weights.fill(0);
+      let built = false;
+      let lit = 0;
+      let samples = 0;
+      for (const [dx, dz] of [
+        [-0.25, -0.25],
+        [0.25, -0.25],
+        [-0.25, 0.25],
+        [0.25, 0.25],
+      ] as const) {
+        const cell = grid.cellAt({ x: x + dx, z: z + dz });
+        if (cell < 0) continue;
+        const surface = level.surface[cell] as Surface;
+        weights[SURFACE_LAYER[surface] ?? 0]! += 1;
+        if (level.flags[cell]! & CellFlag.Steep) weights[ROCK_LAYER]! += 0.6;
+        if (BUILT.has(surface)) built = true;
+        lit += level.staticLight[cell]!;
+        samples += 1;
+      }
+      const sum = weights.reduce((a, b) => a + b, 0) || 1;
+      for (let k = 0; k < 4; k += 1) {
+        splatA[i * 4 + k] = weights[k]! / sum;
+        splatB[i * 4 + k] = weights[k + 4]! / sum;
+      }
+      light[i] = samples ? lit / samples / 255 : 0;
+
+      // Crags: push steep, natural ground in and out along the slope (render only).
+      let px = x;
+      let pz = z;
+      const gx = H(x + 0.5, z) - H(x - 0.5, z);
+      const gz = H(x, z + 0.5) - H(x, z - 0.5);
+      const slope = Math.hypot(gx, gz);
+      if (slope > 0.9 && !built && ix > 0 && iz > 0 && ix < vx - 1 && iz < vz - 1) {
+        const nearBuilt = [-1, 1].some((d) => {
+          const a = grid.cellAt({ x: x + d, z });
+          const b = grid.cellAt({ x, z: z + d });
+          return (a >= 0 && BUILT.has(level.surface[a] as Surface)) || (b >= 0 && BUILT.has(level.surface[b] as Surface));
+        });
+        if (!nearBuilt) {
+          const amp = Math.min(1, (slope - 0.9) / 1.4) * 0.8;
+          const n1 = fbm2(x * 0.42, z * 0.42 + y * 0.35, 11) - 0.5;
+          const n2 = fbm2(x * 0.95 + 5.3, z * 0.95 - y * 0.2, 23) - 0.5;
+          px += (gx / slope) * n1 * amp * 1.8;
+          pz += (gz / slope) * n1 * amp * 1.8;
+          y += n2 * amp * 1.2;
+        }
+      }
+      positions[i * 3] = px;
+      positions[i * 3 + 1] = y;
+      positions[i * 3 + 2] = pz;
     }
   }
 
@@ -47,40 +107,37 @@ function buildTerrainGeometry(level: LevelData): THREE.BufferGeometry {
       const b = a + 1;
       const c = a + vx;
       const d = c + 1;
-      indices[k++] = a;
-      indices[k++] = c;
-      indices[k++] = b;
-      indices[k++] = b;
-      indices[k++] = c;
-      indices[k++] = d;
+      indices.set([a, c, b, b, c, d], k);
+      k += 6;
     }
   }
   const geometry = new THREE.BufferGeometry();
   geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-  geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  geometry.setAttribute('splatA', new THREE.BufferAttribute(splatA, 4));
+  geometry.setAttribute('splatB', new THREE.BufferAttribute(splatB, 4));
   geometry.setAttribute('aLight', new THREE.BufferAttribute(light, 1));
   geometry.setIndex(new THREE.BufferAttribute(indices, 1));
   geometry.computeVertexNormals();
   return geometry;
 }
 
-/** Vertical sides around the map so the terrain reads as a cut diorama block, not a paper sheet. */
+/** Vertical sides around the map so the level reads as a cut diorama block. */
 function buildSkirtGeometry(level: LevelData): THREE.BufferGeometry {
-  const step = level.heightfieldStep;
-  const vx = Math.floor(level.width / step) + 1;
-  const vz = Math.floor(level.depth / step) + 1;
-  const bottom = level.seaLevel - 4;
-  const ring: { x: number; z: number; i: number }[] = [];
-  for (let x = 0; x < vx; x += 1) ring.push({ x: x * step, z: 0, i: x });
-  for (let z = 1; z < vz; z += 1) ring.push({ x: (vx - 1) * step, z: z * step, i: z * vx + vx - 1 });
-  for (let x = vx - 2; x >= 0; x -= 1) ring.push({ x: x * step, z: (vz - 1) * step, i: (vz - 1) * vx + x });
-  for (let z = vz - 2; z >= 0; z -= 1) ring.push({ x: 0, z: z * step, i: z * vx });
+  const grid = new Grid(level);
+  const bottom = level.seaLevel - 4.5;
+  const ring: { x: number; z: number }[] = [];
+  const W = level.width;
+  const D = level.depth;
+  for (let x = 0; x <= W; x += STEP) ring.push({ x, z: 0 });
+  for (let z = STEP; z <= D; z += STEP) ring.push({ x: W, z });
+  for (let x = W - STEP; x >= 0; x -= STEP) ring.push({ x, z: D });
+  for (let z = D - STEP; z >= 0; z -= STEP) ring.push({ x: 0, z });
   const positions: number[] = [];
   for (let k = 0; k < ring.length - 1; k += 1) {
     const a = ring[k]!;
     const b = ring[k + 1]!;
-    const ha = level.heightfield[a.i]!;
-    const hb = level.heightfield[b.i]!;
+    const ha = grid.heightAt(a);
+    const hb = grid.heightAt(b);
     positions.push(a.x, ha, a.z, a.x, bottom, a.z, b.x, hb, b.z, b.x, hb, b.z, a.x, bottom, a.z, b.x, bottom, b.z);
   }
   const geometry = new THREE.BufferGeometry();
@@ -89,48 +146,21 @@ function buildSkirtGeometry(level: LevelData): THREE.BufferGeometry {
   return geometry;
 }
 
-/** Terrain material that adds baked lamp/window light (the same light map the AI uses) as emissive. */
-function createTerrainMaterial(): THREE.MeshStandardMaterial {
-  const material = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.96, metalness: 0 });
-  material.onBeforeCompile = (shader) => {
-    shader.vertexShader = shader.vertexShader
-      .replace('#include <common>', '#include <common>\nattribute float aLight;\nvarying float vLight;')
-      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvLight = aLight;');
-    shader.fragmentShader = shader.fragmentShader
-      .replace('#include <common>', '#include <common>\nvarying float vLight;')
-      .replace(
-        '#include <emissivemap_fragment>',
-        '#include <emissivemap_fragment>\ntotalEmissiveRadiance += diffuseColor.rgb * vec3(1.0, 0.78, 0.5) * vLight * 1.6;',
-      );
-  };
-  return material;
-}
-
 export interface TerrainProps {
   level: LevelData;
-  onPointerMove?: (event: ThreeEvent<PointerEvent>) => void;
-  onPointerDown?: (event: ThreeEvent<PointerEvent>) => void;
-  onPointerLeave?: () => void;
+  /** 0..1 surface wetness (rain). */
+  wetness?: number;
 }
 
-export function Terrain({ level, onPointerMove, onPointerDown, onPointerLeave }: TerrainProps) {
+export function Terrain({ level, wetness = 0.2 }: TerrainProps) {
   const geometry = useMemo(() => buildTerrainGeometry(level), [level]);
   const skirt = useMemo(() => buildSkirtGeometry(level), [level]);
-  const terrainMaterial = useMemo(() => createTerrainMaterial(), []);
+  const terrainMaterial = useMemo(() => createTerrainMaterial({ seaLevel: level.seaLevel, wetness }), [level.seaLevel, wetness]);
+  const skirtMaterial = useMemo(() => surfaceMaterial('rock', { scale: 3.5, tint: '#6b5f52', macro: 0.6, side: THREE.DoubleSide }), []);
   return (
     <>
-      <mesh
-        name="terrain"
-        geometry={geometry}
-        material={terrainMaterial}
-        receiveShadow
-        onPointerMove={onPointerMove}
-        onPointerDown={onPointerDown}
-        onPointerLeave={onPointerLeave}
-      />
-      <mesh name="terrain-skirt" geometry={skirt}>
-        <meshStandardMaterial color="#2c261e" roughness={1} side={THREE.DoubleSide} />
-      </mesh>
+      <mesh name="terrain" geometry={geometry} material={terrainMaterial} receiveShadow castShadow />
+      <mesh name="terrain-skirt" geometry={skirt} material={skirtMaterial} />
     </>
   );
 }

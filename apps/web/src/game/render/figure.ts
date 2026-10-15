@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { glowSprite } from './glows';
 import { material } from './palette';
 
 export type Headgear = 'ridged-helmet' | 'kepi' | 'beanie' | 'field-cap' | 'steel-helmet' | 'beret' | 'bare' | 'hood';
@@ -49,7 +50,8 @@ export interface FigureRig {
 const G = {
   pelvis: new THREE.BoxGeometry(0.22, 0.18, 0.34),
   torso: new THREE.BoxGeometry(0.24, 0.56, 0.4),
-  longCoat: new THREE.BoxGeometry(0.27, 0.5, 0.44),
+  // Flared greatcoat skirt from the waist to the knees.
+  longCoat: new THREE.CylinderGeometry(0.2, 0.29, 0.55, 10).scale(0.8, 1, 1.05),
   head: new THREE.SphereGeometry(0.115, 12, 8),
   limbArm: new THREE.CapsuleGeometry(0.052, 0.42, 3, 6),
   limbLeg: new THREE.CapsuleGeometry(0.066, 0.62, 3, 6),
@@ -159,7 +161,7 @@ export function createFigure(look: FigureLook): FigureRig {
   torso.add(chest);
   if (look.longCoat) {
     const skirt = mesh(G.longCoat, look.coat);
-    skirt.position.y = -0.12;
+    skirt.position.y = -0.22;
     torso.add(skirt);
   }
   if (look.accent) {
@@ -234,6 +236,7 @@ export function createFigure(look: FigureLook): FigureRig {
   if (look.lantern) {
     const lantern = mesh(G.lantern, '#ffd690', { emissive: '#ffb850', emissiveIntensity: 3 });
     lantern.position.set(0.02, -0.56, 0);
+    lantern.add(glowSprite(1.1, '#ffbf70', 0.8));
     armL.add(lantern);
     lanternLight = lantern;
   }

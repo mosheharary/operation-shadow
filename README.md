@@ -55,6 +55,7 @@ Run `make help` to list every command. Full guide: [`docs/operations/local-devel
 | `make e2e` / `make e2e-prod` | Playwright browser tests against the dev server / the production build |
 | `make prod` | Production-like standalone build on <http://localhost:3001> |
 | `make voice-bank` | Generate missing or changed voice lines with Gemini TTS (needs `GOOGLE_API_KEY`; `ARGS="--dry-run"` previews the cost) |
+| `make textures` | Fetch the CC0 surface textures from Poly Haven (checksum-verified; already committed) |
 | `make reset` | **Deletes all local data** (asks for confirmation first) |
 
 ## Tech stack
@@ -78,7 +79,7 @@ packages/content/    Specialists, dialogue bank, abilities text and authored mis
 packages/schemas/    Versioned Zod schemas and API contracts
 packages/db/         Drizzle schema, SQL migrations, ownership-scoped repositories
 tools/samples/       Gemini sample generator used to approve art/music/dialogue direction
-tools/media/         Build-time media pipeline (voice bank)
+tools/media/         Build-time media pipeline (voice bank, CC0 textures)
 samples/             The approved art, music and dialogue samples (open samples/index.html)
 tests/               Integration and browser tests
 infra/docker/        Dockerfile and Postgres init scripts (compose.yaml at the root)

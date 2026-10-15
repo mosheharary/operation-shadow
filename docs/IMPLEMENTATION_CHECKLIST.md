@@ -147,6 +147,56 @@ Updated at the end of every milestone. Only results that actually ran are record
   - planning mode;
   - authored character models.
 
+## Art pass toward the approved concept ✅ (2026-10-15)
+
+Requested after M2: the map and terrain should match the detailed concept `samples/images/env_coastal_night.jpg`.
+Comparison sheet: `docs/art/art-pass-2026-10-15.jpg`. Decisions D25–D31.
+
+- [x] 14 CC0 surface sets (Poly Haven), fetched and verified by `make textures`
+- [x] World-space (triplanar) PBR materials with moss, macro variation and per-vertex tint; UV-mapped roof slabs
+- [x] Splat-blended terrain (8 layers): triplanar rock on cliffs, wet shorelines, crag detail on cliff faces, diorama skirt
+- [x] Faceted mossy rock outcrops on cliffs and cliff bases
+- [x] Harbour: stone quay walls with coping, plank piers on braced posts, iron ladders, bollards
+- [x] Buildings:
+  - textured walls with plinths;
+  - framed, shuttered windows;
+  - door frames and steps;
+  - tiled roofs with ridges and chimneys;
+  - bunker slabs.
+- [x] Fortifications: chain-link fences with barbed wire, sandbagged gun pits, braced watchtowers
+- [x] Props:
+  - barrels with hoops;
+  - framed crates;
+  - nets;
+  - painted boats;
+  - iron lamp posts with glowing lanterns;
+  - field gun;
+  - truck;
+  - jagged pines;
+  - grass tufts.
+- [x] Water:
+  - wave normals;
+  - moon glints;
+  - fresnel sheen;
+  - depth tint;
+  - shore foam;
+  - translucent cut edge.
+- [x] Lighting: brighter moonlit fill, lamp halos, soft searchlight beam
+- [x] Post-processing (High preset): ambient occlusion, bloom, tilt-shift, vignette, ACES tone mapping
+- [x] Generator v2: solid clutter along walls and the quay (mission validation still passes)
+- [x] Turbopack dev cache disabled (fixed the dev reload loop for good)
+
+### Verification (ran 2026-10-15)
+
+| Check | Result |
+|---|---|
+| `pnpm lint` / `pnpm typecheck` | ✅ |
+| Unit tests | ✅ 80 / 80 (mission validation and objective chain re-checked with generator v2) |
+| Browser tests vs. dev server and vs. production build | ✅ 10 / 10 each (Performance preset; see D31) |
+
+**Not verified:** the frame rate of the High preset on a real GPU. Rendering on the SwiftShader software path says
+nothing about it. Check with F3 in Chrome; if it is low, switch the pause-menu Graphics setting to Performance.
+
 ## Milestones 3–6
 
 See `docs/architecture/implementation-plan.md` §13.

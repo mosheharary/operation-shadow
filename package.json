@@ -21,7 +21,8 @@
     "db:migrate": "pnpm --filter @operation-shadow/db migrate",
     "db:seed": "pnpm --filter @operation-shadow/web seed",
     "check": "pnpm lint && pnpm typecheck && pnpm test",
-    "voice-bank": "tsx tools/media/voice-bank.ts"
+    "voice-bank": "tsx tools/media/voice-bank.ts",
+    "textures": "tsx tools/media/textures.ts"
   },
   "devDependencies": {
     "@playwright/test": "1.64.0",

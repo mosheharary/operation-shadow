@@ -97,6 +97,9 @@ make voice-bank                    # generates only those lines (the media image
 
 The key is read from `GOOGLE_API_KEY` in `.env` and never printed. Unchanged lines are skipped.
 
+Surface textures (`apps/web/public/media/textures/`) are CC0 sets from Poly Haven. `make textures` re-fetches any
+missing set, verifies the MD5 sums Poly Haven publishes, and writes the source, authors and licence to the manifest.
+
 ## Reset and rebuild
 
 ```bash
@@ -113,6 +116,6 @@ make reset         # DANGER: deletes the database and dependency volumes (asks y
 | Port 3000, 3001 or 54329 already in use | Stop the other process, or change the host port in `compose.yaml` |
 | Browser tests can't reach the app | Start the stack first (`make up`). The `e2e` service shares the `app` container's network |
 | Dependency errors after pulling changes | `docker compose run --rm tools true` re-syncs `node_modules`; `make rebuild` as a last resort |
-| Pages reload over and over in dev (the log shows `GET /sign-in` many times a second) | Turbopack's dev cache is stale: `docker compose stop app`, delete `apps/web/.next/dev`, then `make up` |
+| Pages reload over and over in dev (the log shows `GET /sign-in` many times a second) | Turbopack's persistent dev cache was stale. It is now disabled in `next.config.ts`; if it ever recurs, `docker compose stop app`, delete `apps/web/.next/dev`, then `make up` |
 | The game is silent | Browsers start audio only after a click or key press in the page; check the volume sliders in the pause menu (Esc) |
 | Low frame rate | Esc → Settings → Graphics: Performance (no shadows, 1× resolution). F3 shows the frame rate |
