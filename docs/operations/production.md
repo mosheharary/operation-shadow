@@ -5,8 +5,8 @@ The same code runs locally (Docker) and on Vercel. This guide lists every step t
 **Current deployment (2026-10-16):** <https://operation-shadow-mu.vercel.app> (Vercel project `operation-shadow`,
 Root Directory `apps/web`) on Neon project `restless-glitter-24520084`, branch `production` (PostgreSQL 18.6,
 us-east-2). Deployed with `vercel deploy --prod`; `/api/ready` reports the database reachable and all migrations
-applied. **Google sign-in is not configured yet** (step 2), so nobody can sign in until `GOOGLE_CLIENT_ID` and
-`GOOGLE_CLIENT_SECRET` are added and the app is redeployed.
+applied. Google sign-in credentials are set (OAuth client in Google Cloud project `mercurial-cairn-620`); its
+authorized redirect URI must be exactly `https://operation-shadow-mu.vercel.app/api/auth/callback/google`.
 
 The repository is linked to Neon with `neon.ts` and a git-ignored `.neon` file (from `neon init`). Connection strings
 use `sslmode=verify-full` (what `pg` does for `require` today, stated explicitly) and `channel_binding=require`.
