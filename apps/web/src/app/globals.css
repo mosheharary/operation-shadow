@@ -445,3 +445,16 @@ a {
 .panel + .panel {
   margin-top: 1rem;
 }
+
+.range__poses {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.range__pose {
+  width: auto;
+  min-height: 2rem;
+  padding: 0.3rem 0.8rem;
+  text-transform: capitalize;
+}

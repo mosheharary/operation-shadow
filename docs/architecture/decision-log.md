@@ -96,3 +96,9 @@ The first M2 build rendered flat-coloured primitives; the user expected the look
 | D54 | `pnpm` override pins drizzle-kit's legacy esbuild to 0.25.12 | Clears GHSA-67mh-4wv8-2f99 (esbuild dev server); drizzle-kit still generates migrations unchanged |
 | D55 | Water glints and roughness follow the time of day and weather: glassy with moon glints at night, matte and choppy in daylight and fog | Found in the real-GPU check: the dawn mission's sea was a field of sparkles |
 | D56 | The local stack allows 500 generated operations per player per day (production default stays 20) | Repeated browser-test runs exhausted the production quota (the quota itself worked) |
+
+## Detailed characters (2026-10-16)
+
+| # | Decision | Why |
+|---|---|---|
+| D57 | Characters are rebuilt as detailed procedural figures (supersedes D13's simple mannequins): anatomical torso, tapered limbs with elbow and knee joints, faces and hair, and every uniform and piece of gear from the approved concept sheets. Each body segment's parts are merged into one mesh with per-vertex colour, roughness, metalness and a fabric weight; one shared material adds creases, grain and wear in object space, fading out when a figure is small on screen. A walk and run cycle with knee and elbow bends, hip bob, torso counter-swing and idle breathing replaces the stiff swing; coat skirts drape over the thighs when crouching. `/test-range/characters` shows every character in every pose | The user asked for more detailed, realistic characters. Staying procedural keeps one art style with the rest of the diorama, needs no licensed models, and merging keeps the cost to about 12 draw calls per figure (fewer than before: 241 against 271 in the same Silent Tide view, 120 FPS either way on the M5 Pro) |

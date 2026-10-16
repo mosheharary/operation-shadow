@@ -19,7 +19,7 @@ or something that could not be verified here.
 - **AI-written debrief narrative** (plan §8.5). Debriefs use authored text plus the verified score breakdown.
 - **Boats and drivable vehicles** (D14). The Marine swims and dives; boats are props.
 - **Climbable watchtowers**; guards use them as posts only.
-- **Character models** are procedural low-poly mannequins (D13), not authored rigged models.
+- **Character models** are detailed procedural figures (D57), not authored, skinned models with motion-captured animation.
 - **Campaign flags affecting later missions** are recorded (`completed:<mission>`) but no mission reads them yet.
 - **Mobile, touch and gamepad** are out of scope (plan §6).
 
