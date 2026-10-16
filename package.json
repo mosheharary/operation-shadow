@@ -25,6 +25,8 @@
     "textures": "tsx tools/media/textures.ts"
   },
   "devDependencies": {
+    "@neon/config": "^1.8.6",
+    "@neon/env": "^1.5.3",
     "@playwright/test": "1.64.0",
     "@types/node": "24.19.1",
     "eslint": "9.39.5",

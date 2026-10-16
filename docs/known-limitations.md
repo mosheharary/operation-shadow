@@ -5,10 +5,9 @@ or something that could not be verified here.
 
 ## Not verified
 
-- **Vercel production deployment.** Not performed (needs your Vercel, Neon and Google accounts). The production build,
-  strict CSP and browser tests were verified against the local production image (`make prod`, `make e2e-prod`). See
-  `docs/operations/production.md`.
-- **Google sign-in.** Configured but not exercised end to end (no OAuth client here); the dev test login was used.
+- **Google sign-in in production.** Deployed to Vercel + Neon on 2026-10-16 (health, readiness against Neon, CSP and
+  access checks verified live), but no Google OAuth client is configured yet, so nobody can sign in there. Gameplay
+  flows were verified locally with the dev test login (`make e2e-prod`). See `docs/operations/production.md`.
 - **Low-end hardware.** Performance was measured only on an Apple M5 Pro (120 FPS on the High preset). The Performance
   preset exists for weaker GPUs but has not been measured on one.
 - **Browsers other than Chrome** (Safari, Firefox) were not tested.

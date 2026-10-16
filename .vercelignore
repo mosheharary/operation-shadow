@@ -1,0 +1,16 @@
+# Never upload local secrets or tool state
+.env
+.env.*
+.neon
+.git
+# Not needed to build or run the app
+node_modules
+**/node_modules
+**/.next
+samples
+playwright-report
+test-results
+blob-report
+docs/art
+docs/perf
+.turbo

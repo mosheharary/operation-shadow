@@ -1,8 +1,15 @@
 # Production: Vercel + Neon
 
-The same code runs locally (Docker) and on Vercel. This guide lists every step to put it in production. It has been
-checked as far as possible locally (production build, strict CSP, browser tests against the production image); an actual
-Vercel deployment has **not** been made, because it needs your Vercel, Neon and Google accounts.
+The same code runs locally (Docker) and on Vercel. This guide lists every step to put it in production.
+
+**Current deployment (2026-10-16):** <https://operation-shadow-mu.vercel.app> (Vercel project `operation-shadow`,
+Root Directory `apps/web`) on Neon project `restless-glitter-24520084`, branch `production` (PostgreSQL 18.6,
+us-east-2). Deployed with `vercel deploy --prod`; `/api/ready` reports the database reachable and all migrations
+applied. **Google sign-in is not configured yet** (step 2), so nobody can sign in until `GOOGLE_CLIENT_ID` and
+`GOOGLE_CLIENT_SECRET` are added and the app is redeployed.
+
+The repository is linked to Neon with `neon.ts` and a git-ignored `.neon` file (from `neon init`). Connection strings
+use `sslmode=verify-full` (what `pg` does for `require` today, stated explicitly) and `channel_binding=require`.
 
 ## 1. Neon (PostgreSQL)
 
@@ -24,12 +31,15 @@ Vercel deployment has **not** been made, because it needs your Vercel, Neon and 
 
 ## 3. Vercel project
 
-1. Import the repository. Set **Root Directory** to `apps/web`; the framework is detected as Next.js.
+1. Import the repository (or `vercel link` and `vercel deploy --prod` from the repository root). Set **Root
+   Directory** to `apps/web`; the framework is detected as Next.js. `.vercelignore` keeps `.env*`, `.neon`,
+   `samples/` and build output out of the upload.
 2. `apps/web/vercel.json` sets:
    - install: `pnpm install --frozen-lockfile` (pnpm 12, from `packageManager`);
    - build: `pnpm --filter @operation-shadow/db migrate && pnpm build`, so migrations run first, against
      `DATABASE_URL_UNPOOLED`. A failed migration fails the deployment, and the previous deployment keeps serving.
-3. Node.js version: 24.x (from `engines`). Fluid compute: on (default).
+3. Node.js version: 24.x (from `engines`). Fluid compute: on (default). Set `ENABLE_EXPERIMENTAL_COREPACK=1` so
+   Vercel installs the pnpm version pinned in `packageManager` (pnpm 12).
 
 ## 4. Environment variables
 

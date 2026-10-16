@@ -6,8 +6,8 @@ classic squad-stealth games.
 
 > **Status: all six milestones delivered (2026-10-15).** A guided tutorial (*Boot Camp*) and a five-mission campaign
 > across coastal, alpine and rail maps; generated operations drafted by Google Gemini with an offline fallback;
-> planning mode; saves and campaign progress; full settings and key remapping. Production deployment to Vercel + Neon
-> is documented but not yet performed. See [`docs/IMPLEMENTATION_CHECKLIST.md`](docs/IMPLEMENTATION_CHECKLIST.md).
+> planning mode; saves and campaign progress; full settings and key remapping. Deployed to Vercel + Neon at
+> <https://operation-shadow-mu.vercel.app> (Google sign-in still to be configured). See [`docs/IMPLEMENTATION_CHECKLIST.md`](docs/IMPLEMENTATION_CHECKLIST.md).
 
 ## Quick start (local, Docker only)
 

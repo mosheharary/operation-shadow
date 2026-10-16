@@ -31,3 +31,6 @@ blob-report/
 # tool state
 .turbo/
 .vercel/
+.neon
+.vercel
+.env*
