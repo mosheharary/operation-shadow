@@ -23,7 +23,8 @@
     "check": "pnpm lint && pnpm typecheck && pnpm test",
     "voice-bank": "tsx tools/media/voice-bank.ts",
     "textures": "tsx tools/media/textures.ts",
-    "models": "tsx tools/media/models.ts"
+    "models": "tsx tools/media/models.ts",
+    "hdri": "tsx tools/media/hdri.ts"
   },
   "devDependencies": {
     "@gltf-transform/core": "4.5.1",

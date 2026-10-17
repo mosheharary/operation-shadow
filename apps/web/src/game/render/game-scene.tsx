@@ -11,7 +11,9 @@ import type { GameController } from '../runtime/controller';
 import { useSettings } from '../runtime/settings';
 import { useGameUi } from '../runtime/store';
 import { Effects } from './effects';
+import { SkyLight } from './environment';
 import { LampGlows } from './glows';
+import { Grass } from './grass';
 import { Harbor } from './harbor';
 import { Lighting } from './lighting';
 import { WorldObjects } from './objects';
@@ -49,6 +51,7 @@ export function GameScene({ controller, onSample = ignoreSample, testHooks = fal
   const resolutionScale = useSettings((s) => s.resolutionScale);
   const edgeScroll = useSettings((s) => s.edgeScroll);
   const reducedShake = useSettings((s) => s.reducedShake);
+  const rich = useSettings((s) => s.environment === 'rich');
   const weather = controller.world.state.env.weather;
   const wetness = weather === 'rain' ? 1 : weather === 'fog' || weather === 'snow' ? 0.5 : 0.15;
   const hour = controller.world.state.env.timeOfDay;
@@ -74,7 +77,7 @@ export function GameScene({ controller, onSample = ignoreSample, testHooks = fal
 
   return (
     <Canvas
-      key={`${shadows}-${post}`}
+      key={`${shadows}-${post}-${rich}`}
       shadows={shadows ? 'percentage' : false}
       dpr={[Math.min(1, resolutionScale), resolutionScale]}
       flat={post}
@@ -87,13 +90,15 @@ export function GameScene({ controller, onSample = ignoreSample, testHooks = fal
       }}
     >
       <SimulationDriver controller={controller} />
-      <Lighting controller={controller} shadows={shadows} />
+      <Lighting controller={controller} shadows={shadows} sharpShadows={rich} />
+      {rich && <SkyLight hour={hour} weather={weather} />}
       <Terrain level={controller.level} wetness={wetness} />
       <Rocks level={controller.level} />
       <Harbor level={controller.level} />
       <Water level={controller.level} glint={glint} />
       <Structures level={controller.level} cutawayRegions={cutawayRegions} />
       <Props level={controller.level} />
+      {rich && <Grass level={controller.level} />}
       <LampGlows level={controller.level} />
       <WorldObjects controller={controller} />
       <Units controller={controller} />

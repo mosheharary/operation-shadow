@@ -44,7 +44,7 @@ function Rain({ controller, count = 1100 }: { controller: GameController; count?
   return <primitive object={lines.object} />;
 }
 
-export function Lighting({ controller, shadows = true }: { controller: GameController; shadows?: boolean }) {
+export function Lighting({ controller, shadows = true, sharpShadows = false }: { controller: GameController; shadows?: boolean; sharpShadows?: boolean }) {
   const sun = useRef<THREE.DirectionalLight>(null);
   const spot = useRef<THREE.SpotLight>(null);
   const lampRefs = useRef<(THREE.PointLight | null)[]>([]);
@@ -110,7 +110,7 @@ export function Lighting({ controller, shadows = true }: { controller: GameContr
         castShadow={shadows}
         color={sunColor}
         intensity={2.5 + daylight * 1.2}
-        shadow-mapSize={[2048, 2048]}
+        shadow-mapSize={sharpShadows ? [4096, 4096] : [2048, 2048]}
         shadow-camera-left={-46}
         shadow-camera-right={46}
         shadow-camera-top={46}

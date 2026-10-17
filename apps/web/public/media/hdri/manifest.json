@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "skies": {
+    "night": {
+      "source": "Poly Haven",
+      "id": "dikhololo_night",
+      "name": "Dikhololo Night",
+      "url": "https://polyhaven.com/a/dikhololo_night",
+      "authors": [
+        "Greg Zaal"
+      ],
+      "license": "CC0-1.0",
+      "file": "night.hdr"
+    },
+    "dusk": {
+      "source": "Poly Haven",
+      "id": "belfast_sunset_puresky",
+      "name": "Belfast Sunset (Pure Sky)",
+      "url": "https://polyhaven.com/a/belfast_sunset_puresky",
+      "authors": [
+        "Greg Zaal",
+        "Dimitrios Savva",
+        "Jarod Guest"
+      ],
+      "license": "CC0-1.0",
+      "file": "dusk.hdr"
+    },
+    "day": {
+      "source": "Poly Haven",
+      "id": "bloem_hill_01",
+      "name": "Bloem Hill 01",
+      "url": "https://polyhaven.com/a/bloem_hill_01",
+      "authors": [
+        "Jenelle van Heerden",
+        "Greg Zaal"
+      ],
+      "license": "CC0-1.0",
+      "file": "day.hdr"
+    }
+  }
+}
