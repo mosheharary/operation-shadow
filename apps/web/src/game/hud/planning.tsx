@@ -107,7 +107,7 @@ export function PlanningPanel() {
         })}
       </ol>
       <div className={styles.planningActions}>
-        <button type="button" className={styles.primaryButton} disabled={!waiting} onClick={() => controller.command({ type: 'signal' })} data-testid="signal">
+        <button type="button" className={styles.primaryButton} disabled={!waiting} onClick={() => controller.command({ type: 'signal' })} data-testid="signal" data-tip="Everyone waiting for the signal moves at once">
           Signal ({primaryKey('signal')})
         </button>
         {[0.5, 1, 2].map((speed) => (
@@ -115,6 +115,7 @@ export function PlanningPanel() {
             key={speed}
             type="button"
             className={controller.speed === speed ? styles.primaryButton : styles.button}
+            data-tip={speed === 1 ? 'Normal game speed' : speed < 1 ? 'Half speed: more time to react' : 'Double speed: skip the waiting'}
             onClick={() => {
               controller.speed = speed;
               controller.notifyHud();

@@ -51,6 +51,8 @@ export function PortraitBar() {
               aria-pressed={isSelected}
               aria-label={`${profile.callSign}, ${profile.roleLabel}${status ? `, ${status.text}` : ''}`}
               data-testid={`portrait-${op.role}`}
+              data-tip={`${profile.callSign}, ${profile.roleLabel}: click to select (Shift adds), double-click to look (${primaryKey(SELECT_ACTIONS[index]!)})`}
+              data-tip-pos="below"
               disabled={unavailable}
               onClick={(e) => select([op.id], e.shiftKey)}
               onDoubleClick={() => {

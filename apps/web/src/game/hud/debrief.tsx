@@ -93,10 +93,10 @@ export function Debrief({ onRestart, onExit }: MenuCallbacks) {
           </section>
         </div>
         <div className={styles.menuButtons}>
-          <button ref={first} type="button" className={styles.primaryButton} onClick={onRestart}>
+          <button ref={first} type="button" className={styles.primaryButton} onClick={onRestart} data-tip="Play this mission again from the start">
             {success ? 'Play again' : 'Retry mission'}
           </button>
-          <button type="button" className={styles.button} onClick={onExit}>
+          <button type="button" className={styles.button} onClick={onExit} data-tip="Back to the mission briefing">
             Back to briefing
           </button>
         </div>

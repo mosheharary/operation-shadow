@@ -1,7 +1,7 @@
 'use client';
 
 import type { LightDef } from '@operation-shadow/engine';
-import { useFrame } from '@react-three/fiber';
+import { useFrame, useThree } from '@react-three/fiber';
 import { useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import type { GameController } from '../runtime/controller';
@@ -59,8 +59,12 @@ export function Lighting({ controller, shadows = true, sharpShadows = false }: {
   // Light enough to read as sea mist from the tactical camera rather than as darkness.
   const fogDensity = env.weather === 'fog' ? 0.0105 : env.weather === 'rain' ? 0.0075 : env.weather === 'snow' ? 0.006 : 0.005;
 
+  const scene = useThree((s) => s.scene);
   useFrame((frame) => {
     const focus = cameraFocus(frame.camera);
+    // Mist is tuned for the play distance: thin it as the camera pulls back so a zoomed-out view
+    // still shows the map instead of a wall of fog.
+    if (scene.fog instanceof THREE.FogExp2) scene.fog.density = fogDensity * THREE.MathUtils.clamp(48 / frame.camera.position.distanceTo(focus), 0.15, 1);
     if (sun.current) {
       sun.current.position.set(focus.x + 30, 55, focus.z - 34);
       sun.current.target.position.set(focus.x, 0, focus.z);

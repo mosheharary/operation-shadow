@@ -1,6 +1,7 @@
 'use client';
 
 import { AbilityBar } from './ability-bar';
+import { ControlBar } from './controls';
 import { Debrief } from './debrief';
 import { EnemyInfo } from './enemy-info';
 import { EventLog } from './event-log';
@@ -12,6 +13,7 @@ import { PerfReadout } from './perf-readout';
 import { PlanningPanel } from './planning';
 import { PortraitBar } from './portraits';
 import { StatusBar } from './status-bar';
+import { TooltipLayer } from './tooltip';
 import { TutorialPanel } from '../tutorial/tutorial-panel';
 import { useController } from '../runtime/game-context';
 import styles from './hud.module.css';
@@ -29,6 +31,7 @@ export function Hud(props: MenuCallbacks) {
       </div>
       <div className={styles.topCenter}>
         <StatusBar />
+        <ControlBar />
         <PerfReadout />
         <Toasts />
       </div>
@@ -46,6 +49,7 @@ export function Hud(props: MenuCallbacks) {
       </div>
       <MenuLayer {...props} />
       <Debrief {...props} />
+      <TooltipLayer />
     </div>
   );
 }

@@ -102,6 +102,8 @@ export function GameInput({ controller }: { controller: GameController }) {
 
     const onPointerDown = (e: PointerEvent) => {
       pointer.current = { x: e.clientX, y: e.clientY, inside: true };
+      // Alt/Option + left drag turns the camera (camera rig), so it neither selects nor targets.
+      if (e.button === 0 && e.altKey) return;
       if (e.button === 0) {
         const state = ui();
         if (state.targeting && running()) {

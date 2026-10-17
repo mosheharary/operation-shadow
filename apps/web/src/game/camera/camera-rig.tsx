@@ -12,12 +12,30 @@ import { useGameUi } from '../runtime/store';
 const DEFAULT_PITCH = 0.93;
 const DEFAULT_DISTANCE = 40;
 const MIN_DISTANCE = 14;
-const MAX_DISTANCE = 95;
+/** Far enough to see a whole 160 × 120 m map. */
+const MAX_DISTANCE = 190;
+const MIN_PITCH = 0.35;
+const MAX_PITCH = 1.48;
+/** Spin rate while a rotate key is held (radians per second). */
+const SPIN_RATE = 1.9;
+/** How long a rotate key must be held before it spins instead of stepping 45°. */
+const SPIN_DELAY = 0.3;
 
 let shake = 0;
 /** Requests a brief camera shake (scaled down by the reduced-shake setting). */
 export function requestShake(amount: number): void {
   shake = Math.min(1.5, shake + amount);
+}
+
+let pendingYaw = 0;
+let pendingReset = false;
+/** Turns the camera about its focus (on-screen buttons); radians, positive turns right. */
+export function rotateCamera(delta: number): void {
+  pendingYaw += delta;
+}
+/** Back to the opening angle, tilt and zoom (on-screen button). */
+export function resetCamera(): void {
+  pendingReset = true;
 }
 
 /** Pans the camera to a point (portraits, minimap, double-click). */
@@ -96,6 +114,8 @@ export function CameraRig({ controller, edgeScroll = false, reducedShake = false
     desiredDistance: DEFAULT_DISTANCE,
   });
   const drag = useRef<{ x: number; y: number } | null>(null);
+  /** When each held rotate key went down (seconds, performance clock), for hold-to-spin. */
+  const spin = useRef<{ left: number | null; right: number | null }>({ left: null, right: null });
 
   useEffect(() => {
     const isTyping = (e: KeyboardEvent) => e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement;
@@ -103,26 +123,42 @@ export function CameraRig({ controller, edgeScroll = false, reducedShake = false
       if (isTyping(e) || e.ctrlKey || e.metaKey) return;
       const b = getBindings();
       if ([...b['pan-up'], ...b['pan-down'], ...b['pan-left'], ...b['pan-right']].includes(e.code)) keys.current.add(e.code);
-      if (isBound('rotate-left', e.code)) rig.current.desiredYaw -= Math.PI / 4;
-      if (isBound('rotate-right', e.code)) rig.current.desiredYaw += Math.PI / 4;
-      if (isBound('camera-reset', e.code)) {
-        // Keep the yaw within one turn of the current heading so the reset never spins around.
-        const r = rig.current;
-        r.desiredYaw = opening.yaw + Math.round((r.desiredYaw - opening.yaw) / (Math.PI * 2)) * Math.PI * 2;
-        r.pitch = DEFAULT_PITCH;
-        r.desiredDistance = DEFAULT_DISTANCE;
+      // A tap turns 45°; holding the key keeps spinning (see the frame loop).
+      if (isBound('rotate-left', e.code) && !e.repeat) {
+        rig.current.desiredYaw -= Math.PI / 4;
+        spin.current.left = performance.now() / 1000;
       }
+      if (isBound('rotate-right', e.code) && !e.repeat) {
+        rig.current.desiredYaw += Math.PI / 4;
+        spin.current.right = performance.now() / 1000;
+      }
+      if (isBound('camera-reset', e.code)) pendingReset = true;
     };
-    const up = (e: KeyboardEvent) => keys.current.delete(e.code);
-    const blur = () => keys.current.clear();
+    const up = (e: KeyboardEvent) => {
+      keys.current.delete(e.code);
+      if (isBound('rotate-left', e.code)) spin.current.left = null;
+      if (isBound('rotate-right', e.code)) spin.current.right = null;
+    };
+    const blur = () => {
+      keys.current.clear();
+      spin.current = { left: null, right: null };
+    };
     const element = gl.domElement;
     const wheel = (e: WheelEvent) => {
       e.preventDefault();
       const r = rig.current;
-      r.desiredDistance = THREE.MathUtils.clamp(r.desiredDistance * (1 + Math.sign(e.deltaY) * 0.12), MIN_DISTANCE, MAX_DISTANCE);
+      // A sideways trackpad swipe turns the camera; vertical scrolling (and pinch) zooms.
+      if (Math.abs(e.deltaX) > Math.abs(e.deltaY) && !e.ctrlKey) {
+        r.desiredYaw += e.deltaX * 0.004 * useSettings.getState().mouseSensitivity;
+        return;
+      }
+      if (e.deltaY === 0) return;
+      const step = e.ctrlKey ? Math.min(0.12, Math.abs(e.deltaY) * 0.01) : 0.12;
+      r.desiredDistance = THREE.MathUtils.clamp(r.desiredDistance * (1 + Math.sign(e.deltaY) * step), MIN_DISTANCE, MAX_DISTANCE);
     };
     const pointerDown = (e: PointerEvent) => {
-      if (e.button === 1) {
+      // Middle drag, or Alt/Option + left drag (trackpads), turns and tilts the camera.
+      if (e.button === 1 || (e.button === 0 && e.altKey)) {
         e.preventDefault();
         drag.current = { x: e.clientX, y: e.clientY };
       }
@@ -134,12 +170,12 @@ export function CameraRig({ controller, edgeScroll = false, reducedShake = false
         const r = rig.current;
         const sensitivity = useSettings.getState().mouseSensitivity;
         r.desiredYaw -= (e.clientX - drag.current.x) * 0.006 * sensitivity;
-        r.pitch = THREE.MathUtils.clamp(r.pitch + (e.clientY - drag.current.y) * 0.004 * sensitivity, 0.55, 1.3);
+        r.pitch = THREE.MathUtils.clamp(r.pitch + (e.clientY - drag.current.y) * 0.004 * sensitivity, MIN_PITCH, MAX_PITCH);
         drag.current = { x: e.clientX, y: e.clientY };
       }
     };
     const pointerUp = (e: PointerEvent) => {
-      if (e.button === 1) drag.current = null;
+      if (e.button === 1 || e.button === 0) drag.current = null;
     };
     const leave = () => {
       pointer.current.inside = false;
@@ -182,6 +218,20 @@ export function CameraRig({ controller, edgeScroll = false, reducedShake = false
       r.yaw = r.desiredYaw = v.yaw;
       r.distance = r.desiredDistance = THREE.MathUtils.clamp(v.distance, MIN_DISTANCE, MAX_DISTANCE);
     }
+    if (pendingYaw !== 0) {
+      r.desiredYaw += pendingYaw;
+      pendingYaw = 0;
+    }
+    if (pendingReset) {
+      pendingReset = false;
+      // Keep the yaw within one turn of the current heading so the reset never spins around.
+      r.desiredYaw = opening.yaw + Math.round((r.desiredYaw - opening.yaw) / (Math.PI * 2)) * Math.PI * 2;
+      r.pitch = DEFAULT_PITCH;
+      r.desiredDistance = DEFAULT_DISTANCE;
+    }
+    const now = performance.now() / 1000;
+    if (spin.current.left !== null && now - spin.current.left > SPIN_DELAY) r.desiredYaw -= SPIN_RATE * dt;
+    if (spin.current.right !== null && now - spin.current.right > SPIN_DELAY) r.desiredYaw += SPIN_RATE * dt;
     const fx = -Math.sin(r.yaw);
     const fz = -Math.cos(r.yaw);
     const rx = Math.cos(r.yaw);
@@ -225,10 +275,15 @@ export function CameraRig({ controller, edgeScroll = false, reducedShake = false
     r.distance += (r.desiredDistance - r.distance) * smooth;
 
     const grid = controller.world.grid;
-    const ground = grid.heightAt({ x: r.target.x, z: r.target.y });
+    // Zoomed far out, the view drifts to the middle of the map so the whole map is framed
+    // (otherwise a squad at the map edge leaves half the screen looking at empty sky).
+    const overview = THREE.MathUtils.smoothstep(r.distance, DEFAULT_DISTANCE * 1.5, MAX_DISTANCE);
+    const lookX = THREE.MathUtils.lerp(r.target.x, width / 2, overview);
+    const lookZ = THREE.MathUtils.lerp(r.target.y, depth / 2, overview);
+    const ground = grid.heightAt({ x: lookX, z: lookZ });
     const horizontal = Math.cos(r.pitch) * r.distance;
-    let cx = r.target.x + Math.sin(r.yaw) * horizontal;
-    let cz = r.target.y + Math.cos(r.yaw) * horizontal;
+    let cx = lookX + Math.sin(r.yaw) * horizontal;
+    let cz = lookZ + Math.cos(r.yaw) * horizontal;
     let cy = ground + Math.sin(r.pitch) * r.distance;
     const clearance = grid.heightAt({ x: cx, z: cz }) + 3;
     if (cy < clearance) cy = clearance;
@@ -240,7 +295,14 @@ export function CameraRig({ controller, edgeScroll = false, reducedShake = false
       shake *= Math.exp(-dt * 7);
     }
     camera.position.set(cx, cy, cz);
-    camera.lookAt(r.target.x, ground + 1, r.target.y);
+    camera.lookAt(lookX, ground + 1, lookZ);
+    // The near plane follows the zoom: nothing comes close to a camera this high, and pushing it
+    // out keeps depth precision (shadows, ambient occlusion) across the much longer zoomed-out view.
+    const near = THREE.MathUtils.clamp(r.distance * 0.08, 0.5, 15);
+    if (camera instanceof THREE.PerspectiveCamera && Math.abs(camera.near - near) > camera.near * 0.02) {
+      camera.near = near;
+      camera.updateProjectionMatrix();
+    }
     currentView = { x: r.desiredTarget.x, z: r.desiredTarget.y, distance: r.desiredDistance, yaw: r.desiredYaw };
   });
 

@@ -9,10 +9,10 @@ import { useGameUi } from '../runtime/store';
 import { Icon } from './icons';
 import styles from './hud.module.css';
 
-const STANCES: { stance: Stance; label: string; action: 'stand' | 'crouch' | 'prone' }[] = [
-  { stance: 'stand', label: 'Stand', action: 'stand' },
-  { stance: 'crouch', label: 'Crouch', action: 'crouch' },
-  { stance: 'prone', label: 'Prone', action: 'prone' },
+const STANCES: { stance: Stance; label: string; action: 'stand' | 'crouch' | 'prone'; tip: string }[] = [
+  { stance: 'stand', label: 'Stand', action: 'stand', tip: 'Stand up: fastest, but easy to see' },
+  { stance: 'crouch', label: 'Crouch', action: 'crouch', tip: 'Crouch: quieter and harder to see, hidden in tall grass and shadow' },
+  { stance: 'prone', label: 'Prone', action: 'prone', tip: 'Go prone: slow, but nearly invisible beyond a guard’s inner view zone' },
 ];
 
 function itemCount(op: Operative, abilityId: AbilityId): number | null {
@@ -74,12 +74,13 @@ export function AbilityBar() {
           {unitIds.length > 1 && <span className={styles.groupNote}>+{unitIds.length - 1} more</span>}
         </div>
         <div className={styles.stances} role="group" aria-label="Stance">
-          {STANCES.map(({ stance, label, action }) => (
+          {STANCES.map(({ stance, label, action, tip }) => (
             <button
               key={stance}
               type="button"
               className={`${styles.slot} ${styles.stanceSlot} ${lead.stance === stance ? styles.slotActive : ''}`}
               aria-pressed={lead.stance === stance}
+              data-tip={`${tip} (${primaryKey(action)})`}
               onClick={() => {
                 const result = controller.command({ type: 'stance', unitIds, stance });
                 if (!result.ok) toast(result.message);
@@ -103,7 +104,7 @@ export function AbilityBar() {
                 className={`${styles.slot} ${targeting === abilityId ? styles.slotActive : ''} ${info.lethal ? styles.slotLethal : ''}`}
                 disabled={empty || cooldown > 0}
                 aria-pressed={targeting === abilityId}
-                title={`${info.name}: ${info.description}${info.lethal ? ' (lethal)' : ''}${info.loud ? ' (loud)' : ''}`}
+                data-tip={`${info.name} (${primaryKey(SLOT_ACTIONS[i]!)}): ${info.description}${info.lethal ? ' Lethal.' : ''}${info.loud ? ' Loud.' : ''}${count !== null ? ` ${count} left.` : ''}${cooldown > 0 ? ` Ready in ${Math.ceil(cooldown / TICK_RATE)} s.` : ''}`}
                 data-testid={`ability-${abilityId}`}
                 onClick={() => activate(abilityId)}
               >

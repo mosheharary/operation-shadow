@@ -1056,3 +1056,68 @@
   background: rgba(240, 162, 58, 0.12);
   font-size: 0.82rem;
 }
+
+/* Control bar: pause, camera turning, mission menu and exit (under the status bar). */
+.controlBar {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  border: 1px solid var(--panel-line);
+  border-radius: var(--radius);
+  background: var(--panel-bg);
+}
+
+.control {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.control:hover,
+.control:focus-visible {
+  border-color: var(--brass);
+  color: var(--brass-strong);
+}
+
+.controlActive {
+  border-color: var(--brass);
+  background: rgba(201, 164, 92, 0.18);
+  color: var(--brass-strong);
+}
+
+.controlDivider {
+  width: 1px;
+  height: 1.2rem;
+  margin: 0 0.2rem;
+  background: var(--panel-line);
+}
+
+.modalText {
+  margin: 0 0 1rem;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+/* One shared tooltip bubble (tooltip.tsx), fixed so no panel clips it. */
+.tooltip {
+  position: fixed;
+  z-index: 100;
+  max-width: 18rem;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--panel-line);
+  border-radius: var(--radius);
+  background: rgba(12, 16, 20, 0.95);
+  color: var(--ink);
+  font-size: 0.78rem;
+  line-height: 1.4;
+  pointer-events: none;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+}

@@ -164,6 +164,8 @@ export function Minimap() {
         width={w}
         height={h}
         style={{ aspectRatio: `${width} / ${depth}` }}
+        data-tip="Click to look there; right-click to send the selected squad there"
+        data-tip-pos="below"
         onClick={(e) => focusOn(toWorld(e))}
         onContextMenu={(e) => {
           e.preventDefault();

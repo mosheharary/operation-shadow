@@ -12,7 +12,10 @@ import styles from './hud.module.css';
 
 export interface MenuCallbacks {
   onRestart: () => void;
+  /** Back to the mission briefing. */
   onExit: () => void;
+  /** Leave the mission for Field HQ without saving. */
+  onQuit: () => void;
 }
 
 /** Focuses the first control when a dialog opens, for keyboard users. */
@@ -272,23 +275,52 @@ export function PauseMenu({ onRestart, onExit }: MenuCallbacks) {
           Paused
         </h2>
         <div className={styles.menuButtons}>
-          <button ref={first} type="button" className={styles.primaryButton} onClick={() => closeMenu(controller)}>
+          <button ref={first} type="button" className={styles.primaryButton} onClick={() => closeMenu(controller)} data-tip="Close this menu and carry on (Esc)">
             Resume
           </button>
-          <button type="button" className={styles.button} onClick={() => openMenu(controller, 'saves')} data-testid="open-saves">
+          <button type="button" className={styles.button} onClick={() => openMenu(controller, 'saves')} data-testid="open-saves" data-tip="Save into a slot, or load any save">
             Save / load
           </button>
-          <button type="button" className={styles.button} onClick={() => openMenu(controller, 'help')}>
+          <button type="button" className={styles.button} onClick={() => openMenu(controller, 'help')} data-tip="Every key and mouse control">
             Controls
           </button>
-          <button type="button" className={styles.button} onClick={() => openMenu(controller, 'settings')} data-testid="open-settings">
+          <button type="button" className={styles.button} onClick={() => openMenu(controller, 'settings')} data-testid="open-settings" data-tip="Graphics, sound, accessibility and keys">
             Settings
           </button>
-          <button type="button" className={styles.button} onClick={onRestart}>
+          <button type="button" className={styles.button} onClick={onRestart} data-tip="Start this mission again from the beginning">
             Restart mission
           </button>
-          <button type="button" className={styles.button} onClick={onExit}>
+          <button type="button" className={styles.button} onClick={onExit} data-tip="Leave without saving and go back to the briefing">
             Abort to briefing
+          </button>
+          <button type="button" className={styles.button} onClick={() => openMenu(controller, 'exit')} data-tip="Leave without saving and go back to Field HQ">
+            Exit without saving
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** Asks before leaving: nothing since the last save is kept. */
+export function ExitConfirm({ onQuit }: MenuCallbacks) {
+  const controller = useController();
+  const first = useAutoFocus<HTMLButtonElement>();
+  return (
+    <div className={styles.modalBackdrop}>
+      <div className={styles.modal} role="alertdialog" aria-modal="true" aria-labelledby="exit-title" aria-describedby="exit-text" data-testid="exit-confirm">
+        <h2 id="exit-title" className={styles.modalTitle}>
+          Exit without saving?
+        </h2>
+        <p id="exit-text" className={styles.modalText}>
+          Progress since your last save is lost. Your quicksave and saved slots stay as they are.
+        </p>
+        <div className={styles.menuButtons}>
+          <button ref={first} type="button" className={styles.button} onClick={() => closeMenu(controller)} data-testid="exit-cancel" data-tip="Back to the mission">
+            Stay
+          </button>
+          <button type="button" className={styles.primaryButton} onClick={onQuit} data-testid="exit-confirm-button" data-tip="Leave for Field HQ now">
+            Exit to Field HQ
           </button>
         </div>
       </div>
@@ -301,9 +333,10 @@ const HELP_GROUPS: { title: string; rows: [BindingAction[] | string, string][] }
     title: 'Camera',
     rows: [
       [['pan-up', 'pan-left', 'pan-down', 'pan-right'], 'Pan'],
-      [['rotate-left', 'rotate-right'], 'Rotate 45°'],
-      ['Wheel', 'Zoom'],
-      ['Middle drag', 'Free rotate and tilt'],
+      [['rotate-left', 'rotate-right'], 'Turn 45° (hold to spin all the way round)'],
+      ['Wheel / pinch', 'Zoom'],
+      ['Swipe sideways', 'Turn (trackpad)'],
+      ['Middle or Alt + drag', 'Free turn and tilt'],
       [['track'], 'Follow the selected unit'],
       [['camera-reset'], 'Reset camera'],
     ],
@@ -434,12 +467,12 @@ export function SaveMenu() {
                   </div>
                   <div className={styles.saveActions}>
                     {manual && persistence && (
-                      <button type="button" className={styles.button} disabled={busy} onClick={() => void run(() => persistence.save(slot), false)}>
+                      <button type="button" className={styles.button} disabled={busy} onClick={() => void run(() => persistence.save(slot), false)} data-tip="Save the mission here (replaces what is in this slot)">
                         Save here
                       </button>
                     )}
                     {save && persistence && (
-                      <button type="button" className={styles.button} disabled={busy} onClick={() => void run(() => persistence.load(slot), true)}>
+                      <button type="button" className={styles.button} disabled={busy} onClick={() => void run(() => persistence.load(slot), true)} data-tip="Load this save (the current progress is lost)">
                         Load
                       </button>
                     )}
@@ -465,5 +498,6 @@ export function MenuLayer(props: MenuCallbacks) {
   if (menu === 'saves') return <SaveMenu />;
   if (menu === 'settings') return <SettingsMenu />;
   if (menu === 'help') return <HelpOverlay />;
+  if (menu === 'exit') return <ExitConfirm {...props} />;
   return null;
 }

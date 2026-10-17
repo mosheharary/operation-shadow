@@ -122,8 +122,10 @@ export function Overlay({ controller }: { controller: GameController }) {
           void main() {
             vAlong = clamp(length(position) / 46.0, 0.0, 1.0);
             vec4 mv = modelViewMatrix * vec4(position, 1.0);
-            vNormalView = normalize(normalMatrix * normal);
-            vViewDir = normalize(-mv.xyz);
+            // Normalised in the fragment shader: the cone's tip has a zero-length normal, and
+            // normalize(0) is NaN, which bloom spreads over the whole screen.
+            vNormalView = normalMatrix * normal;
+            vViewDir = -mv.xyz;
             gl_Position = projectionMatrix * mv;
           }`,
         fragmentShader: `
@@ -132,8 +134,11 @@ export function Overlay({ controller }: { controller: GameController }) {
           varying vec3 vNormalView;
           varying vec3 vViewDir;
           void main() {
-            float facing = abs(dot(normalize(vNormalView), normalize(vViewDir)));
-            float alpha = pow(1.0 - vAlong, 1.6) * smoothstep(0.05, 0.75, facing) * 0.16;
+            float nLen = length(vNormalView);
+            float vLen = length(vViewDir);
+            float facing = nLen > 1e-5 && vLen > 1e-5 ? abs(dot(vNormalView / nLen, vViewDir / vLen)) : 0.0;
+            // Interpolation can push 1 - vAlong a hair below zero, and pow() of a negative is NaN.
+            float alpha = pow(max(1.0 - vAlong, 0.0), 1.6) * smoothstep(0.05, 0.75, facing) * 0.16;
             gl_FragColor = vec4(uColor * alpha, alpha);
           }`,
       }),

@@ -94,6 +94,11 @@ export function PlaySession({ setup, title, fallback }: { setup: GameSetup; titl
     router.push(`/missions/${setup.missionKey}`);
   }, [router, session, setup.missionKey]);
 
+  const quit = useCallback(() => {
+    session?.controller.setPaused(true);
+    router.push('/dashboard');
+  }, [router, session]);
+
   if (error) {
     return (
       <div className="game-loading" role="alert">
@@ -111,7 +116,7 @@ export function PlaySession({ setup, title, fallback }: { setup: GameSetup; titl
         <div className={styles.canvas}>
           <GameScene controller={session.controller} audio={session.audio} testHooks />
         </div>
-        <Hud onRestart={restart} onExit={exit} />
+        <Hud onRestart={restart} onExit={exit} onQuit={quit} />
       </div>
     </GameControllerProvider>
   );
