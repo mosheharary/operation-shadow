@@ -15,7 +15,8 @@ export function contentSecurityPolicy(nonce: string, dev: boolean): string {
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob:",
     "font-src 'self' data:",
-    `connect-src 'self'${dev ? ' ws: wss:' : ''}`,
+    // blob: lets the glTF loader decode embedded model textures (it fetches them as blob URLs).
+    `connect-src 'self' blob:${dev ? ' ws: wss:' : ''}`,
     "media-src 'self' blob:",
     "worker-src 'self' blob:",
     "object-src 'none'",

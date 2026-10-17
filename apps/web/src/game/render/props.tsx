@@ -1,19 +1,18 @@
 'use client';
 
 import { CellFlag, Grid, type LevelData, type PropDef, type PropKind, Surface } from '@operation-shadow/engine';
-import { useLayoutEffect, useMemo, useRef } from 'react';
+import { useFrame } from '@react-three/fiber';
+import { Suspense, useLayoutEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
+import { bakeStaticParts, type Part } from '../assets/bake';
+import { AssetBoundary, useModel } from '../assets/models';
+import type { ModelId } from '../assets/registry';
+import { useSettings } from '../runtime/settings';
 import { box, merge, tinted } from './geom';
 import { surfaceMaterial } from './materials/surface';
+import { advanceWind, windMaterial } from './materials/wind';
 import { hash2, prng, valueNoise3 } from './noise';
 import { material } from './palette';
-
-/** One instanced part of a prop model: geometry (feet at the origin, facing +x) and material. */
-interface Part {
-  geometry: THREE.BufferGeometry;
-  material: THREE.Material;
-  shadow?: boolean;
-}
 
 const t = <T extends THREE.BufferGeometry>(g: T, f: (g: T) => void): T => {
   f(g);
@@ -152,7 +151,7 @@ function grassTuft(): THREE.BufferGeometry {
 }
 
 /** Primitive-built models, each facing +x (rotation is applied per instance from the prop heading). */
-function partsFor(kind: PropKind): Part[] {
+function proceduralParts(kind: PropKind): Part[] {
   switch (kind) {
     case 'crate': {
       const frame: THREE.BufferGeometry[] = [];
@@ -365,14 +364,58 @@ function partsFor(kind: PropKind): Part[] {
   }
 }
 
+/**
+ * Authored replacements (High preset). Heights match the procedural models, so a prop's own
+ * scale still means the same size. Kinds not listed stay procedural.
+ */
+const AUTHORED: Partial<Record<PropKind, { id: ModelId; height: number; yaw?: number }>> = {
+  crate: { id: 'prop.crate', height: 0.85 },
+  barrel: { id: 'prop.barrel', height: 1 },
+  'fuel-barrel': { id: 'prop.fuel-barrel', height: 0.9 },
+  'lamp-post': { id: 'prop.lamp-post', height: 4.6 },
+  buoy: { id: 'prop.buoy', height: 1.7 },
+  bench: { id: 'prop.bench', height: 0.9, yaw: Math.PI / 2 },
+  bush: { id: 'veg.shrub', height: 1.5 },
+};
+
+/** Kinds that sway in the wind, and how much (bend in metres per square metre of height). */
+const WIND: Partial<Record<PropKind, number>> = { 'tree-pine': 0.0012, 'tree-oak': 0.0015, bush: 0.02, 'tall-grass': 0.12 };
+
+/** Gives swaying kinds wind-patched copies of their materials (and matching shadow materials). */
+function withWind(kind: PropKind, parts: Part[]): (Part & { depth?: THREE.Material })[] {
+  const strength = WIND[kind];
+  if (!strength) return parts;
+  return parts.map((part) => {
+    const { material, depth } = windMaterial(part.material, strength);
+    return { ...part, material, depth };
+  });
+}
+
 const FLOATING: ReadonlySet<PropKind> = new Set(['rowboat', 'fishing-boat', 'buoy']);
 /** Painted hull colours for boats (instance tint), like the moored boats in the concept art. */
 const HULL_TINTS = ['#c9c2b4', '#5b7183', '#8a3f30', '#b8b29e', '#3f5c4d'];
 /** Wagon paint (body instance tint). */
 const WAGON_TINTS = ['#ffffff', '#8c9a8a', '#b9a37f', '#a0a8b0'];
 
-function PropKindInstances({ kind, props, grid, seaLevel }: { kind: PropKind; props: PropDef[]; grid: Grid; seaLevel: number }) {
-  const parts = useMemo(() => partsFor(kind), [kind]);
+interface KindProps {
+  kind: PropKind;
+  props: PropDef[];
+  grid: Grid;
+  seaLevel: number;
+}
+
+function ProceduralKind(props: KindProps) {
+  const parts = useMemo(() => withWind(props.kind, proceduralParts(props.kind)), [props.kind]);
+  return <PropKindInstances {...props} parts={parts} />;
+}
+
+function AuthoredKind(props: KindProps & { spec: { id: ModelId; height: number; yaw?: number } }) {
+  const scene = useModel(props.spec.id);
+  const parts = useMemo(() => withWind(props.kind, bakeStaticParts(scene, props.spec)), [scene, props.kind, props.spec]);
+  return <PropKindInstances {...props} parts={parts} />;
+}
+
+function PropKindInstances({ kind, props, grid, seaLevel, parts }: KindProps & { parts: (Part & { depth?: THREE.Material })[] }) {
   const refs = useRef<(THREE.InstancedMesh | null)[]>([]);
 
   useLayoutEffect(() => {
@@ -405,23 +448,43 @@ function PropKindInstances({ kind, props, grid, seaLevel }: { kind: PropKind; pr
       if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
       mesh.computeBoundingSphere();
     }
-  }, [props, grid, kind, seaLevel]);
+  }, [props, grid, kind, seaLevel, parts]);
 
   return (
     <>
       {parts.map((part, i) => (
         <instancedMesh
-          key={i}
+          key={`${part.geometry.uuid}-${i}`}
           ref={(m) => {
             refs.current[i] = m;
           }}
           args={[part.geometry, part.material, props.length]}
+          customDepthMaterial={part.depth}
           castShadow={part.shadow ?? false}
           receiveShadow
         />
       ))}
     </>
   );
+}
+
+/** Authored model on the High preset (procedural while it downloads or if it fails), else procedural. */
+function KindInstances(props: KindProps & { authored: boolean }) {
+  const spec = props.authored ? AUTHORED[props.kind] : undefined;
+  if (!spec) return <ProceduralKind {...props} />;
+  const fallback = <ProceduralKind {...props} />;
+  return (
+    <AssetBoundary id={spec.id} fallback={fallback}>
+      <Suspense fallback={fallback}>
+        <AuthoredKind {...props} spec={spec} />
+      </Suspense>
+    </AssetBoundary>
+  );
+}
+
+function WindClock() {
+  useFrame((_, dt) => advanceWind(Math.min(dt, 0.1)));
+  return null;
 }
 
 /** Render-only dressing (rope coils, baskets, small crates, bollards) along quays and walls. */
@@ -447,6 +510,7 @@ function decorProps(level: LevelData): PropDef[] {
 
 /** All level props, instanced per kind and part (one draw call per part type). */
 export function Props({ level }: { level: LevelData }) {
+  const authored = useSettings((s) => s.models);
   const grid = useMemo(() => new Grid(level), [level]);
   const byKind = useMemo(() => {
     const map = new Map<PropKind, PropDef[]>();
@@ -460,8 +524,9 @@ export function Props({ level }: { level: LevelData }) {
   }, [level]);
   return (
     <group name="props">
+      <WindClock />
       {byKind.map(([kind, props]) => (
-        <PropKindInstances key={kind} kind={kind} props={props} grid={grid} seaLevel={level.seaLevel} />
+        <KindInstances key={kind} kind={kind} props={props} grid={grid} seaLevel={level.seaLevel} authored={authored} />
       ))}
     </group>
   );

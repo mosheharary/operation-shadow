@@ -25,7 +25,11 @@ const nextConfig: NextConfig = {
     turbopackFileSystemCacheForDev: false,
   },
   async headers() {
-    return [{ source: '/:path*', headers: securityHeaders }];
+    return [
+      { source: '/:path*', headers: securityHeaders },
+      // Model files carry a content hash in their names (tools/media/models.ts), so they never change.
+      { source: '/media/models/:path*', headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }] },
+    ];
   },
 };
 

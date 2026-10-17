@@ -22,15 +22,21 @@
     "db:seed": "pnpm --filter @operation-shadow/web seed",
     "check": "pnpm lint && pnpm typecheck && pnpm test",
     "voice-bank": "tsx tools/media/voice-bank.ts",
-    "textures": "tsx tools/media/textures.ts"
+    "textures": "tsx tools/media/textures.ts",
+    "models": "tsx tools/media/models.ts"
   },
   "devDependencies": {
+    "@gltf-transform/core": "4.5.1",
+    "@gltf-transform/extensions": "4.5.1",
+    "@gltf-transform/functions": "4.5.1",
     "@neon/config": "^1.8.6",
     "@neon/env": "^1.5.3",
     "@playwright/test": "1.64.0",
     "@types/node": "24.19.1",
     "eslint": "9.39.5",
     "eslint-config-next": "16.4.0",
+    "meshoptimizer": "1.3.0",
+    "sharp": "0.35.5",
     "tsx": "4.23.15",
     "typescript": "6.0.3",
     "vitest": "5.0.3"

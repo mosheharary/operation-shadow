@@ -12,6 +12,10 @@ export interface GameSettings {
   postEffects: boolean;
   /** Device pixel ratio cap: 0.75, 1, 1.25 or 1.5. */
   resolutionScale: number;
+  /** Authored glTF models (props, vegetation, characters); procedural models otherwise. */
+  models: boolean;
+  /** 'rich' adds the sky light, grass, sharper ground detail and water reflections. */
+  environment: 'basic' | 'rich';
   /** Interface size, 0.75 to 1.5. */
   uiScale: number;
   subtitleSize: 'normal' | 'large';
@@ -39,6 +43,8 @@ const DEFAULTS: GameSettings = {
   shadows: true,
   postEffects: true,
   resolutionScale: 1.5,
+  models: true,
+  environment: 'rich',
   uiScale: 1,
   subtitleSize: 'normal',
   palette: 'standard',
@@ -57,12 +63,12 @@ const DEFAULTS: GameSettings = {
 };
 
 /** Settings that stay on this device. */
-const DEVICE_ONLY = new Set<keyof GameSettings>(['quality', 'shadows', 'postEffects', 'resolutionScale', 'showFps']);
+const DEVICE_ONLY = new Set<keyof GameSettings>(['quality', 'shadows', 'postEffects', 'resolutionScale', 'models', 'environment', 'showFps']);
 
 /** What each graphics preset sets. */
-export const PRESETS: Record<'high' | 'low', Pick<GameSettings, 'shadows' | 'postEffects' | 'resolutionScale'>> = {
-  high: { shadows: true, postEffects: true, resolutionScale: 1.5 },
-  low: { shadows: false, postEffects: false, resolutionScale: 1 },
+export const PRESETS: Record<'high' | 'low', Pick<GameSettings, 'shadows' | 'postEffects' | 'resolutionScale' | 'models' | 'environment'>> = {
+  high: { shadows: true, postEffects: true, resolutionScale: 1.5, models: true, environment: 'rich' },
+  low: { shadows: false, postEffects: false, resolutionScale: 1, models: false, environment: 'basic' },
 };
 
 const STORAGE_KEY = 'operation-shadow:settings';

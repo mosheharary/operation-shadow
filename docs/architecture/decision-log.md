@@ -102,3 +102,13 @@ The first M2 build rendered flat-coloured primitives; the user expected the look
 | # | Decision | Why |
 |---|---|---|
 | D57 | Characters are rebuilt as detailed procedural figures (supersedes D13's simple mannequins): anatomical torso, tapered limbs with elbow and knee joints, faces and hair, and every uniform and piece of gear from the approved concept sheets. Each body segment's parts are merged into one mesh with per-vertex colour, roughness, metalness and a fabric weight; one shared material adds creases, grain and wear in object space, fading out when a figure is small on screen. A walk and run cycle with knee and elbow bends, hip bob, torso counter-swing and idle breathing replaces the stiff swing; coat skirts drape over the thighs when crouching. `/test-range/characters` shows every character in every pose | The user asked for more detailed, realistic characters. Staying procedural keeps one art style with the rest of the diorama, needs no licensed models, and merging keeps the cost to about 12 draw calls per figure (fewer than before: 241 against 271 in the same Silent Tide view, 120 FPS either way on the M5 Pro) |
+
+## Authored glTF world (2026-10-17)
+
+| # | Decision | Why |
+|---|---|---|
+| D58 | Authored CC0 glTF models replace procedural props where a fitting model exists. `make models` fetches, verifies and simplifies them to per-model budgets and writes content-hashed GLBs with WebP textures and plain float geometry (no Draco or meshopt compression, so no decoder and no WebAssembly); the manifest records source, authors, licence, size and triangles, and a unit test enforces CC0 and the 15 MB total | Much more detail for little download (about 1.7 MB for the first eight models); hashed names cache immutably; keeping the policy free of `wasm-unsafe-eval` |
+| D59 | Authored models load only when the per-device `models` setting is on (High preset); Performance and the browser tests keep the procedural models. Each prop kind renders its procedural model while its file downloads or if it fails (error boundary), and `window.__OS_ASSETS__` reports what loaded | CI's software renderer stays fast and deterministic; a failed download never leaves holes in the world |
+| D60 | The policy's `connect-src` allows `blob:` | three.js decodes glTF-embedded textures by fetching blob URLs (`ImageBitmapLoader`); without it every model renders untextured |
+| D61 | Trees, bushes and tall grass sway in the wind in the vertex shader (height-squared bend, per-instance phase from the instance position, matching shadow depth material) | Static vegetation was the most obviously "dead" part of the diorama; the cost is a few shader instructions |
+

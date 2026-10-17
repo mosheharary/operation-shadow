@@ -163,6 +163,14 @@ function SettingsFields() {
           <input type="checkbox" checked={settings.postEffects} onChange={(e) => custom({ postEffects: e.target.checked })} />
           <span>Ambient occlusion, bloom and tilt-shift</span>
         </label>
+        <label className={styles.check}>
+          <input type="checkbox" checked={settings.models} onChange={(e) => custom({ models: e.target.checked })} />
+          <span>Detailed models (downloads about 15 MB)</span>
+        </label>
+        <label className={styles.check}>
+          <input type="checkbox" checked={settings.environment === 'rich'} onChange={(e) => custom({ environment: e.target.checked ? 'rich' : 'basic' })} />
+          <span>Rich environment (sky light, grass, reflections)</span>
+        </label>
         <label>
           <span>Resolution</span>
           <select value={settings.resolutionScale} onChange={(e) => custom({ resolutionScale: Number(e.target.value) })}>

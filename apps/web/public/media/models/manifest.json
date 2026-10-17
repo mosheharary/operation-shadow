@@ -1,0 +1,197 @@
+{
+  "version": 1,
+  "models": {
+    "prop.barrel": {
+      "file": "props/barrel.ed9b2d74.glb",
+      "bytes": 234556,
+      "triangles": 2998,
+      "bounds": {
+        "min": [
+          1.104242205619812,
+          0.000021108424334670417,
+          -1.9324112236499786
+        ],
+        "max": [
+          1.847242385149002,
+          0.9133074283599854,
+          -1.1894135177135468
+        ]
+      },
+      "source": "Poly Haven",
+      "name": "Wooden Barrels 01",
+      "url": "https://polyhaven.com/a/wooden_barrels_01",
+      "authors": [
+        "James Ray Cock"
+      ],
+      "license": "CC0-1.0"
+    },
+    "prop.bench": {
+      "file": "props/bench.ccfdea13.glb",
+      "bytes": 91180,
+      "triangles": 630,
+      "bounds": {
+        "min": [
+          -0.5760610699653625,
+          -0.0004994967021048069,
+          -0.25369879603385925
+        ],
+        "max": [
+          0.5888825058937073,
+          0.8887919783592224,
+          0.24284429848194122
+        ]
+      },
+      "source": "Poly Haven",
+      "name": "Painted Wooden Bench",
+      "url": "https://polyhaven.com/a/painted_wooden_bench",
+      "authors": [
+        "Kirill Sannikov"
+      ],
+      "license": "CC0-1.0"
+    },
+    "prop.buoy": {
+      "file": "props/buoy.fe04cec9.glb",
+      "bytes": 303384,
+      "triangles": 2991,
+      "bounds": {
+        "min": [
+          -0.4760739803314209,
+          -0.8034747242927551,
+          -0.4760739803314209
+        ],
+        "max": [
+          0.5766127109527588,
+          1.84686279296875,
+          0.4760739803314209
+        ]
+      },
+      "source": "Poly Haven",
+      "name": "Ocean Buoy",
+      "url": "https://polyhaven.com/a/ocean_buoy",
+      "authors": [
+        "Mateusz Sadek"
+      ],
+      "license": "CC0-1.0"
+    },
+    "prop.crate": {
+      "file": "props/crate.0791a6ab.glb",
+      "bytes": 200108,
+      "triangles": 2999,
+      "bounds": {
+        "min": [
+          -0.902349978685379,
+          -0.000014066696166992188,
+          -0.2288835048675537
+        ],
+        "max": [
+          -0.09765002131462097,
+          0.3009185492992401,
+          0.23732545971870422
+        ]
+      },
+      "source": "Poly Haven",
+      "name": "Old Military Crate",
+      "url": "https://polyhaven.com/a/old_military_crate",
+      "authors": [
+        "Jack Mava"
+      ],
+      "license": "CC0-1.0"
+    },
+    "prop.fuel-barrel": {
+      "file": "props/fuel-barrel.4606ab34.glb",
+      "bytes": 195260,
+      "triangles": 2682,
+      "bounds": {
+        "min": [
+          -0.2815175950527191,
+          -0.006614277604967356,
+          -0.28151750564575195
+        ],
+        "max": [
+          0.28151753544807434,
+          0.8733857274055481,
+          0.28151771426200867
+        ]
+      },
+      "source": "Poly Haven",
+      "name": "Barrel_01",
+      "url": "https://polyhaven.com/a/Barrel_01",
+      "authors": [
+        "Jorge Camacho"
+      ],
+      "license": "CC0-1.0"
+    },
+    "prop.lamp-post": {
+      "file": "props/lamp-post.699b57c6.glb",
+      "bytes": 191780,
+      "triangles": 3998,
+      "bounds": {
+        "min": [
+          -0.19311153888702393,
+          -0.39410582184791565,
+          -2.3082069589008825e-8
+        ],
+        "max": [
+          0.19180341064929962,
+          1.2795000076293945,
+          0.8063770532608032
+        ]
+      },
+      "source": "Poly Haven",
+      "name": "Street Lamp 02",
+      "url": "https://polyhaven.com/a/street_lamp_02",
+      "authors": [
+        "Josh Dean"
+      ],
+      "license": "CC0-1.0"
+    },
+    "veg.shrub": {
+      "file": "vegetation/shrub.8315e428.glb",
+      "bytes": 279568,
+      "triangles": 5852,
+      "bounds": {
+        "min": [
+          -0.02444666624069214,
+          -0.005937241483479738,
+          -0.07500956952571869
+        ],
+        "max": [
+          0.5592435225844383,
+          0.2132624387741089,
+          0.07108771800994873
+        ]
+      },
+      "source": "Poly Haven",
+      "name": "Shrub 04",
+      "url": "https://polyhaven.com/a/shrub_04",
+      "authors": [
+        "Rico Cilliers"
+      ],
+      "license": "CC0-1.0"
+    },
+    "weapon.rifle": {
+      "file": "weapons/rifle.da95b4f1.glb",
+      "bytes": 235004,
+      "triangles": 2626,
+      "bounds": {
+        "min": [
+          -0.6227492541074753,
+          -0.1050107441842556,
+          -0.02579336892813444
+        ],
+        "max": [
+          0.5796375274658203,
+          0.09563986908739383,
+          0.021439185366034508
+        ]
+      },
+      "source": "Poly Haven",
+      "name": "Bolt Action Rifle 7.62",
+      "url": "https://polyhaven.com/a/bolt_action_rifle_7_62",
+      "authors": [
+        "Mateusz Sadek"
+      ],
+      "license": "CC0-1.0"
+    }
+  }
+}
