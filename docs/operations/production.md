@@ -2,7 +2,7 @@
 
 The same code runs locally (Docker) and on Vercel. This guide lists every step to put it in production.
 
-**Current deployment (2026-10-16):** <https://operation-shadow-mu.vercel.app> (Vercel project `operation-shadow`,
+**Current deployment (2026-10-17, authored glTF world: D58–D63):** <https://operation-shadow-mu.vercel.app> (Vercel project `operation-shadow`,
 Root Directory `apps/web`) on Neon project `restless-glitter-24520084`, branch `production` (PostgreSQL 18.6,
 us-east-2). Deployed with `vercel deploy --prod`; `/api/ready` reports the database reachable and all migrations
 applied. Google sign-in credentials are set (OAuth client in Google Cloud project `mercurial-cairn-620`); its
