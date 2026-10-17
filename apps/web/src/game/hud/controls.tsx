@@ -25,7 +25,7 @@ export function ControlBar() {
     <div className={styles.controlBar} role="toolbar" aria-label="Game controls">
       <ControlButton
         icon={paused ? 'play' : 'pause'}
-        label={paused ? 'Resume' : 'Pause'}
+        label={paused ? 'Resume game' : 'Pause game'}
         tip={paused ? `Resume (${primaryKey('pause')})` : `Tactical pause (${primaryKey('pause')}): the action stops, but you can still give orders`}
         active={paused}
         testId="control-pause"
