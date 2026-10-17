@@ -1,6 +1,7 @@
 // Fetches the CC0 surface textures used by the renderer from Poly Haven, verifies them against
-// the published MD5 sums, downsizes them to 512 px WebP and writes a manifest with the source,
-// authors, licence and real-world tile size of every set.
+// the published MD5 sums, downsizes them to 512 px WebP (plus a 1024 px colour map for the rich
+// environment setting) and writes a manifest with the source, authors, licence and real-world
+// tile size of every set.
 //
 //   make textures            # fetch missing sets
 //   make textures ARGS="--force"
@@ -34,6 +35,8 @@ const SETS: Record<string, string> = {
   hessian: 'hessian_230',
   'concrete-cast': 'concrete_wall_006',
   corrugated: 'corrugated_iron',
+  'bark-pine': 'pine_bark',
+  'bark-oak': 'bark_brown_02',
 };
 
 const MAPS = { color: 'Diffuse', normal: 'nor_gl', rough: 'Rough' } as const;
@@ -70,7 +73,7 @@ async function main(): Promise<void> {
 
   for (const [key, id] of Object.entries(SETS)) {
     const dir = path.join(OUT_DIR, key);
-    if (!force && existsSync(path.join(dir, 'rough.webp')) && sets[key]) {
+    if (!force && existsSync(path.join(dir, 'rough.webp')) && existsSync(path.join(dir, 'color-1k.webp')) && sets[key]) {
       console.log(`skip ${key} (${id})`);
       continue;
     }
@@ -86,6 +89,9 @@ async function main(): Promise<void> {
       await fs.writeFile(source, await download(entry));
       const filter = name === 'rough' ? `scale=${SIZE}:${SIZE}:flags=lanczos,format=gray` : `scale=${SIZE}:${SIZE}:flags=lanczos`;
       execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-i', source, '-vf', filter, '-c:v', 'libwebp', '-quality', name === 'normal' ? '90' : '82', path.join(dir, `${name}.webp`)]);
+      if (name === 'color') {
+        execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-i', source, '-vf', `scale=${SIZE * 2}:${SIZE * 2}:flags=lanczos`, '-c:v', 'libwebp', '-quality', '80', path.join(dir, 'color-1k.webp')]);
+      }
     }
     const [w, h] = info.dimensions ?? [2000, 2000];
     sets[key] = {
@@ -96,7 +102,7 @@ async function main(): Promise<void> {
       authors: Object.keys(info.authors),
       license: 'CC0-1.0',
       tileMeters: [Math.round(w) / 1000, Math.round(h) / 1000],
-      files: { color: `${key}/color.webp`, normal: `${key}/normal.webp`, rough: `${key}/rough.webp` },
+      files: { color: `${key}/color.webp`, color1k: `${key}/color-1k.webp`, normal: `${key}/normal.webp`, rough: `${key}/rough.webp` },
     };
     console.log(`ok   ${key} ← ${id} (${info.name}, ${Object.keys(info.authors).join(', ')})`);
   }

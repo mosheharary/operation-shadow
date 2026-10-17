@@ -7,6 +7,7 @@ interface GameProbe {
   alarm: number;
   selected: string[];
   conesVisible: number;
+  rigs: { authored: number; procedural: number };
   operatives: { id: string; role: string; x: number; z: number; status: string; stance: string; busy: boolean }[];
 }
 

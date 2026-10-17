@@ -40,6 +40,8 @@ export interface ModelSpec {
    * 'animations': keeps only the skeleton and the clips in `clips`.
    */
   process?: 'static' | 'skinned' | 'animations';
+  /** Skinned models only: simplify to `maxTriangles` anyway (shadow-casting LOD bodies). */
+  simplify?: boolean;
   /** Animation clips to keep: source name → name used by the game. */
   clips?: Record<string, string>;
   /** Same clips with root motion (inside the same archive): measures each clip's ground speed. */
@@ -83,7 +85,7 @@ export const MODELS: ModelSpec[] = [
   { id: 'prop.lamp-post', group: 'props', source: { kind: 'polyhaven', asset: 'street_lamp_02' }, maxTriangles: 4000, textureSize: 512 },
   { id: 'prop.buoy', group: 'props', source: { kind: 'polyhaven', asset: 'ocean_buoy' }, maxTriangles: 3000, textureSize: 512 },
   { id: 'prop.bench', group: 'props', source: { kind: 'polyhaven', asset: 'painted_wooden_bench' }, maxTriangles: 2000, textureSize: 512 },
-  { id: 'veg.shrub', group: 'vegetation', source: { kind: 'polyhaven', asset: 'shrub_04' }, maxTriangles: 6000, textureSize: 512 },
+  { id: 'veg.shrub', group: 'vegetation', source: { kind: 'polyhaven', asset: 'shrub_04' }, maxTriangles: 2400, textureSize: 512 },
   // Base bodies (one skeleton shared with the animation library). The light skin texture is
   // tinted per character; the uniform is painted over the body in the shader.
   {
@@ -101,6 +103,27 @@ export const MODELS: ModelSpec[] = [
     process: 'skinned',
     maxTriangles: 16000,
     textureSize: 512,
+  },
+  // Low-detail bodies that cast the characters' shadows (same skeleton and weights).
+  {
+    id: 'char.body-male-lod1',
+    group: 'characters',
+    source: { ...UBC, file: `${BODY}/Superhero_Male_FullBody.gltf`, images: { 'T_Hair_1_Normal_png.png': 'T_Hair_1_Normal.png', 'T_Eye_Normal_png.png': 'T_Eye_Normal.png' } },
+    nodes: ['Armature'],
+    process: 'skinned',
+    simplify: true,
+    maxTriangles: 3500,
+    textureSize: 16,
+  },
+  {
+    id: 'char.body-female-lod1',
+    group: 'characters',
+    source: { ...UBC, file: `${BODY}/Superhero_Female_FullBody.gltf`, images: { 'T_Eye_Normal_png.png': 'T_Eye_Normal.png' } },
+    nodes: ['Armature'],
+    process: 'skinned',
+    simplify: true,
+    maxTriangles: 3500,
+    textureSize: 16,
   },
   hair('short', 'Hair_SimpleParted'),
   hair('cropped', 'Hair_Buzzed'),

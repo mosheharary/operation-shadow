@@ -9,6 +9,8 @@ export interface BodySource {
   scene: THREE.Object3D;
   /** Body height in its own units (metres). */
   height: number;
+  /** Low-detail body geometry (same skeleton and weights) that casts the shadow. */
+  shadow: THREE.BufferGeometry | null;
 }
 
 /** Everything the authored characters share: bodies, hair, and the animation clips. */
@@ -37,8 +39,12 @@ function filterClip(clip: THREE.AnimationClip, keep: (bone: string) => boolean, 
   return new THREE.AnimationClip(`${clip.name}${suffix}`, clip.duration, tracks);
 }
 
-function prepareBody(scene: THREE.Object3D): BodySource {
+function prepareBody(scene: THREE.Object3D, lod: THREE.Object3D | null): BodySource {
   let height = 1.8;
+  let shadow: THREE.BufferGeometry | null = null;
+  lod?.traverse((object) => {
+    if ((object as THREE.SkinnedMesh).isSkinnedMesh) shadow = (object as THREE.SkinnedMesh).geometry;
+  });
   scene.traverse((object) => {
     const mesh = object as THREE.SkinnedMesh;
     if (!mesh.isSkinnedMesh) return;
@@ -52,12 +58,14 @@ function prepareBody(scene: THREE.Object3D): BodySource {
       height = mesh.geometry.boundingBox!.max.y - mesh.geometry.boundingBox!.min.y;
     }
   });
-  return { scene, height };
+  return { scene, height, shadow };
 }
 
 export function buildLibrary(input: {
   male: THREE.Object3D;
   female: THREE.Object3D;
+  maleLod: THREE.Object3D | null;
+  femaleLod: THREE.Object3D | null;
   hair: Record<HairId, THREE.Object3D>;
   clips: THREE.AnimationClip[];
   speeds: Partial<Record<string, number>>;
@@ -72,8 +80,8 @@ export function buildLibrary(input: {
     upper.set(name, filterClip(clip, isUpper, '-upper'));
   }
   return {
-    male: prepareBody(input.male),
-    female: prepareBody(input.female),
+    male: prepareBody(input.male, input.maleLod),
+    female: prepareBody(input.female, input.femaleLod),
     hair: input.hair,
     full,
     lower,

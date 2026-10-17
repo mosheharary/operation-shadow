@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { NOISE_GLSL } from './surface';
-import { type SurfaceArrays, type SurfaceKey, surfaceArrays } from './textures';
+import { highResTextures, type SurfaceArrays, type SurfaceKey, surfaceArrays } from './textures';
 
 /** Terrain layers, in array order. Rock (index 5) is projected triplanar on steep ground. */
 export const TERRAIN_LAYERS: readonly SurfaceKey[] = ['grass', 'sand', 'cobble', 'gravel', 'forest', 'rock', 'concrete', 'planks', 'snow'];
@@ -20,13 +20,19 @@ const LAYER_TINT = [
   [1.0, 1.02, 1.06],
 ];
 
-let arrays: SurfaceArrays | null = null;
+/** The layer arrays, per texture tier (built once each). */
+const arraysByTier = new Map<boolean, SurfaceArrays>();
 
 export interface TerrainMaterialOptions {
   seaLevel: number;
   /** 0..1 rain wetness: darker, glossier ground. */
   wetness: number;
+  /** Detail normals: each layer sampled again at a fine scale near the camera (rich environment). */
+  detail?: boolean;
 }
+
+/** Detail tiles are this fraction of each layer's tile size. */
+const DETAIL_SCALE = 0.17;
 
 /**
  * Splat-blended terrain: eight CC0 surface sets in two array textures, weighted per vertex from
@@ -34,7 +40,12 @@ export interface TerrainMaterialOptions {
  * the baked lamp light the AI uses.
  */
 export function createTerrainMaterial(options: TerrainMaterialOptions): THREE.MeshStandardMaterial {
-  arrays ??= surfaceArrays(TERRAIN_LAYERS);
+  const tier = highResTextures();
+  let arrays = arraysByTier.get(tier);
+  if (!arrays) {
+    arrays = surfaceArrays(TERRAIN_LAYERS, tier);
+    arraysByTier.set(tier, arrays);
+  }
   const material = new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 1, metalness: 0 });
   const uniforms = {
     tTerrainColor: { value: arrays.color },
@@ -43,6 +54,7 @@ export function createTerrainMaterial(options: TerrainMaterialOptions): THREE.Me
     uLayerTint: { value: LAYER_TINT.map(([r, g, b]) => new THREE.Vector3(r, g, b)) },
     uSea: { value: options.seaLevel },
     uWet: { value: options.wetness },
+    uDetail: { value: options.detail ? 1 : 0 },
   };
   material.onBeforeCompile = (shader) => {
     Object.assign(shader.uniforms, uniforms);
@@ -82,6 +94,7 @@ export function createTerrainMaterial(options: TerrainMaterialOptions): THREE.Me
         uniform vec3 uLayerTint[9];
         uniform float uSea;
         uniform float uWet;
+        uniform float uDetail;
         varying float vLight;
         varying vec4 vSplatA;
         varying vec4 vSplatB;
@@ -122,6 +135,21 @@ export function createTerrainMaterial(options: TerrainMaterialOptions): THREE.Me
           terrainN += vec3(nt.x + tN.x, abs(nt.z) * tN.y, nt.y + tN.z) * w[i];
           terrainRough += nr.a * w[i];
         }
+        // Detail normals: grit, pebbles and blades a few centimetres across, from each layer's own
+        // normal map at a fine scale, fading out with distance (where they would only shimmer).
+        float detailFade = uDetail * (1.0 - smoothstep(12.0, 40.0, distance(cameraPosition, vTpPos)));
+        if (detailFade > 0.01) {
+          vec2 detailN = vec2(0.0);
+          float detailShade = 0.0;
+          for (int i = 0; i < 9; i++) {
+            if (i == 5 || w[i] < 0.05) continue;
+            vec4 nd = texture(tTerrainNormal, vec3(vTpPos.xz / (uLayerScale[i] * ${DETAIL_SCALE}), float(i)));
+            detailN += (nd.xy * 2.0 - 1.0) * w[i];
+            detailShade += (nd.a - 0.5) * w[i];
+          }
+          terrainN += vec3(detailN.x, 0.0, detailN.y) * 0.55 * detailFade;
+          terrainCol *= 1.0 - detailShade * 0.25 * detailFade;
+        }
         if (w[5] >= 0.003) {
           vec3 tw = osTriWeights(tN);
           vec3 sg = vec3(tN.x < 0.0 ? -1.0 : 1.0, tN.y < 0.0 ? -1.0 : 1.0, tN.z < 0.0 ? -1.0 : 1.0);
@@ -158,6 +186,6 @@ export function createTerrainMaterial(options: TerrainMaterialOptions): THREE.Me
         '#include <emissivemap_fragment>\ntotalEmissiveRadiance += diffuseColor.rgb * vec3(1.0, 0.78, 0.5) * vLight * 1.6;',
       );
   };
-  material.customProgramCacheKey = () => 'terrain-splat';
+  material.customProgramCacheKey = () => `terrain-splat${options.detail ? '-detail' : ''}`;
   return material;
 }

@@ -103,6 +103,30 @@
       ],
       "license": "CC0-1.0"
     },
+    "char.body-female-lod1": {
+      "file": "characters/body-female-lod1.07a32f01.glb",
+      "bytes": 161540,
+      "triangles": 3500,
+      "bounds": {
+        "min": [
+          -0.8344025611877441,
+          -0.00816815160214901,
+          -0.1624695360660553
+        ],
+        "max": [
+          0.83443284034729,
+          1.7664859294891357,
+          0.1402275115251541
+        ]
+      },
+      "source": "Quaternius",
+      "name": "Universal Base Characters (Standard): Superhero_Female_FullBody",
+      "url": "https://quaternius.com/packs/universalbasecharacters.html",
+      "authors": [
+        "Quaternius"
+      ],
+      "license": "CC0-1.0"
+    },
     "char.body-male": {
       "file": "characters/body-male.d743b91f.glb",
       "bytes": 666888,
@@ -117,6 +141,30 @@
           0.9294325113296509,
           1.8100767135620117,
           0.12803764641284943
+        ]
+      },
+      "source": "Quaternius",
+      "name": "Universal Base Characters (Standard): Superhero_Male_FullBody",
+      "url": "https://quaternius.com/packs/universalbasecharacters.html",
+      "authors": [
+        "Quaternius"
+      ],
+      "license": "CC0-1.0"
+    },
+    "char.body-male-lod1": {
+      "file": "characters/body-male-lod1.c7ac0496.glb",
+      "bytes": 160736,
+      "triangles": 3500,
+      "bounds": {
+        "min": [
+          -0.9285045862197876,
+          -0.009509669616818428,
+          -0.1615000218153
+        ],
+        "max": [
+          0.9285045862197876,
+          1.8100767135620117,
+          0.1264255791902542
         ]
       },
       "source": "Quaternius",
@@ -254,7 +302,7 @@
       "bounds": {
         "min": [
           1.104242205619812,
-          2.1108424334670417e-05,
+          0.000021108424334670417,
           -1.9324112236499786
         ],
         "max": [
@@ -326,7 +374,7 @@
       "bounds": {
         "min": [
           -0.902349978685379,
-          -1.4066696166992188e-05,
+          -0.000014066696166992188,
           -0.2288835048675537
         ],
         "max": [
@@ -375,7 +423,7 @@
         "min": [
           -0.19311153888702393,
           -0.39410582184791565,
-          -2.3082069589008825e-08
+          -2.3082069589008825e-8
         ],
         "max": [
           0.19180341064929962,
@@ -392,9 +440,9 @@
       "license": "CC0-1.0"
     },
     "veg.shrub": {
-      "file": "vegetation/shrub.8315e428.glb",
-      "bytes": 279568,
-      "triangles": 5852,
+      "file": "vegetation/shrub.ce01c245.glb",
+      "bytes": 178720,
+      "triangles": 2383,
       "bounds": {
         "min": [
           -0.02444666624069214,

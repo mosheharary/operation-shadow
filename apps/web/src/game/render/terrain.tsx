@@ -5,6 +5,7 @@ import { useMemo } from 'react';
 import * as THREE from 'three';
 import { surfaceMaterial } from './materials/surface';
 import { createTerrainMaterial, ROCK_LAYER } from './materials/terrain-material';
+import { SHADOW_ONLY_LAYER } from './layers';
 import { fbm2 } from './noise';
 
 /** Render mesh resolution (the gameplay heightfield is 1 m; the extra vertices carry cliff detail). */
@@ -149,20 +150,41 @@ function buildSkirtGeometry(level: LevelData): THREE.BufferGeometry {
   return geometry;
 }
 
+/**
+ * The ground's shadow caster: the gameplay heightfield at 1 m (a quarter of the render mesh's
+ * triangles), drawn only by the shadow cameras. Hills and cliffs still shade the ground.
+ */
+function buildShadowProxy(level: LevelData): THREE.BufferGeometry {
+  const grid = new Grid(level);
+  const g = new THREE.PlaneGeometry(level.width, level.depth, Math.round(level.width), Math.round(level.depth));
+  g.rotateX(-Math.PI / 2);
+  g.translate(level.width / 2, 0, level.depth / 2);
+  const pos = g.attributes.position as THREE.BufferAttribute;
+  for (let i = 0; i < pos.count; i += 1) pos.setY(i, grid.heightAt({ x: pos.getX(i), z: pos.getZ(i) }) - 0.05);
+  g.computeVertexNormals();
+  return g;
+}
+
+const PROXY_MATERIAL = new THREE.MeshBasicMaterial({ colorWrite: false, depthWrite: false });
+
 export interface TerrainProps {
   level: LevelData;
   /** 0..1 surface wetness (rain). */
   wetness?: number;
+  /** Fine detail normals near the camera (rich environment). */
+  detail?: boolean;
 }
 
-export function Terrain({ level, wetness = 0.2 }: TerrainProps) {
+export function Terrain({ level, wetness = 0.2, detail = false }: TerrainProps) {
   const geometry = useMemo(() => buildTerrainGeometry(level), [level]);
   const skirt = useMemo(() => buildSkirtGeometry(level), [level]);
-  const terrainMaterial = useMemo(() => createTerrainMaterial({ seaLevel: level.seaLevel, wetness }), [level.seaLevel, wetness]);
+  const shadowProxy = useMemo(() => buildShadowProxy(level), [level]);
+  const terrainMaterial = useMemo(() => createTerrainMaterial({ seaLevel: level.seaLevel, wetness, detail }), [level.seaLevel, wetness, detail]);
   const skirtMaterial = useMemo(() => surfaceMaterial('rock', { scale: 3.5, tint: '#6b5f52', macro: 0.6, side: THREE.DoubleSide }), []);
   return (
     <>
-      <mesh name="terrain" geometry={geometry} material={terrainMaterial} receiveShadow castShadow />
+      <mesh name="terrain" geometry={geometry} material={terrainMaterial} receiveShadow />
+      <mesh name="terrain-shadow" geometry={shadowProxy} material={PROXY_MATERIAL} castShadow layers={SHADOW_ONLY_LAYER} />
       <mesh name="terrain-skirt" geometry={skirt} material={skirtMaterial} />
     </>
   );

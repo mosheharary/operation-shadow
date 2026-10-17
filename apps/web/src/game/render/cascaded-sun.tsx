@@ -4,6 +4,7 @@ import { useFrame, useThree } from '@react-three/fiber';
 import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { CSM } from 'three/examples/jsm/csm/CSM.js';
+import { SHADOW_ONLY_LAYER } from './layers';
 
 /** Where the sun shines from, relative to what it lights (the same as the single shadow light). */
 const SUN_OFFSET = new THREE.Vector3(30, 55, -34);
@@ -48,6 +49,7 @@ export function CascadedSun({ color, intensity }: { color: THREE.Color; intensit
     for (const light of csm.lights) {
       light.shadow.bias = -0.0004;
       light.shadow.normalBias = 0.03;
+      light.shadow.camera.layers.enable(SHADOW_ONLY_LAYER);
     }
     return () => {
       csmRef.current = null;

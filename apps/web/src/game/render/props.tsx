@@ -2,16 +2,18 @@
 
 import { CellFlag, Grid, type LevelData, type PropDef, type PropKind, Surface } from '@operation-shadow/engine';
 import { useFrame } from '@react-three/fiber';
-import { Suspense, useLayoutEffect, useMemo, useRef } from 'react';
+import { lazy, Suspense, useLayoutEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
-import { bakeStaticParts, type Part } from '../assets/bake';
-import { AssetBoundary, useModel } from '../assets/models';
+import type { Part } from '../assets/bake';
+import { AssetBoundary } from '../assets/boundary';
 import type { ModelId } from '../assets/registry';
 import { useSettings } from '../runtime/settings';
 import { box, merge, tinted } from './geom';
 import { surfaceMaterial } from './materials/surface';
+import { SHADOW_ONLY_LAYER } from './layers';
 import { advanceWind, windMaterial } from './materials/wind';
 import { hash2, prng, valueNoise3 } from './noise';
+import { oakParts, pineParts } from './vegetation';
 import { material } from './palette';
 
 const t = <T extends THREE.BufferGeometry>(g: T, f: (g: T) => void): T => {
@@ -101,26 +103,6 @@ function hullGeometry(length: number, beam: number, depth: number): THREE.Buffer
   return g;
 }
 
-/** Jagged cone layer for pines (noise on the rim so they don't look like party hats). */
-function pineLayer(radius: number, height: number, y: number, seed: number): THREE.BufferGeometry {
-  const g = new THREE.ConeGeometry(radius, height, 11, 2);
-  const pos = g.attributes.position as THREE.BufferAttribute;
-  for (let i = 0; i < pos.count; i += 1) {
-    const x = pos.getX(i);
-    const z = pos.getZ(i);
-    const r = Math.hypot(x, z);
-    if (r < 1e-3) continue;
-    const a = Math.atan2(z, x);
-    const k = 1 + (valueNoise3(Math.cos(a) * 2, y, Math.sin(a) * 2, seed) - 0.5) * 0.45;
-    pos.setX(i, x * k);
-    pos.setZ(i, z * k);
-    if (pos.getY(i) < -height / 2 + 0.01) pos.setY(i, pos.getY(i) - (k - 1) * 0.6);
-  }
-  g.translate(0, y, 0);
-  g.computeVertexNormals();
-  return g;
-}
-
 function blob(radius: number, seed: number, squash = 0.8): THREE.BufferGeometry {
   const g = new THREE.IcosahedronGeometry(radius, 2);
   const pos = g.attributes.position as THREE.BufferAttribute;
@@ -151,7 +133,7 @@ function grassTuft(): THREE.BufferGeometry {
 }
 
 /** Primitive-built models, each facing +x (rotation is applied per instance from the prop heading). */
-function proceduralParts(kind: PropKind): Part[] {
+export function proceduralParts(kind: PropKind): Part[] {
   switch (kind) {
     case 'crate': {
       const frame: THREE.BufferGeometry[] = [];
@@ -250,16 +232,9 @@ function proceduralParts(kind: PropKind): Part[] {
         { geometry: box(0.24, 0.32, 0.24, 0, 4.16, 0), material: M.lantern() },
       ];
     case 'tree-pine':
-      return [
-        { geometry: t(new THREE.CylinderGeometry(0.14, 0.24, 2.6, 7), (g) => g.translate(0, 1.3, 0)), material: M.bark(), shadow: true },
-        { geometry: merge([pineLayer(2.1, 2.9, 2.9, 1), pineLayer(1.65, 2.6, 4.5, 2)])!, material: M.needles(), shadow: true },
-        { geometry: merge([pineLayer(1.2, 2.3, 6.0, 3), pineLayer(0.7, 1.8, 7.3, 4)])!, material: M.needlesLight(), shadow: true },
-      ];
+      return pineParts();
     case 'tree-oak':
-      return [
-        { geometry: t(new THREE.CylinderGeometry(0.2, 0.32, 2.8, 7), (g) => g.translate(0, 1.4, 0)), material: M.bark(), shadow: true },
-        { geometry: merge([t(blob(1.8, 5), (g) => g.translate(0, 4, 0)), t(blob(1.3, 6), (g) => g.translate(1, 3.4, 0.6)), t(blob(1.2, 7), (g) => g.translate(-0.9, 3.6, -0.5))])!, material: M.leaves(), shadow: true },
-      ];
+      return oakParts();
     case 'bush':
       return [{ geometry: merge([t(blob(0.75, 11, 0.75), (g) => g.translate(0, 0.5, 0)), t(blob(0.55, 12, 0.8), (g) => g.translate(0.5, 0.4, 0.3)), t(blob(0.5, 13, 0.8), (g) => g.translate(-0.45, 0.35, -0.25))])!, material: M.leaves(), shadow: true }];
     case 'rock':
@@ -390,7 +365,7 @@ function proceduralParts(kind: PropKind): Part[] {
  * Authored replacements (High preset). Heights match the procedural models, so a prop's own
  * scale still means the same size. Kinds not listed stay procedural.
  */
-const AUTHORED: Partial<Record<PropKind, { id: ModelId; height: number; yaw?: number }>> = {
+export const AUTHORED: Partial<Record<PropKind, { id: ModelId; height: number; yaw?: number }>> = {
   crate: { id: 'prop.crate', height: 0.85 },
   barrel: { id: 'prop.barrel', height: 1 },
   'fuel-barrel': { id: 'prop.fuel-barrel', height: 0.9 },
@@ -404,7 +379,7 @@ const AUTHORED: Partial<Record<PropKind, { id: ModelId; height: number; yaw?: nu
 const WIND: Partial<Record<PropKind, number>> = { 'tree-pine': 0.0012, 'tree-oak': 0.0015, bush: 0.02, 'tall-grass': 0.12 };
 
 /** Gives swaying kinds wind-patched copies of their materials (and matching shadow materials). */
-function withWind(kind: PropKind, parts: Part[]): (Part & { depth?: THREE.Material })[] {
+export function withWind(kind: PropKind, parts: Part[]): (Part & { depth?: THREE.Material })[] {
   const strength = WIND[kind];
   if (!strength) return parts;
   return parts.map((part) => {
@@ -419,7 +394,7 @@ const HULL_TINTS = ['#c9c2b4', '#5b7183', '#8a3f30', '#b8b29e', '#3f5c4d'];
 /** Wagon paint (body instance tint). */
 const WAGON_TINTS = ['#ffffff', '#8c9a8a', '#b9a37f', '#a0a8b0'];
 
-interface KindProps {
+export interface KindProps {
   kind: PropKind;
   props: PropDef[];
   grid: Grid;
@@ -431,13 +406,21 @@ function ProceduralKind(props: KindProps) {
   return <PropKindInstances {...props} parts={parts} />;
 }
 
-function AuthoredKind(props: KindProps & { spec: { id: ModelId; height: number; yaw?: number } }) {
-  const scene = useModel(props.spec.id);
-  const parts = useMemo(() => withWind(props.kind, bakeStaticParts(scene, props.spec)), [scene, props.kind, props.spec]);
-  return <PropKindInstances {...props} parts={parts} />;
-}
+/** Authored models load glTF code that the Performance preset never needs: fetched on first use. */
+const AuthoredKind = lazy(() => import('./authored-prop').then((m) => ({ default: m.AuthoredKind })));
 
-function PropKindInstances({ kind, props, grid, seaLevel, parts }: KindProps & { parts: (Part & { depth?: THREE.Material })[] }) {
+export function PropKindInstances({
+  kind,
+  props,
+  grid,
+  seaLevel,
+  parts,
+  shadowOnly = false,
+}: KindProps & {
+  parts: (Part & { depth?: THREE.Material })[];
+  /** Draw only into the shadow maps (a cheap stand-in casting an authored model's shadow). */
+  shadowOnly?: boolean;
+}) {
   const refs = useRef<(THREE.InstancedMesh | null)[]>([]);
 
   useLayoutEffect(() => {
@@ -483,7 +466,8 @@ function PropKindInstances({ kind, props, grid, seaLevel, parts }: KindProps & {
           args={[part.geometry, part.material, props.length]}
           customDepthMaterial={part.depth}
           castShadow={part.shadow ?? false}
-          receiveShadow
+          receiveShadow={!shadowOnly}
+          layers={shadowOnly ? SHADOW_ONLY_LAYER : 0}
         />
       ))}
     </>

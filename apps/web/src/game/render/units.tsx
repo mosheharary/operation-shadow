@@ -3,21 +3,25 @@
 import { SPECIALIST_PROFILES } from '@operation-shadow/content';
 import { CellFlag, type Guard, type Vec2 } from '@operation-shadow/engine';
 import { useFrame } from '@react-three/fiber';
-import { useCallback, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import * as THREE from 'three';
 import type { GameController } from '../runtime/controller';
 import { useSettings } from '../runtime/settings';
 import { type HoverTarget, useGameUi } from '../runtime/store';
-import { createCharacterRig } from './characters/character-rig';
-import type { CharacterLibrary } from './characters/library';
-import { CharacterLibraryLoader } from './characters/library-loader';
+import type { CharacterKit } from './characters/library-loader';
 import type { FigureLook, FigurePose } from './figure';
 import { DISGUISED_LOOK, guardLook, PRISONER_LOOK, SQUAD_LOOKS } from './looks';
-import { proceduralRig, type UnitRig } from './rig';
+import { type AnimationRate, proceduralRig, rigCounts, type UnitRig } from './rig';
+
+/** Characters animated every frame (the nearest on screen); the rest step at half rate. */
+const FULL_RATE = 24;
 
 type IconKind = 'eye' | 'question' | 'alert' | 'talk' | 'sleep';
 
 const iconCache = new Map<IconKind, THREE.SpriteMaterial>();
+
+/** Skinned characters (glTF, animation) load only when the detailed models setting is on. */
+const CharacterLibraryLoader = lazy(() => import('./characters/library-loader').then((m) => ({ default: m.CharacterLibraryLoader })));
 
 function iconMaterial(kind: IconKind): THREE.SpriteMaterial {
   const cached = iconCache.get(kind);
@@ -112,15 +116,29 @@ export function Units({ controller }: UnitsProps) {
   const hitboxes = useRef(new Map<string, THREE.Mesh>());
   const key = useSyncExternalStore(controller.subscribeHud, () => unitKey(controller), () => '');
   const authored = useSettings((s) => s.models);
-  const [library, setLibrary] = useState<CharacterLibrary | null>(null);
-  const onLibrary = useCallback((lib: CharacterLibrary) => setLibrary(lib), []);
-  const lib = authored ? library : null;
+  const [library, setLibrary] = useState<CharacterKit | null>(null);
+  const onLibrary = useCallback((kit: CharacterKit) => setLibrary(kit), []);
+  const kit = authored ? library : null;
+  // The counts describe this mission's rigs only.
+  useEffect(
+    () => () => {
+      rigCounts.authored = 0;
+      rigCounts.procedural = 0;
+    },
+    [],
+  );
 
   const lists = useMemo(() => {
     const [ops = '', guards = '', prisoners = ''] = key.split('|');
     const split = (v: string) => (v ? v.split(',') : []);
     return { ops: split(ops), guards: split(guards), prisoners: split(prisoners) };
   }, [key]);
+
+  // Animation rates for this frame, decided from last frame's positions (cheap and a frame is invisible).
+  const rates = useRef(new Map<string, AnimationRate>());
+  const frustum = useMemo(() => new THREE.Frustum(), []);
+  const viewProjection = useMemo(() => new THREE.Matrix4(), []);
+  const probeSphere = useMemo(() => new THREE.Sphere(new THREE.Vector3(), 1.5), []);
 
   const ringGeometry = useMemo(() => new THREE.RingGeometry(0.5, 0.62, 32).rotateX(-Math.PI / 2), []);
   const hitGeometry = useMemo(() => new THREE.CylinderGeometry(0.55, 0.55, 1.9, 8).translate(0, 0.95, 0), []);
@@ -136,15 +154,17 @@ export function Units({ controller }: UnitsProps) {
 
   /** The rig for a unit, rebuilt when its look changes or the authored library arrives. */
   const ensureRig = (id: string, lookKey: string, look: () => FigureLook): RigEntry => {
-    const key = `${lookKey}|${lib ? 'authored' : 'procedural'}`;
+    const key = `${lookKey}|${kit ? 'authored' : 'procedural'}`;
     const existing = rigs.current.get(id);
     if (existing && existing.key === key) return existing;
     if (existing) {
       group.current?.remove(existing.rig.root);
       existing.rig.dispose();
     }
-    const rig = lib ? createCharacterRig(look(), lib) : proceduralRig(look());
+    const rig = kit ? kit.create(look()) : proceduralRig(look());
     group.current?.add(rig.root);
+    if (existing) rigCounts[existing.key.endsWith('|authored') ? 'authored' : 'procedural'] -= 1;
+    rigCounts[kit ? 'authored' : 'procedural'] += 1;
     const entry: RigEntry = { rig, key, last: existing?.last ?? null, speed: 0 };
     rigs.current.set(id, entry);
     return entry;
@@ -162,6 +182,7 @@ export function Units({ controller }: UnitsProps) {
 
   useFrame((frame, dt) => {
     const world = controller.world;
+    const rateOf = (id: string): AnimationRate => rates.current.get(id) ?? 'full';
     const s = world.state;
     const time = frame.clock.elapsedTime;
     const ui = useGameUi.getState();
@@ -199,7 +220,7 @@ export function Units({ controller }: UnitsProps) {
         swimming,
         climbing: (action?.kind === 'move' || action?.kind === 'approach') && action.linkProgress > 0,
       };
-      rig.update(pose, dt, time, trackSpeed(entry, pos, dt));
+      rig.update(pose, dt, time, trackSpeed(entry, pos, dt), frame.camera.position.distanceTo(rig.root.position), rateOf(op.id));
 
       let ring = rings.current.get(op.id);
       if (!ring && group.current) {
@@ -241,7 +262,7 @@ export function Units({ controller }: UnitsProps) {
         swimming: false,
         climbing: false,
       };
-      rig.update(pose, dt, time, trackSpeed(entry, pos, dt));
+      rig.update(pose, dt, time, trackSpeed(entry, pos, dt), frame.camera.position.distanceTo(rig.root.position), rateOf(g.id));
       if (rig.lanternLight) rig.lanternLight.visible = g.status === 'active';
 
       const iconKind = guardIcon(g);
@@ -275,9 +296,23 @@ export function Units({ controller }: UnitsProps) {
       rig.root.rotation.y = -facing;
       const moving = Boolean(leader) && Math.hypot(leader!.pos.x - obj.pos.x, leader!.pos.z - obj.pos.z) > 1.9;
       const prisonerPose: FigurePose = { stance: 'stand', moving, running: false, lying: obj.alive ? 'none' : 'back', carrying: false, carried: false, aiming: false, talking: false, swimming: false, climbing: false };
-      rig.update(prisonerPose, dt, time, trackSpeed(entry, pos, dt));
+      rig.update(prisonerPose, dt, time, trackSpeed(entry, pos, dt), frame.camera.position.distanceTo(rig.root.position), rateOf(obj.id));
       placeHitbox(obj.id, pos, groundY(pos), obj.alive && !obj.extracted);
     }
+
+    // Next frame's animation rates: off screen frozen, the nearest on screen at full rate.
+    viewProjection.multiplyMatrices(frame.camera.projectionMatrix, frame.camera.matrixWorldInverse);
+    frustum.setFromProjectionMatrix(viewProjection);
+    const onScreen: { id: string; distance: number }[] = [];
+    rates.current.clear();
+    for (const [id, entry] of rigs.current) {
+      const root = entry.rig.root;
+      probeSphere.center.set(root.position.x, root.position.y + 0.9, root.position.z);
+      if (root.visible && frustum.intersectsSphere(probeSphere)) onScreen.push({ id, distance: frame.camera.position.distanceTo(root.position) });
+      else rates.current.set(id, 'frozen');
+    }
+    onScreen.sort((a, b) => a.distance - b.distance);
+    onScreen.forEach(({ id }, i) => rates.current.set(id, i < FULL_RATE ? 'full' : 'half'));
   });
 
   const hit = (id: string, kind: NonNullable<HoverTarget>['kind']) => (
@@ -295,7 +330,11 @@ export function Units({ controller }: UnitsProps) {
 
   return (
     <group ref={group} name="units">
-      {authored && <CharacterLibraryLoader onReady={onLibrary} />}
+      {authored && (
+        <Suspense fallback={null}>
+          <CharacterLibraryLoader onReady={onLibrary} />
+        </Suspense>
+      )}
       {lists.ops.map((id) => hit(id, 'operative'))}
       {lists.guards.map((id) => hit(id, 'guard'))}
       {lists.prisoners.map((id) => hit(id, 'object'))}

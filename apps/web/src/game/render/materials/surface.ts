@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { type SurfaceKey, surfaceTexture } from './textures';
+import { highResTextures, type SurfaceKey, surfaceTexture } from './textures';
 
 /** Cheap value noise and triplanar helpers shared by the custom surface shaders. */
 export const NOISE_GLSL = /* glsl */ `
@@ -44,7 +44,7 @@ const cache = new Map<string, THREE.MeshStandardMaterial>();
  * Triplanar projection uses whiteout normal blending; instanced meshes are supported.
  */
 export function surfaceMaterial(key: SurfaceKey, options: SurfaceOptions = {}): THREE.MeshStandardMaterial {
-  const id = `${key}|${JSON.stringify(options)}`;
+  const id = `${key}|${highResTextures() ? 'hi' : 'lo'}|${JSON.stringify(options)}`;
   const cached = cache.get(id);
   if (cached) return cached;
   const { scale = 2, tint = '#ffffff', roughness = 1, normalStrength = 1, moss = 0, macro = 0.35, projection = 'triplanar' } = options;

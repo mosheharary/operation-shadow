@@ -201,5 +201,7 @@ export function buildDoor(style: DoorStyle, width: number, seed: number): DoorMo
   if (built.brass.length) root.add(mesh(joinPlain(built.brass), brassMaterial()));
   const lock = padlock(width);
   root.add(lock);
+  // Hardware is a few centimetres deep: only the leaf casts a shadow (one draw call per cascade).
+  root.traverse((o) => (o.castShadow = built.leaf.includes(o as THREE.Mesh)));
   return { root, padlock: lock };
 }

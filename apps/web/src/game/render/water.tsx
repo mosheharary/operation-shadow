@@ -159,8 +159,14 @@ export function Water({ level, glint = 1, reflections = false }: { level: LevelD
   return hasWater ? <Sea level={level} glint={glint} reflections={reflections} /> : null;
 }
 
-/** Objects left out of the mirrored view: the water itself, ground decals and the grass. */
-const NOT_REFLECTED = new Set(['water', 'water-edge', 'overlay', 'grass']);
+/**
+ * Objects left out of the mirrored view: the water itself, ground decals and grass, and the
+ * figures and small interactive objects (a few pixels in the reflection, a draw call each).
+ */
+const NOT_REFLECTED = new Set(['water', 'water-edge', 'overlay', 'grass', 'units', 'world-objects']);
+
+/** Camera height above the sea beyond which reflections are not drawn (overview zoom). */
+const OVERVIEW_HEIGHT = 110;
 
 function Sea({ level, glint, reflections }: { level: LevelData; glint: number; reflections: boolean }) {
   const { gl, scene, camera } = useThree();
@@ -270,7 +276,9 @@ function Sea({ level, glint, reflections }: { level: LevelData; glint: number; r
     uniforms.uTime.value += delta;
     // The mirror is redrawn every other frame at half resolution (the sea barely changes per frame).
     frame.current += 1;
-    if (mirror && camera instanceof THREE.PerspectiveCamera && frame.current % 2 === 0) {
+    // From an overview (the whole map on screen) the mirror is a few pixels: skip it there.
+    const overview = camera.position.y - level.seaLevel > OVERVIEW_HEIGHT;
+    if (mirror && !overview && camera instanceof THREE.PerspectiveCamera && frame.current % 2 === 0) {
       const hidden: THREE.Object3D[] = [];
       for (const child of scene.children) {
         if (child.visible && NOT_REFLECTED.has(child.name)) {
@@ -285,7 +293,7 @@ function Sea({ level, glint, reflections }: { level: LevelData; glint: number; r
         uniforms.uReflectMatrix.value.copy(mirror.textureMatrix);
       }
     }
-    uniforms.uReflect.value = mirror && uniforms.tReflect.value ? 1 : 0;
+    uniforms.uReflect.value = mirror && uniforms.tReflect.value && !overview ? 1 : 0;
     uniforms.uGlint.value = glint;
     // A glassy sea suits moonlight; under daylight or fog the sun's highlight would cover it.
     uniforms.uRough.value = 0.06 + (1 - glint) * 0.4;

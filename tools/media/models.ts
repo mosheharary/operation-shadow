@@ -217,8 +217,15 @@ async function optimize(spec: ModelSpec, doc: Document): Promise<void> {
   const isStatic = (spec.process ?? 'static') === 'static';
   await doc.transform(dedup(), prune(), weld());
   if (isStatic) await doc.transform(flatten(), join(), weld());
-  // Simplify with a growing error tolerance until the model fits its triangle budget.
-  for (let error = 0.002; isStatic && triangles(doc) > spec.maxTriangles && error < 0.2; error *= 2) {
+  // Simplify with a growing error tolerance until the model fits its triangle budget (skinned
+  // models only when asked: meshopt reduces the index buffer, so joints and weights are kept).
+  const reduce = isStatic || spec.simplify === true;
+  if (spec.simplify) {
+    // A shadow body needs neither eyes nor eyebrows.
+    for (const node of doc.getRoot().listNodes()) if (/^(Eyes|Eyebrows)$/.test(node.getName())) node.dispose();
+    await doc.transform(prune());
+  }
+  for (let error = 0.002; reduce && triangles(doc) > spec.maxTriangles && error < 0.2; error *= 2) {
     await MeshoptSimplifier.ready;
     await doc.transform(simplify({ simplifier: MeshoptSimplifier, ratio: spec.maxTriangles / triangles(doc), error }));
   }

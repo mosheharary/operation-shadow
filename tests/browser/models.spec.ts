@@ -31,6 +31,21 @@ test.describe('authored models', () => {
     expect(violations).toEqual([]);
   });
 
+  test('a mission plays with authored characters: they load, and picking still selects them', async ({ page }) => {
+    await signIn(page);
+    await page.goto('/play/silent-tide?squad=engineer,infiltrator,recon,marine&seed=42');
+    await expect.poll(() => page.evaluate(() => Boolean(window.__OS_GAME__)), { timeout: 60_000 }).toBe(true);
+    const probe = () => page.evaluate(() => window.__OS_GAME__!.probe());
+    // Every squad member, guard and prisoner switches to the skinned rig once the library loads.
+    await expect.poll(async () => (await probe()).rigs.authored, { timeout: 90_000 }).toBeGreaterThanOrEqual(4);
+    expect((await probe()).rigs.procedural).toBe(0);
+    // Picking goes through the hitboxes, not the skinned meshes: clicking an operative selects it.
+    const at = (await page.evaluate(() => window.__OS_GAME__!.entityScreen('op:recon')))!;
+    await page.mouse.click(at.x, at.y);
+    await expect.poll(async () => (await probe()).selected).toEqual(['op:recon']);
+    expect((await page.evaluate(() => window.__OS_ASSETS__?.() ?? { failed: {} })).failed).toEqual({});
+  });
+
   test('a failed model download falls back to the procedural figures', async ({ page }) => {
     await page.route('**/media/models/**', (route) => route.fulfill({ status: 404, body: '' }));
     await signIn(page);

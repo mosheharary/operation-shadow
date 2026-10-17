@@ -1,7 +1,8 @@
 import * as THREE from 'three';
 import { clone as cloneSkinned } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import { buildAttachments, type FigureLook, type FigurePose } from '../figure';
-import type { UnitRig } from '../rig';
+import { SHADOW_ONLY_LAYER } from '../layers';
+import type { AnimationRate, UnitRig } from '../rig';
 import { bodyMaterial } from './body-material';
 import { type ClipChoice, clipsFor, type ClipName, LOCOMOTION } from './clips';
 import type { CharacterLibrary, HairId } from './library';
@@ -11,6 +12,7 @@ const FIGURE_HEIGHT = 1.78;
 /** The procedural head's eyes, from its kit origin (the neck joint): up and forward, metres. */
 const FIGURE_EYES = { up: 0.128, forward: 0.09 };
 const FADE = 0.22;
+const FACE_DETAIL_DISTANCE = 35;
 
 /**
  * Where the procedural kit hangs on the skeleton: the bone it follows, the bone whose rest
@@ -34,6 +36,8 @@ function hairFor(look: FigureLook, female: boolean): HairId | null {
 }
 
 const materialCache = new Map<string, THREE.Material>();
+/** Shadow proxies are never drawn in colour; the shadow pass uses its own depth material. */
+const SHADOW_PROXY_MATERIAL = new THREE.MeshBasicMaterial({ colorWrite: false, depthWrite: false });
 
 function lookKey(look: FigureLook): string {
   return JSON.stringify(look);
@@ -58,10 +62,23 @@ export function createCharacterRig(look: FigureLook, lib: CharacterLibrary): Uni
 
   const key = lookKey(look);
   const owned: THREE.Material[] = [];
+  const shadowProxies: THREE.SkinnedMesh[] = [];
+  /** Eyes and eyebrows: under a pixel beyond a few dozen metres, so drawn only up close. */
+  const faceDetail: THREE.Object3D[] = [];
   body.traverse((object) => {
     const mesh = object as THREE.SkinnedMesh;
     if (!mesh.isSkinnedMesh) return;
     mesh.userData = {};
+    // Culled by a fixed sphere round the figure (bind-pose bounds are wrong once animated, and
+    // recomputing from the bones every frame costs more than it saves). It also covers a figure
+    // lying down or carried, which only move it within the rig.
+    mesh.frustumCulled = true;
+    mesh.boundingSphere = new THREE.Sphere(new THREE.Vector3(0, source.height * 0.5, 0), source.height * 0.85);
+    const isBody = Boolean(mesh.geometry.getAttribute('aRegion'));
+    // The full body casts no shadow: a 3.5k-triangle stand-in on the same skeleton does, seen
+    // only by the shadow cameras (each cascade would otherwise draw the full body again).
+    mesh.castShadow = isBody && !source.shadow;
+    if (isBody && source.shadow) shadowProxies.push(mesh);
     const mat = mesh.material as THREE.MeshStandardMaterial;
     if (mesh.geometry.getAttribute('aRegion')) {
       const cacheKey = `body:${female}:${key}`;
@@ -71,7 +88,10 @@ export function createCharacterRig(look: FigureLook, lib: CharacterLibrary): Uni
         materialCache.set(cacheKey, painted);
       }
       mesh.material = painted;
-    } else if (/hair/i.test(mat.name)) {
+    } else {
+      faceDetail.push(mesh);
+    }
+    if (/hair/i.test(mat.name)) {
       // Eyebrows take the hair colour.
       const tinted = mat.clone();
       tinted.color.set(look.hair).multiplyScalar(2.2);
@@ -79,6 +99,16 @@ export function createCharacterRig(look: FigureLook, lib: CharacterLibrary): Uni
       owned.push(tinted);
     }
   });
+
+  for (const full of shadowProxies) {
+    const proxy = new THREE.SkinnedMesh(source.shadow!, SHADOW_PROXY_MATERIAL);
+    proxy.bind(full.skeleton, full.bindMatrix);
+    proxy.layers.set(SHADOW_ONLY_LAYER);
+    proxy.castShadow = true;
+    proxy.frustumCulled = true;
+    proxy.boundingSphere = full.boundingSphere!.clone();
+    full.parent!.add(proxy);
+  }
 
   const bones = new Map<string, THREE.Object3D>();
   body.traverse((object) => {
@@ -129,7 +159,10 @@ export function createCharacterRig(look: FigureLook, lib: CharacterLibrary): Uni
   if (weapon) hang(weapon, 'chest');
   const lantern = kit.lantern;
   if (lantern) hang(lantern, 'lantern');
-  for (const mesh of [kit.head, kit.chest, kit.pelvis, skirt]) if (mesh) mesh.castShadow = true;
+  // Only the body (and a coat skirt) casts shadows: at game distance the kit's own shadows are a
+  // pixel or two, and each would cost a draw call in every shadow cascade.
+  for (const object of [kit.head, kit.chest, kit.pelvis, weapon, lantern]) object?.traverse((o) => (o.castShadow = false));
+  if (skirt) skirt.castShadow = true;
 
   // Hair and beards are static meshes in the body's rest space: hung on the head bone.
   const hairIds: HairId[] = [];
@@ -148,7 +181,7 @@ export function createCharacterRig(look: FigureLook, lib: CharacterLibrary): Uni
         const mesh = object as THREE.Mesh;
         if (!mesh.isMesh) return;
         mesh.userData = {};
-        mesh.castShadow = true;
+        mesh.castShadow = false;
         const tinted = (mesh.material as THREE.MeshStandardMaterial).clone();
         tinted.color.set(look.hair).multiplyScalar(2.2);
         mesh.material = tinted;
@@ -184,11 +217,15 @@ export function createCharacterRig(look: FigureLook, lib: CharacterLibrary): Uni
   const layout = { forward: 0, y: 0, pitch: 0 };
   const target = { forward: 0, y: 0, pitch: 0 };
   const phase = Math.random() * 10;
+  let pending = 0;
+  let halfTick = false;
 
   return {
     root,
     lanternLight: lantern,
-    update(pose: FigurePose, dt: number, _time: number, speed: number) {
+    update(pose: FigurePose, dt: number, _time: number, speed: number, cameraDistance = 0, rate: AnimationRate = 'full') {
+      const near = cameraDistance < FACE_DETAIL_DISTANCE;
+      for (const mesh of faceDetail) mesh.visible = near;
       const choice = clipsFor(pose, Boolean(look.lantern));
       if (!current || choice.base !== current.base || choice.upper !== current.upper || choice.once !== current.once) {
         const nextBase = actionFor(choice.base, choice.upper ? 'lower' : 'full');
@@ -240,7 +277,12 @@ export function createCharacterRig(look: FigureLook, lib: CharacterLibrary): Uni
         weapon.position.set(aimed ? 0.26 : -0.15, aimed ? 0.41 : 0.27, aimed ? 0.11 : 0.02);
         weapon.rotation.set(0, 0, aimed ? 0 : 1.2);
       }
-      mixer.update(dt);
+      // Animation level of detail: off-screen figures hold their pose; distant ones step at half rate.
+      pending += dt;
+      if (rate === 'frozen') return;
+      if (rate === 'half' && (halfTick = !halfTick)) return;
+      mixer.update(pending);
+      pending = 0;
     },
     dispose() {
       mixer.stopAllAction();

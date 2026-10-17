@@ -2,7 +2,7 @@
 
 import { Environment } from '@react-three/drei';
 import { Suspense } from 'react';
-import { AssetBoundary } from '../assets/models';
+import { AssetBoundary } from '../assets/boundary';
 
 /** Which sky lights the scene at an hour of the day. */
 export function skyFor(hour: number): 'night' | 'dusk' | 'day' {

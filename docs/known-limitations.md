@@ -31,3 +31,5 @@ or something that could not be verified here.
 - `ai_usage` rows remain after account deletion (anonymised) so the monthly budget stays accurate.
 - The 404 page is static, so it renders without the nonce-protected scripts (it needs none).
 - Generated operations' own HQ lines (written by the model) are text-only; template and campaign lines are voiced.
+- **Full-map overview**: zoomed all the way out (190 m) both presets exceed the draw-call budget (High 701 of 600, Performance 586 of 300) because everything on the map is on screen; the play-distance view is within budget. See `docs/perf/2026-10-17-gltf-world.md`.
+

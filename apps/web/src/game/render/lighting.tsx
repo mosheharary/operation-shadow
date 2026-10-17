@@ -2,11 +2,14 @@
 
 import type { LightDef } from '@operation-shadow/engine';
 import { useFrame, useThree } from '@react-three/fiber';
-import { useMemo, useRef } from 'react';
+import { lazy, Suspense, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import type { GameController } from '../runtime/controller';
 import { cameraFocus } from '../camera/camera-rig';
-import { CascadedSun } from './cascaded-sun';
+import { SHADOW_ONLY_LAYER } from './layers';
+
+/** Cascaded shadow maps (three's CSM) only load with the rich environment setting. */
+const CascadedSun = lazy(() => import('./cascaded-sun').then((m) => ({ default: m.CascadedSun })));
 
 const LAMP_POOL = 6;
 const LANTERN_POOL = 4;
@@ -115,7 +118,11 @@ export function Lighting({ controller, shadows = true, cascaded = false }: { con
       {/* CSM's shader expects its cascade lights to be the only directional lights. */}
       {!csm && (
         <directionalLight
-          ref={sun}
+          ref={(light) => {
+            sun.current = light;
+            // Shadow proxies (low-detail stand-ins) are drawn by the shadow camera only.
+            light?.shadow.camera.layers.enable(SHADOW_ONLY_LAYER);
+          }}
           castShadow={shadows}
           color={sunColor}
           intensity={2.5 + daylight * 1.2}
@@ -155,7 +162,11 @@ export function Lighting({ controller, shadows = true, cascaded = false }: { con
         />
       ))}
       <spotLight ref={spot} color="#f5f2dc" intensity={160} distance={60} angle={0.16} penumbra={0.35} decay={1.4} />
-      {csm && <CascadedSun color={sunColor} intensity={2.5 + daylight * 1.2} />}
+      {csm && (
+        <Suspense fallback={null}>
+          <CascadedSun color={sunColor} intensity={2.5 + daylight * 1.2} />
+        </Suspense>
+      )}
       {env.weather === 'rain' && <Rain controller={controller} />}
     </>
   );

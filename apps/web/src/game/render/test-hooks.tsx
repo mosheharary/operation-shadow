@@ -6,6 +6,7 @@ import { useEffect } from 'react';
 import * as THREE from 'three';
 import type { GameController } from '../runtime/controller';
 import { useGameUi } from '../runtime/store';
+import { rigCounts } from './rig';
 
 export interface GameProbe {
   tick: number;
@@ -15,6 +16,8 @@ export interface GameProbe {
   selected: string[];
   /** View cones currently drawn (far and near fans count separately). */
   conesVisible: number;
+  /** Characters drawn as authored (skinned glTF) and as procedural figures. */
+  rigs: { authored: number; procedural: number };
   operatives: { id: string; role: string; x: number; z: number; status: OperativeStatus; stance: Stance; busy: boolean }[];
 }
 
@@ -62,6 +65,7 @@ export function TestHooks({ controller }: { controller: GameController }) {
           alarm: s.alarm.level,
           selected: [...useGameUi.getState().selected],
           conesVisible: countCones(scene),
+          rigs: { ...rigCounts },
           operatives: s.operatives.map((op) => ({
             id: op.id,
             role: op.role,

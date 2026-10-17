@@ -17,6 +17,7 @@
       ],
       "files": {
         "color": "cobble/color.webp",
+        "color1k": "cobble/color-1k.webp",
         "normal": "cobble/normal.webp",
         "rough": "cobble/rough.webp"
       }
@@ -36,6 +37,7 @@
       ],
       "files": {
         "color": "rock/color.webp",
+        "color1k": "rock/color-1k.webp",
         "normal": "rock/normal.webp",
         "rough": "rock/rough.webp"
       }
@@ -55,6 +57,7 @@
       ],
       "files": {
         "color": "grass/color.webp",
+        "color1k": "grass/color-1k.webp",
         "normal": "grass/normal.webp",
         "rough": "grass/rough.webp"
       }
@@ -75,6 +78,7 @@
       ],
       "files": {
         "color": "forest/color.webp",
+        "color1k": "forest/color-1k.webp",
         "normal": "forest/normal.webp",
         "rough": "forest/rough.webp"
       }
@@ -94,6 +98,7 @@
       ],
       "files": {
         "color": "sand/color.webp",
+        "color1k": "sand/color-1k.webp",
         "normal": "sand/normal.webp",
         "rough": "sand/rough.webp"
       }
@@ -114,6 +119,7 @@
       ],
       "files": {
         "color": "gravel/color.webp",
+        "color1k": "gravel/color-1k.webp",
         "normal": "gravel/normal.webp",
         "rough": "gravel/rough.webp"
       }
@@ -133,6 +139,7 @@
       ],
       "files": {
         "color": "planks/color.webp",
+        "color1k": "planks/color-1k.webp",
         "normal": "planks/normal.webp",
         "rough": "planks/rough.webp"
       }
@@ -152,6 +159,7 @@
       ],
       "files": {
         "color": "planks-light/color.webp",
+        "color1k": "planks-light/color-1k.webp",
         "normal": "planks-light/normal.webp",
         "rough": "planks-light/rough.webp"
       }
@@ -171,6 +179,7 @@
       ],
       "files": {
         "color": "plaster/color.webp",
+        "color1k": "plaster/color-1k.webp",
         "normal": "plaster/normal.webp",
         "rough": "plaster/rough.webp"
       }
@@ -190,6 +199,7 @@
       ],
       "files": {
         "color": "stone-wall/color.webp",
+        "color1k": "stone-wall/color-1k.webp",
         "normal": "stone-wall/normal.webp",
         "rough": "stone-wall/rough.webp"
       }
@@ -209,6 +219,7 @@
       ],
       "files": {
         "color": "roof-slate/color.webp",
+        "color1k": "roof-slate/color-1k.webp",
         "normal": "roof-slate/normal.webp",
         "rough": "roof-slate/rough.webp"
       }
@@ -228,6 +239,7 @@
       ],
       "files": {
         "color": "roof-clay/color.webp",
+        "color1k": "roof-clay/color-1k.webp",
         "normal": "roof-clay/normal.webp",
         "rough": "roof-clay/rough.webp"
       }
@@ -247,6 +259,7 @@
       ],
       "files": {
         "color": "concrete/color.webp",
+        "color1k": "concrete/color-1k.webp",
         "normal": "concrete/normal.webp",
         "rough": "concrete/rough.webp"
       }
@@ -266,6 +279,7 @@
       ],
       "files": {
         "color": "metal/color.webp",
+        "color1k": "metal/color-1k.webp",
         "normal": "metal/normal.webp",
         "rough": "metal/rough.webp"
       }
@@ -285,6 +299,7 @@
       ],
       "files": {
         "color": "snow/color.webp",
+        "color1k": "snow/color-1k.webp",
         "normal": "snow/normal.webp",
         "rough": "snow/rough.webp"
       }
@@ -305,6 +320,7 @@
       ],
       "files": {
         "color": "hessian/color.webp",
+        "color1k": "hessian/color-1k.webp",
         "normal": "hessian/normal.webp",
         "rough": "hessian/rough.webp"
       }
@@ -325,6 +341,7 @@
       ],
       "files": {
         "color": "concrete-cast/color.webp",
+        "color1k": "concrete-cast/color-1k.webp",
         "normal": "concrete-cast/normal.webp",
         "rough": "concrete-cast/rough.webp"
       }
@@ -345,8 +362,49 @@
       ],
       "files": {
         "color": "corrugated/color.webp",
+        "color1k": "corrugated/color-1k.webp",
         "normal": "corrugated/normal.webp",
         "rough": "corrugated/rough.webp"
+      }
+    },
+    "bark-pine": {
+      "source": "Poly Haven",
+      "id": "pine_bark",
+      "name": "Pine Bark",
+      "url": "https://polyhaven.com/a/pine_bark",
+      "authors": [
+        "Dimitrios Savva"
+      ],
+      "license": "CC0-1.0",
+      "tileMeters": [
+        2,
+        2
+      ],
+      "files": {
+        "color": "bark-pine/color.webp",
+        "color1k": "bark-pine/color-1k.webp",
+        "normal": "bark-pine/normal.webp",
+        "rough": "bark-pine/rough.webp"
+      }
+    },
+    "bark-oak": {
+      "source": "Poly Haven",
+      "id": "bark_brown_02",
+      "name": "Bark Brown 02",
+      "url": "https://polyhaven.com/a/bark_brown_02",
+      "authors": [
+        "Rob Tuytel"
+      ],
+      "license": "CC0-1.0",
+      "tileMeters": [
+        1,
+        1
+      ],
+      "files": {
+        "color": "bark-oak/color.webp",
+        "color1k": "bark-oak/color-1k.webp",
+        "normal": "bark-oak/normal.webp",
+        "rough": "bark-oak/rough.webp"
       }
     }
   }
