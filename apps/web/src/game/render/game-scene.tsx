@@ -90,12 +90,12 @@ export function GameScene({ controller, onSample = ignoreSample, testHooks = fal
       }}
     >
       <SimulationDriver controller={controller} />
-      <Lighting controller={controller} shadows={shadows} sharpShadows={rich} />
+      <Lighting controller={controller} shadows={shadows} cascaded={rich} />
       {rich && <SkyLight hour={hour} weather={weather} />}
       <Terrain level={controller.level} wetness={wetness} />
       <Rocks level={controller.level} />
       <Harbor level={controller.level} />
-      <Water level={controller.level} glint={glint} />
+      <Water level={controller.level} glint={glint} reflections={rich} />
       <Structures level={controller.level} cutawayRegions={cutawayRegions} />
       <Props level={controller.level} />
       {rich && <Grass level={controller.level} />}

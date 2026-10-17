@@ -1,10 +1,11 @@
 'use client';
 
 import { CellFlag, Grid, type LevelData } from '@operation-shadow/engine';
-import { useFrame } from '@react-three/fiber';
-import { useMemo } from 'react';
+import { useFrame, useThree } from '@react-three/fiber';
+import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { NOISE_GLSL } from './materials/surface';
+import { PlanarReflection } from './reflection';
 
 const NORMAL_SIZE = 256;
 
@@ -153,12 +154,19 @@ function edgeGeometry(level: LevelData): THREE.BufferGeometry {
  * `glint` scales the specular sparkle: full under a night sky, much less in daylight (the scene's
  * lights already brighten the water) and in fog.
  */
-export function Water({ level, glint = 1 }: { level: LevelData; glint?: number }) {
+export function Water({ level, glint = 1, reflections = false }: { level: LevelData; glint?: number; reflections?: boolean }) {
   const hasWater = useMemo(() => level.flags.some((f) => (f & CellFlag.Deep) !== 0), [level]);
-  return hasWater ? <Sea level={level} glint={glint} /> : null;
+  return hasWater ? <Sea level={level} glint={glint} reflections={reflections} /> : null;
 }
 
-function Sea({ level, glint }: { level: LevelData; glint: number }) {
+/** Objects left out of the mirrored view: the water itself, ground decals and the grass. */
+const NOT_REFLECTED = new Set(['water', 'water-edge', 'overlay', 'grass']);
+
+function Sea({ level, glint, reflections }: { level: LevelData; glint: number; reflections: boolean }) {
+  const { gl, scene, camera } = useThree();
+  const mirror = useMemo(() => (reflections ? new PlanarReflection(level.seaLevel - 0.12) : null), [reflections, level.seaLevel]);
+  useEffect(() => () => mirror?.dispose(), [mirror]);
+  const frame = useRef(0);
   const { geometry, material, uniforms, edge, edgeMaterial } = useMemo(() => {
     const geo = new THREE.PlaneGeometry(level.width, level.depth, 160, 120);
     geo.rotateX(-Math.PI / 2);
@@ -170,18 +178,22 @@ function Sea({ level, glint }: { level: LevelData; glint: number }) {
       tWaves: { value: waveNormalTexture() },
       tShore: { value: shoreTexture(level) },
       uMapSize: { value: new THREE.Vector2(level.width, level.depth) },
+      tReflect: { value: null as THREE.Texture | null },
+      uReflectMatrix: { value: new THREE.Matrix4() },
+      uReflect: { value: 0 },
     };
     const mat = new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.08, metalness: 0.05, transparent: true, depthWrite: false });
     mat.onBeforeCompile = (shader) => {
       Object.assign(shader.uniforms, u);
       shader.vertexShader = shader.vertexShader
-        .replace('#include <common>', '#include <common>\nuniform float uTime;\nvarying vec3 vWorld;')
+        .replace('#include <common>', '#include <common>\nuniform float uTime;\nuniform mat4 uReflectMatrix;\nvarying vec3 vWorld;\nvarying vec4 vReflectCoord;')
         .replace(
           '#include <begin_vertex>',
           `#include <begin_vertex>
           float swell = sin(position.x * 0.21 + uTime * 0.8) * 0.06 + cos(position.z * 0.17 + uTime * 0.65) * 0.05;
           transformed.y += swell;
-          vWorld = (modelMatrix * vec4(transformed, 1.0)).xyz;`,
+          vWorld = (modelMatrix * vec4(transformed, 1.0)).xyz;
+          vReflectCoord = uReflectMatrix * vec4(vWorld, 1.0);`,
         );
       shader.fragmentShader = shader.fragmentShader
         .replace(
@@ -193,7 +205,11 @@ function Sea({ level, glint }: { level: LevelData; glint: number }) {
           uniform sampler2D tWaves;
           uniform sampler2D tShore;
           uniform vec2 uMapSize;
+          uniform sampler2D tReflect;
+          uniform float uReflect;
           varying vec3 vWorld;
+          varying vec4 vReflectCoord;
+          vec2 waterSlope = vec2(0.0);
           ${NOISE_GLSL}`,
         )
         .replace(
@@ -220,6 +236,7 @@ function Sea({ level, glint }: { level: LevelData; glint: number }) {
             vec3 w2 = texture2D(tWaves, vWorld.xz * 0.37 - vec2(uTime * 0.026, -uTime * 0.019)).xyz * 2.0 - 1.0;
             vec3 w3 = texture2D(tWaves, vWorld.xz * 0.9 + vec2(-uTime * 0.05, uTime * 0.04)).xyz * 2.0 - 1.0;
             vec2 slope = (w1.xy * 0.5 + w2.xy * 0.45 + w3.xy * 0.35) * mix(1.0, 0.4, foam);
+            waterSlope = slope;
             waterN = normalize(vec3(slope.x, 1.0, slope.y));
             normal = normalize((viewMatrix * vec4(waterN, 0.0)).xyz);
           }`,
@@ -235,16 +252,40 @@ function Sea({ level, glint }: { level: LevelData; glint: number }) {
             float glint = pow(max(dot(refl, normalize(vec3(0.42, 0.77, -0.48))), 0.0), 140.0);
             float sparkle = pow(max(dot(refl, normalize(vec3(-0.3, 0.9, 0.3))), 0.0), 260.0);
             totalEmissiveRadiance += (vec3(0.09, 0.13, 0.19) * fres + vec3(0.8, 0.85, 0.9) * (glint * 1.2 + sparkle * 0.6) * uGlint) * (1.0 - foam);
+            if (uReflect > 0.0) {
+              // Mirrored scene, rippled by the wave slope: strongest at grazing angles.
+              vec2 ruv = vReflectCoord.xy / max(vReflectCoord.w, 1e-4) + waterSlope * 0.035;
+              vec3 mirrored = texture2D(tReflect, clamp(ruv, 0.001, 0.999)).rgb;
+              totalEmissiveRadiance += mirrored * (0.04 + 0.55 * fres) * uReflect * (1.0 - foam);
+            }
           }`,
         );
     };
-    mat.customProgramCacheKey = () => 'water-v4';
+    mat.customProgramCacheKey = () => 'water-v5';
     const edgeMat = new THREE.MeshStandardMaterial({ color: '#0d2229', roughness: 0.2, transparent: true, opacity: 0.82, side: THREE.DoubleSide, depthWrite: false });
     return { geometry: geo, material: mat, uniforms: u, edge: edgeGeometry(level), edgeMaterial: edgeMat };
   }, [level]);
 
   useFrame((_, delta) => {
     uniforms.uTime.value += delta;
+    // The mirror is redrawn every other frame at half resolution (the sea barely changes per frame).
+    frame.current += 1;
+    if (mirror && camera instanceof THREE.PerspectiveCamera && frame.current % 2 === 0) {
+      const hidden: THREE.Object3D[] = [];
+      for (const child of scene.children) {
+        if (child.visible && NOT_REFLECTED.has(child.name)) {
+          child.visible = false;
+          hidden.push(child);
+        }
+      }
+      const drawn = mirror.render(gl, scene, camera);
+      for (const child of hidden) child.visible = true;
+      if (drawn) {
+        uniforms.tReflect.value = mirror.target.texture;
+        uniforms.uReflectMatrix.value.copy(mirror.textureMatrix);
+      }
+    }
+    uniforms.uReflect.value = mirror && uniforms.tReflect.value ? 1 : 0;
     uniforms.uGlint.value = glint;
     // A glassy sea suits moonlight; under daylight or fog the sun's highlight would cover it.
     uniforms.uRough.value = 0.06 + (1 - glint) * 0.4;

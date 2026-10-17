@@ -6,6 +6,7 @@ import { useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import type { GameController } from '../runtime/controller';
 import { cameraFocus } from '../camera/camera-rig';
+import { CascadedSun } from './cascaded-sun';
 
 const LAMP_POOL = 6;
 const LANTERN_POOL = 4;
@@ -44,7 +45,9 @@ function Rain({ controller, count = 1100 }: { controller: GameController; count?
   return <primitive object={lines.object} />;
 }
 
-export function Lighting({ controller, shadows = true, sharpShadows = false }: { controller: GameController; shadows?: boolean; sharpShadows?: boolean }) {
+export function Lighting({ controller, shadows = true, cascaded = false }: { controller: GameController; shadows?: boolean; cascaded?: boolean }) {
+  // Cascaded shadows replace the single sun shadow (and the sun itself: CSM brings its lights).
+  const csm = shadows && cascaded;
   const sun = useRef<THREE.DirectionalLight>(null);
   const spot = useRef<THREE.SpotLight>(null);
   const lampRefs = useRef<(THREE.PointLight | null)[]>([]);
@@ -109,21 +112,24 @@ export function Lighting({ controller, shadows = true, sharpShadows = false }: {
       {/* Moonlit night: a cool blue sky fill keeps the diorama readable, warm lamps do the rest. */}
       <hemisphereLight args={['#7d93b8', '#2b2a24', 1.45 + daylight * 0.4]} />
       <ambientLight color="#9fb2cc" intensity={0.32 + daylight * 0.2} />
-      <directionalLight
-        ref={sun}
-        castShadow={shadows}
-        color={sunColor}
-        intensity={2.5 + daylight * 1.2}
-        shadow-mapSize={sharpShadows ? [4096, 4096] : [2048, 2048]}
-        shadow-camera-left={-46}
-        shadow-camera-right={46}
-        shadow-camera-top={46}
-        shadow-camera-bottom={-46}
-        shadow-camera-near={1}
-        shadow-camera-far={160}
-        shadow-bias={-0.0006}
-        shadow-normalBias={0.03}
-      />
+      {/* CSM's shader expects its cascade lights to be the only directional lights. */}
+      {!csm && (
+        <directionalLight
+          ref={sun}
+          castShadow={shadows}
+          color={sunColor}
+          intensity={2.5 + daylight * 1.2}
+          shadow-mapSize={[2048, 2048]}
+          shadow-camera-left={-46}
+          shadow-camera-right={46}
+          shadow-camera-top={46}
+          shadow-camera-bottom={-46}
+          shadow-camera-near={1}
+          shadow-camera-far={160}
+          shadow-bias={-0.0006}
+          shadow-normalBias={0.03}
+        />
+      )}
       {Array.from({ length: LAMP_POOL }, (_, i) => (
         <pointLight
           key={`lamp-${i}`}
@@ -149,6 +155,7 @@ export function Lighting({ controller, shadows = true, sharpShadows = false }: {
         />
       ))}
       <spotLight ref={spot} color="#f5f2dc" intensity={160} distance={60} angle={0.16} penumbra={0.35} decay={1.4} />
+      {csm && <CascadedSun color={sunColor} intensity={2.5 + daylight * 1.2} />}
       {env.weather === 'rain' && <Rain controller={controller} />}
     </>
   );
