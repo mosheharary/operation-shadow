@@ -6,6 +6,7 @@ import { useMemo, useRef, useSyncExternalStore } from 'react';
 import * as THREE from 'three';
 import type { GameController } from '../runtime/controller';
 import { useGameUi } from '../runtime/store';
+import { buildDoor, DOOR_HEIGHT, type DoorModel, doorStyleFor } from './buildings/doors';
 import { material } from './palette';
 
 interface DoorInfo {
@@ -14,6 +15,7 @@ interface DoorInfo {
   /** Rotation of the closed panel around Y. */
   closed: number;
   width: number;
+  model: DoorModel;
 }
 
 /** Works out each door's wall orientation from the building it belongs to. */
@@ -27,7 +29,8 @@ function doorLayout(level: LevelData): DoorInfo[] {
     const width = (f.width ?? 1.2) - 0.08;
     // Panel lies along the wall; the hinge sits at one end of the opening.
     const hinge = onWestEast ? new THREE.Vector3(f.pos.x, s.baseHeight, f.pos.z - width / 2) : new THREE.Vector3(f.pos.x - width / 2, s.baseHeight, f.pos.z);
-    doors.push({ id: f.id, hinge, closed: onWestEast ? -Math.PI / 2 : 0, width });
+    const seed = Math.round(f.pos.x * 7 + f.pos.z * 13);
+    doors.push({ id: f.id, hinge, closed: onWestEast ? -Math.PI / 2 : 0, width, model: buildDoor(doorStyleFor(s.kind), width, seed) });
   }
   return doors;
 }
@@ -81,6 +84,7 @@ export function WorldObjects({ controller }: WorldObjectsProps) {
       if (!group || obj?.type !== 'door') continue;
       const target = door.closed + (obj.open ? -Math.PI / 2 : 0);
       group.rotation.y += (target - group.rotation.y) * 0.18;
+      door.model.padlock.visible = obj.locked;
     }
     const t = frame.clock.elapsedTime;
     for (const [id, mesh] of blinkers.current) {
@@ -97,6 +101,8 @@ export function WorldObjects({ controller }: WorldObjectsProps) {
   });
 
   const handlers = (id: string) => ({ userData: { id, kind: 'object' } });
+  // Doors are picked through an invisible box over the leaf; the modelled leaf carries no userData.
+  const proxyMaterial = useMemo(() => new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, colorWrite: false }), []);
 
   const grid = controller.world.grid;
   const y = (o: WorldObject) => grid.heightAt(o.pos);
@@ -112,9 +118,10 @@ export function WorldObjects({ controller }: WorldObjectsProps) {
             if (g) doorRefs.current.set(door.id, g);
           }}
         >
-          <mesh position={[door.width / 2, 1.1, 0]} material={material('#5a432c')} castShadow {...handlers(door.id)}>
-            <boxGeometry args={[door.width, 2.2, 0.08]} />
+          <mesh position={[door.width / 2, DOOR_HEIGHT / 2, 0]} material={proxyMaterial} {...handlers(door.id)}>
+            <boxGeometry args={[door.width, DOOR_HEIGHT, 0.12]} />
           </mesh>
+          <primitive object={door.model.root} />
         </group>
       ))}
       {objects.map((o) => {

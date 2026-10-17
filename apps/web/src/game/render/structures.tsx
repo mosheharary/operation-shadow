@@ -5,6 +5,7 @@ import { useFrame } from '@react-three/fiber';
 import { useLayoutEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+import { doorHood, downpipe, downpipeEnds, facadeMatrix, gutter, KitBatch, SHUTTER_WIDTH, shutterLeaf, WINDOW, windowFrame, windowGlass, windowStone } from './buildings/pieces';
 import { box, merge, shade, tinted } from './geom';
 import { surfaceMaterial, withMetreUvs } from './materials/surface';
 import type { SurfaceKey } from './materials/textures';
@@ -119,6 +120,8 @@ interface RoofGroup {
 interface BuildingMeshes {
   batches: { geometry: THREE.BufferGeometry; material: THREE.Material }[];
   roofs: RoofGroup[];
+  /** Instanced façade pieces (windows, shutters, stonework, downpipes). */
+  kit: KitBatch[];
 }
 
 const glassLit = () => new THREE.MeshStandardMaterial({ color: '#3a2a16', emissive: new THREE.Color('#ffb05a'), emissiveIntensity: 2.6, roughness: 0.3 });
@@ -132,6 +135,19 @@ function buildBuildings(level: LevelData): BuildingMeshes {
   const trimMat = surfaceMaterial('planks-light', { scale: 1.2, vertexColors: true, roughness: 0.8 });
   const litMat = glassLit();
   const darkMat = glassDark();
+  // Kit materials: instance colours tint them, so they use no vertex colours.
+  const paintMat = surfaceMaterial('planks-light', { scale: 0.7, roughness: 0.7, normalStrength: 0.4, macro: 0.2 });
+  const dressedStone = surfaceMaterial('stone-wall', { scale: 1.4, tint: '#c9c4ba', normalStrength: 0.6, macro: 0.3 });
+  const zincMat = surfaceMaterial('metal', { scale: 1.2, tint: '#7b8186', metalness: 0.55, roughness: 0.55 });
+  const zincTinted = surfaceMaterial('metal', { scale: 1.2, tint: '#7b8186', metalness: 0.55, roughness: 0.55, vertexColors: true });
+  const kit = {
+    glassLit: new KitBatch(windowGlass(), litMat, false),
+    glassDark: new KitBatch(windowGlass(), darkMat, false),
+    frame: new KitBatch(windowFrame(), paintMat),
+    stone: new KitBatch(windowStone(), dressedStone),
+    shutter: new KitBatch(shutterLeaf(), paintMat),
+    pipe: new KitBatch(downpipe(), zincMat),
+  };
 
   for (const s of level.structures) {
     if (!BUILDING_KINDS.has(s.kind)) continue;
@@ -183,25 +199,29 @@ function buildBuildings(level: LevelData): BuildingMeshes {
         }
       }
       if (hasWindows) {
+        // Kit window units: casing and glazing bars, stone sill and lintel, open louvred shutters.
+        const sill = s.baseHeight + Math.min(WINDOW.sillHeight, s.height - WINDOW.height - 0.45);
+        const lit = LIT_BUILDINGS.has(s.id);
         for (let t = 3; t < len - 1; t += 4) {
           if (openings.some((o) => Math.hypot(o.pos.x - at(t).x, o.pos.z - at(t).z) < 1.6)) continue;
-          const pane = at(t, WALL_T / 2 + 0.01);
-          const y = s.baseHeight + 1.45;
-          batches.add(LIT_BUILDINGS.has(s.id) ? 'glass-lit' : 'glass-dark', LIT_BUILDINGS.has(s.id) ? litMat : darkMat, box(0.9, 0.85, 0.04, pane.x, y, pane.z, rot));
-          const frame = (dt: number, dy: number, w: number, h: number) => {
-            const f = at(t + dt, WALL_T / 2 + 0.04);
-            batches.add('trim', trimMat, tinted(box(w, h, 0.08, f.x, y + dy, f.z, rot), new THREE.Color('#e4ddd0')));
-          };
-          frame(-0.49, 0, 0.08, 1.0);
-          frame(0.49, 0, 0.08, 1.0);
-          frame(0, 0.48, 1.06, 0.08);
-          frame(0, 0, 0.9, 0.05);
-          const sill = at(t, WALL_T / 2 + 0.1);
-          batches.add('stone', stoneMat, tinted(box(1.2, 0.08, 0.22, sill.x, y - 0.49, sill.z, rot), shade(0.95, 0.08, random)));
+          const m = facadeMatrix(run.a, dir, t, WALL_T / 2, sill);
+          (lit ? kit.glassLit : kit.glassDark).add(m);
+          kit.frame.add(m, new THREE.Color('#e4ddd0').multiplyScalar(0.92 + random() * 0.1));
+          kit.stone.add(m, shade(0.95, 0.1, random));
           for (const side of [-1, 1]) {
-            const sh = at(t + side * 0.78, WALL_T / 2 + 0.05);
-            batches.add('trim', trimMat, tinted(box(0.5, 0.95, 0.04, sh.x, y, sh.z, rot), shutter.clone().multiplyScalar(0.9 + random() * 0.2)));
+            const offset = side * (WINDOW.width / 2 + 0.1 + SHUTTER_WIDTH / 2);
+            kit.shutter.add(m.clone().multiply(new THREE.Matrix4().makeTranslation(offset, 0, 0.005)), shutter.clone().multiplyScalar(0.85 + random() * 0.25));
           }
+        }
+      }
+      if (s.kind === 'house' || s.kind === 'office') {
+        // A small pitched hood over each door.
+        for (const o of openings) {
+          const t = (o.pos.x - run.a.x) * dir.x + (o.pos.z - run.a.z) * dir.z;
+          const off = Math.abs((o.pos.x - run.a.x) * dir.z - (o.pos.z - run.a.z) * dir.x);
+          if (off > 0.3 || t <= 0 || t >= len) continue;
+          const hood = doorHood(o.width).applyMatrix4(facadeMatrix(run.a, dir, t, WALL_T / 2, s.baseHeight + 2.36));
+          batches.add('trim', trimMat, tinted(hood, shutter.clone().multiplyScalar(0.8)));
         }
       }
       if (bunker) {
@@ -211,10 +231,42 @@ function buildBuildings(level: LevelData): BuildingMeshes {
       }
     }
 
+    // Quoins: dressed corner stones in alternating courses on plastered and brick houses.
+    if (wall.key === 'plaster' || s.material === 'brick') {
+      for (const [cx, cz, sx, sz] of [
+        [min.x, min.z, -1, -1],
+        [max.x, min.z, 1, -1],
+        [max.x, max.z, 1, 1],
+        [min.x, max.z, -1, 1],
+      ] as const) {
+        for (let course = 0, y = s.baseHeight + 0.55; y + 0.3 <= s.baseHeight + s.height; course += 1, y += 0.32) {
+          const [la, lb] = course % 2 ? [0.5, 0.28] : [0.28, 0.5];
+          const colour = shade(0.9, 0.12, random);
+          batches.add('stone', stoneMat, tinted(box(la, 0.3, 0.05, cx + sx * (WALL_T / 2 - la / 2 + 0.02), y + 0.15, cz + sz * (WALL_T / 2 + 0.02)), colour));
+          batches.add('stone', stoneMat, tinted(box(0.05, 0.3, lb, cx + sx * (WALL_T / 2 + 0.02), y + 0.15, cz + sz * (WALL_T / 2 - lb / 2 + 0.02)), colour));
+        }
+      }
+    }
+    // Downpipes at two opposite corners of pitched roofs, on the eave walls.
+    if (s.roof === 'gable') {
+      const eaveAlongX = s.size.x >= s.size.z;
+      runs.forEach((run, k) => {
+        const len = Math.hypot(run.b.x - run.a.x, run.b.z - run.a.z);
+        const dir = { x: (run.b.x - run.a.x) / len, z: (run.b.z - run.a.z) / len };
+        const alongX = Math.abs(dir.x) > 0.5;
+        if (alongX !== eaveAlongX) return;
+        const t = k < 2 ? 0.35 : len - 0.35;
+        const height = s.height - 0.05;
+        kit.pipe.add(facadeMatrix(run.a, dir, t, WALL_T / 2, s.baseHeight, new THREE.Vector3(1, height, 1)));
+        batches.add('zinc', zincTinted, tinted(downpipeEnds(height).applyMatrix4(facadeMatrix(run.a, dir, t, WALL_T / 2, s.baseHeight)), '#ffffff'));
+      });
+    }
+
     // ── Roof (hidden by the cutaway when a squad member is inside) ──────────────────────
     const roofParts: THREE.BufferGeometry[] = [];
     const gableParts: THREE.BufferGeometry[] = [];
     const extraParts: THREE.BufferGeometry[] = [];
+    const gutterParts: THREE.BufferGeometry[] = [];
     const top = s.baseHeight + s.height;
     if (s.roof === 'gable') {
       const alongX = s.size.x >= s.size.z;
@@ -242,10 +294,25 @@ function buildBuildings(level: LevelData): BuildingMeshes {
         slab.translate(s.pos.x, 0, s.pos.z);
         roofParts.push(slab);
       }
-      const ridge = box(length + overhang * 2 + 0.05, 0.16, 0.26, 0, top + rise + 0.07, 0);
-      if (!alongX) ridge.rotateY(Math.PI / 2);
-      ridge.translate(s.pos.x, 0, s.pos.z);
-      extraParts.push(tinted(ridge, new THREE.Color('#6d6a66')));
+      // Ridge capped with half-round tiles.
+      const ridgeLength = length + overhang * 2 + 0.05;
+      const tiles = Math.max(1, Math.round(ridgeLength / 0.42));
+      for (let k = 0; k < tiles; k += 1) {
+        const tile = new THREE.CylinderGeometry(0.14, 0.14, ridgeLength / tiles + 0.02, 8, 1, false, -Math.PI / 2, Math.PI);
+        tile.rotateZ(Math.PI / 2);
+        tile.translate(-ridgeLength / 2 + (k + 0.5) * (ridgeLength / tiles), top + rise + 0.04, 0);
+        if (!alongX) tile.rotateY(Math.PI / 2);
+        tile.translate(s.pos.x, 0, s.pos.z);
+        extraParts.push(tinted(tile, shade(0.62, 0.08, random)));
+      }
+      // Gutters along both eaves.
+      for (const side of [1, -1]) {
+        const g = gutter().scale(length + overhang * 2, 1, 1);
+        g.translate(0, top - eaveDrop - 0.05, side * (run + 0.03));
+        if (!alongX) g.rotateY(Math.PI / 2);
+        g.translate(s.pos.x, 0, s.pos.z);
+        gutterParts.push(tinted(g, '#ffffff'));
+      }
       // Gable-end triangles in the wall material.
       for (const end of [-1, 1]) {
         const shape = new THREE.Shape();
@@ -262,13 +329,23 @@ function buildBuildings(level: LevelData): BuildingMeshes {
         gableParts.push(tinted(tri, shade(1, 0.06, random)));
       }
       if (s.kind === 'house' || s.kind === 'office') {
+        // Brick stack with an oversailing course, a cap and two clay pots.
         const cx = (hash2(Math.round(s.pos.x), Math.round(s.pos.z), 3) > 0.5 ? 1 : -1) * length * 0.27;
-        const chimney = box(0.62, rise + 1.1, 0.62, cx, top + (rise + 1.1) / 2 + 0.25, 0.2);
-        const cap = box(0.78, 0.12, 0.78, cx, top + rise + 1.4, 0.2);
-        for (const g of [chimney, cap]) {
+        const brick = new THREE.Color('#a87560').multiplyScalar(0.85 + random() * 0.2);
+        const stackTop = top + rise + 1.15;
+        const pieces: [THREE.BufferGeometry, THREE.ColorRepresentation][] = [
+          [box(0.62, stackTop - top - 0.25, 0.62, cx, (stackTop + top + 0.25) / 2, 0.2), brick],
+          [box(0.74, 0.1, 0.74, cx, stackTop - 0.22, 0.2), brick.clone().multiplyScalar(0.9)],
+          [box(0.76, 0.1, 0.76, cx, stackTop + 0.05, 0.2), '#8a8580'],
+        ];
+        for (const dx of [-0.15, 0.15]) {
+          pieces.push([new THREE.CylinderGeometry(0.075, 0.1, 0.36, 10).translate(cx + dx, stackTop + 0.28, 0.2), '#a3573a']);
+          pieces.push([new THREE.CylinderGeometry(0.095, 0.095, 0.05, 10).translate(cx + dx, stackTop + 0.47, 0.2), '#934e34']);
+        }
+        for (const [g, colour] of pieces) {
           if (!alongX) g.rotateY(Math.PI / 2);
           g.translate(s.pos.x, 0, s.pos.z);
-          extraParts.push(tinted(g, shade(0.8, 0.1, random)));
+          extraParts.push(tinted(g, colour));
         }
       }
     } else {
@@ -302,9 +379,11 @@ function buildBuildings(level: LevelData): BuildingMeshes {
     if (gables) parts.push({ geometry: gables, material: wallMat });
     const extras = merge(extraParts);
     if (extras) parts.push({ geometry: extras, material: stoneMat });
+    const gutters = merge(gutterParts);
+    if (gutters) parts.push({ geometry: gutters, material: zincTinted });
     roofs.push({ regionId: s.regionId ?? 0, parts });
   }
-  return { batches: batches.build(), roofs };
+  return { batches: batches.build(), roofs, kit: Object.values(kit).filter((k) => k.matrices.length > 0) };
 }
 
 /** Pillow-shaped sandbag (about 0.6 × 0.24 × 0.34 m). */
@@ -501,6 +580,23 @@ function chainLinkTexture(): THREE.Texture {
   return texture;
 }
 
+/** One kit piece drawn for every placement (one draw call per piece type). */
+function KitInstances({ batch }: { batch: KitBatch }) {
+  const mesh = useRef<THREE.InstancedMesh>(null);
+  useLayoutEffect(() => {
+    const m = mesh.current;
+    if (!m) return;
+    batch.matrices.forEach((matrix, i) => {
+      m.setMatrixAt(i, matrix);
+      m.setColorAt(i, batch.colors[i]!);
+    });
+    m.instanceMatrix.needsUpdate = true;
+    if (m.instanceColor) m.instanceColor.needsUpdate = true;
+    m.computeBoundingSphere();
+  }, [batch]);
+  return <instancedMesh ref={mesh} args={[batch.geometry, batch.material, batch.matrices.length]} castShadow={batch.shadow} receiveShadow />;
+}
+
 export interface StructuresProps {
   level: LevelData;
   /** Region ids whose roofs are lifted away this frame (buildings with squad members inside, hovered). */
@@ -539,6 +635,9 @@ export function Structures({ level, cutawayRegions }: StructuresProps) {
     <group name="structures">
       {buildings.batches.map(({ geometry, material }, i) => (
         <mesh key={`b${i}`} geometry={geometry} material={material} castShadow receiveShadow />
+      ))}
+      {buildings.kit.map((batch, i) => (
+        <KitInstances key={`k${i}`} batch={batch} />
       ))}
       {buildings.roofs.map((roof, i) => (
         <group
