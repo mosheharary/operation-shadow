@@ -2,12 +2,17 @@
 
 import { OrbitControls } from '@react-three/drei';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import * as THREE from 'three';
-import { createFigure, type FigurePose, type FigureRig, poseFigure } from '../figure';
+import { createCharacterRig } from '../characters/character-rig';
+import type { CharacterLibrary } from '../characters/library';
+import { CharacterLibraryLoader } from '../characters/library-loader';
+import type { FigurePose } from '../figure';
 import { DISGUISED_LOOK, guardLook, PRISONER_LOOK, SQUAD_LOOKS } from '../looks';
+import { proceduralRig, type UnitRig } from '../rig';
 
-export type LineupPose = 'stand' | 'walk' | 'run' | 'crouch' | 'prone' | 'aim';
+export type LineupPose = 'stand' | 'walk' | 'run' | 'crouch' | 'prone' | 'aim' | 'lying';
+export type LineupMode = 'procedural' | 'authored';
 
 const LINEUP = [
   SQUAD_LOOKS.infiltrator,
@@ -29,7 +34,7 @@ function poseFor(p: LineupPose): FigurePose {
     stance: p === 'crouch' ? 'crouch' : p === 'prone' ? 'prone' : 'stand',
     moving: p === 'walk' || p === 'run',
     running: p === 'run',
-    lying: 'none',
+    lying: p === 'lying' ? 'back' : 'none',
     carrying: false,
     carried: false,
     aiming: p === 'aim',
@@ -39,11 +44,11 @@ function poseFor(p: LineupPose): FigurePose {
   };
 }
 
-function Lineup({ pose }: { pose: LineupPose }) {
+function Lineup({ pose, lib }: { pose: LineupPose; lib: CharacterLibrary | null }) {
   // Rigs and their group are built together: React may run this twice in development, and each
   // run must own its own objects (re-parenting shared rigs would empty the kept group).
   const { rigs, group } = useMemo(() => {
-    const built: FigureRig[] = LINEUP.map((look) => createFigure(look));
+    const built: UnitRig[] = LINEUP.map((look) => (lib ? createCharacterRig(look, lib) : proceduralRig(look)));
     const g = new THREE.Group();
     built.forEach((rig, i) => {
       // Facing the camera (figures face +x; the camera looks along -z).
@@ -52,15 +57,20 @@ function Lineup({ pose }: { pose: LineupPose }) {
       g.add(rig.root);
     });
     return { rigs: built, group: g };
-  }, []);
+  }, [lib]);
+  useEffect(() => () => rigs.forEach((rig) => rig.dispose()), [rigs]);
   const figurePose = poseFor(pose);
+  const speed = pose === 'run' ? 4.2 : pose === 'walk' ? 1.4 : 0;
   useFrame((state, dt) => {
-    for (const rig of rigs) poseFigure(rig, figurePose, Math.min(dt, 0.05), state.clock.elapsedTime);
+    for (const rig of rigs) rig.update(figurePose, Math.min(dt, 0.05), state.clock.elapsedTime, speed);
   });
   return <primitive object={group} />;
 }
 
-export function CharacterScene({ pose }: { pose: LineupPose }) {
+export function CharacterScene({ pose, mode }: { pose: LineupPose; mode: LineupMode }) {
+  const [library, setLibrary] = useState<CharacterLibrary | null>(null);
+  const onLibrary = useCallback((lib: CharacterLibrary) => setLibrary(lib), []);
+  const lib = mode === 'authored' ? library : null;
   return (
     <Canvas shadows camera={{ fov: 30, position: [0, 1.6, 9], near: 0.05, far: 100 }} dpr={[1, 2]} onCreated={({ gl }) => (gl.toneMapping = THREE.ACESFilmicToneMapping)}>
       <color attach="background" args={['#1a2026']} />
@@ -71,7 +81,8 @@ export function CharacterScene({ pose }: { pose: LineupPose }) {
         <planeGeometry args={[30, 12]} />
         <meshStandardMaterial color="#4a4a40" roughness={0.95} />
       </mesh>
-      <Lineup pose={pose} />
+      {mode === 'authored' && <CharacterLibraryLoader onReady={onLibrary} />}
+      <Lineup pose={pose} lib={lib} />
       <OrbitControls target={[0, 0.95, 0]} maxPolarAngle={Math.PI * 0.49} />
     </Canvas>
   );

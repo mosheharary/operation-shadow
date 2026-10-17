@@ -19,7 +19,7 @@ or something that could not be verified here.
 - **AI-written debrief narrative** (plan §8.5). Debriefs use authored text plus the verified score breakdown.
 - **Boats and drivable vehicles** (D14). The Marine swims and dives; boats are props.
 - **Climbable watchtowers**; guards use them as posts only.
-- **Character models** are detailed procedural figures (D57), not authored, skinned models with motion-captured animation.
+- **Character models**: on the High preset they are skinned CC0 base bodies with a shared animation library (D62), but the uniforms are painted on in the shader rather than modelled, prone crawling is the walk cycle laid flat, and climbing reuses a generic interact clip. Performance keeps the procedural figures (D57).
 - **Campaign flags affecting later missions** are recorded (`completed:<mission>`) but no mission reads them yet.
 - **Mobile, touch and gamepad** are out of scope (plan §6).
 

@@ -36,8 +36,8 @@ voice-bank: ## Generate missing or changed voice lines with Gemini TTS (ARGS="--
 textures: ## Fetch the CC0 surface textures from Poly Haven (verified, downsized to WebP)
 	$(COMPOSE) --profile media run --rm --build media pnpm textures $(ARGS)
 
-models: ## Fetch the CC0 glTF models (Poly Haven; pack archives via ARGS="--from <dir>"), optimise them and write the manifest
-	$(COMPOSE) --profile media run --rm --build media pnpm models $(ARGS)
+models: ## Fetch the CC0 glTF models (Poly Haven; Quaternius pack archives from PACKS=<dir>), optimise them and write the manifest
+	$(COMPOSE) --profile media run --rm --build $(if $(PACKS),-v "$(PACKS):/packs:ro") media pnpm models $(if $(PACKS),--from /packs) $(ARGS)
 
 lint: ## Run ESLint
 	$(COMPOSE) run --rm --no-deps tools pnpm lint

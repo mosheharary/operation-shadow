@@ -6,27 +6,30 @@
 //   make models                          # fetch and build missing models
 //   make models ARGS="--force"           # rebuild everything
 //   make models ARGS="--inspect <id>"    # list a source's top-level nodes and triangles
-//   make models ARGS="--from packs"      # folder with downloaded pack archives (Quaternius)
+//   make models PACKS=~/Downloads        # folder with the downloaded pack archives (Quaternius),
+//                                        # mounted read-only and verified by SHA-256
 //
 // Poly Haven and Quaternius assets are CC0 1.0 (public domain).
 
+import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { existsSync } from 'node:fs';
+import { createReadStream, existsSync } from 'node:fs';
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { type Document, NodeIO, type Node as GltfNode } from '@gltf-transform/core';
 import { ALL_EXTENSIONS } from '@gltf-transform/extensions';
-import { dedup, flatten, getBounds, join, prune, simplify, textureCompress, weld } from '@gltf-transform/functions';
+import { dedup, flatten, getBounds, join, prune, resample, simplify, textureCompress, weld } from '@gltf-transform/functions';
 import { MeshoptSimplifier } from 'meshoptimizer';
 import sharp from 'sharp';
-import { MODELS, type ModelSpec, type PolyHavenSource } from './model-sources';
+import { MODELS, type ModelSpec, type PackSource, type PolyHavenSource } from './model-sources';
 
 const OUT_DIR = path.resolve('apps/web/public/media/models');
 const MANIFEST = path.join(OUT_DIR, 'manifest.json');
 const args = process.argv.slice(2);
 const force = args.includes('--force');
 const inspectId = args.includes('--inspect') ? args[args.indexOf('--inspect') + 1] : undefined;
+const fromDir = args.includes('--from') ? path.resolve(args[args.indexOf('--from') + 1]!) : undefined;
 
 interface FileEntry {
   url: string;
@@ -46,6 +49,16 @@ export interface ManifestEntry {
   url: string;
   authors: string[];
   license: 'CC0-1.0';
+  /** Animation library only: clip length (s) and ground speed of the root-motion version (m/s). */
+  clips?: Record<string, { duration: number; speed: number }>;
+}
+
+interface Fetched {
+  file: string;
+  name: string;
+  url: string;
+  authors: string[];
+  source: string;
 }
 
 async function json<T>(url: string): Promise<T> {
@@ -63,7 +76,7 @@ async function download(entry: FileEntry): Promise<Buffer> {
 }
 
 /** Downloads a Poly Haven model (1k textures) into a fresh folder; returns the .gltf path and its credits. */
-async function fetchPolyHaven(src: PolyHavenSource, tmp: string): Promise<{ file: string; name: string; url: string; authors: string[] }> {
+async function fetchPolyHaven(src: PolyHavenSource, tmp: string): Promise<Fetched> {
   const [files, info] = await Promise.all([
     json<{ gltf: Record<string, { gltf: FileEntry }> }>(`https://api.polyhaven.com/files/${src.asset}`),
     json<{ name: string; authors: Record<string, string> }>(`https://api.polyhaven.com/info/${src.asset}`),
@@ -79,7 +92,71 @@ async function fetchPolyHaven(src: PolyHavenSource, tmp: string): Promise<{ file
     await fs.mkdir(path.dirname(target), { recursive: true });
     await fs.writeFile(target, await download(inc));
   }
-  return { file, name: info.name, url: `https://polyhaven.com/a/${src.asset}`, authors: Object.keys(info.authors) };
+  return { file, name: info.name, url: `https://polyhaven.com/a/${src.asset}`, authors: Object.keys(info.authors), source: 'Poly Haven' };
+}
+
+async function sha256(file: string): Promise<string> {
+  const hash = createHash('sha256');
+  for await (const chunk of createReadStream(file)) hash.update(chunk as Buffer);
+  return hash.digest('hex');
+}
+
+const extracted = new Map<string, string>();
+
+/** Verifies a downloaded pack archive and extracts it (once) into a fresh folder. */
+async function extractPack(src: PackSource, tmp: string): Promise<string> {
+  const cached = extracted.get(src.archive);
+  if (cached) return cached;
+  if (!fromDir) throw new Error(`${src.archive}: pass --from <folder with the downloaded archives>`);
+  const archive = path.join(fromDir, src.archive);
+  if (!existsSync(archive)) throw new Error(`${archive}: not found (download it from ${src.url})`);
+  if ((await sha256(archive)) !== src.sha256) throw new Error(`${src.archive}: checksum mismatch`);
+  const dir = await fs.mkdtemp(path.join(tmp, 'pack-'));
+  execFileSync('unzip', ['-q', archive, '-d', dir]);
+  extracted.set(src.archive, dir);
+  return dir;
+}
+
+/** Finds a model inside an extracted pack; for .gltf files, rewrites the image URIs listed in `images`. */
+async function fetchPack(src: PackSource, file: string, tmp: string): Promise<Fetched> {
+  const dir = await extractPack(src, tmp);
+  const target = path.resolve(dir, file);
+  if (!target.startsWith(dir + path.sep) || !existsSync(target)) throw new Error(`${src.archive}: no ${file}`);
+  let out = target;
+  if (src.images && target.endsWith('.gltf')) {
+    const json = JSON.parse(await fs.readFile(target, 'utf8')) as { images?: { uri?: string }[] };
+    for (const image of json.images ?? []) {
+      const replacement = image.uri && src.images[image.uri];
+      if (replacement) image.uri = replacement;
+    }
+    out = target.replace(/\.gltf$/, '.patched.gltf');
+    await fs.writeFile(out, JSON.stringify(json));
+  }
+  return { file: out, name: `${src.pack}: ${path.basename(file).replace(/\.(gltf|glb)$/, '')}`, url: src.url, authors: src.authors, source: 'Quaternius' };
+}
+
+/** Clip durations and the ground speed of each clip's root-motion version. */
+function clipSpeeds(doc: Document, clips: Record<string, string>): Record<string, { duration: number; speed: number }> {
+  const out: Record<string, { duration: number; speed: number }> = {};
+  for (const anim of doc.getRoot().listAnimations()) {
+    const name = clips[anim.getName()];
+    if (!name) continue;
+    let duration = 0;
+    let speed = 0;
+    for (const channel of anim.listChannels()) {
+      const input = channel.getSampler()?.getInput()?.getArray();
+      if (input) duration = Math.max(duration, input[input.length - 1]!);
+      if (channel.getTargetNode()?.getName() !== 'root' || channel.getTargetPath() !== 'translation') continue;
+      const values = channel.getSampler()!.getOutput()!.getArray()!;
+      const n = values.length / 3;
+      const dx = values[(n - 1) * 3]! - values[0]!;
+      const dz = values[(n - 1) * 3 + 2]! - values[2]!;
+      const span = input ? input[input.length - 1]! - input[0]! : 0;
+      speed = span > 0 ? Math.hypot(dx, dz) / span : 0;
+    }
+    out[name] = { duration: Math.round(duration * 1000) / 1000, speed: Math.round(speed * 1000) / 1000 };
+  }
+  return out;
 }
 
 function triangles(doc: Document): number {
@@ -110,10 +187,38 @@ async function optimize(spec: ModelSpec, doc: Document): Promise<void> {
     const keep = new Set(spec.nodes);
     for (const node of topLevelNodes(doc)) if (!keep.has(node.getName())) node.dispose();
   }
+  if (spec.process === 'animations') {
+    // Skeleton and the wanted clips only: drop the mannequin mesh and every other clip.
+    const clips = spec.clips ?? {};
+    for (const node of doc.getRoot().listNodes()) {
+      node.setMesh(null);
+      node.setSkin(null);
+    }
+    for (const skin of doc.getRoot().listSkins()) skin.dispose();
+    for (const anim of doc.getRoot().listAnimations()) {
+      const name = clips[anim.getName()];
+      if (!name) {
+        // Disposing a clip leaves its samplers (and their data) alive.
+        for (const sampler of anim.listSamplers()) sampler.dispose();
+        anim.dispose();
+        continue;
+      }
+      anim.setName(name);
+      // Finger tips are a few pixels at game distance: keep the knuckles, drop the finer joints.
+      for (const channel of anim.listChannels()) {
+        if (!/_0[234]_|_leaf/.test(channel.getTargetNode()?.getName() ?? '')) continue;
+        channel.getSampler()?.dispose();
+        channel.dispose();
+      }
+    }
+    await doc.transform(resample(), prune({ keepLeaves: true }), dedup());
+    return;
+  }
+  const isStatic = (spec.process ?? 'static') === 'static';
   await doc.transform(dedup(), prune(), weld());
-  if (!spec.skinned) await doc.transform(flatten(), join(), weld());
+  if (isStatic) await doc.transform(flatten(), join(), weld());
   // Simplify with a growing error tolerance until the model fits its triangle budget.
-  for (let error = 0.002; !spec.skinned && triangles(doc) > spec.maxTriangles && error < 0.2; error *= 2) {
+  for (let error = 0.002; isStatic && triangles(doc) > spec.maxTriangles && error < 0.2; error *= 2) {
     await MeshoptSimplifier.ready;
     await doc.transform(simplify({ simplifier: MeshoptSimplifier, ratio: spec.maxTriangles / triangles(doc), error }));
   }
@@ -139,9 +244,12 @@ async function main(): Promise<void> {
         console.log(`skip ${spec.id}`);
         continue;
       }
-      if (spec.source.kind !== 'polyhaven') throw new Error(`${spec.id}: pack sources need --from (not yet configured)`);
-      const fetched = await fetchPolyHaven(spec.source, tmp);
+      const fetched = spec.source.kind === 'polyhaven' ? await fetchPolyHaven(spec.source, tmp) : await fetchPack(spec.source, spec.source.file, tmp);
       const doc = await io.read(fetched.file);
+      let clips: ManifestEntry['clips'];
+      if (spec.rootMotionFile && spec.source.kind === 'pack' && spec.clips) {
+        clips = clipSpeeds(await io.read((await fetchPack(spec.source, spec.rootMotionFile, tmp)).file), spec.clips);
+      }
       if (inspectId) {
         for (const node of topLevelNodes(doc)) console.log(`${node.getName()}\t${nodeTriangles(node)} tris`);
         continue;
@@ -154,17 +262,20 @@ async function main(): Promise<void> {
       await fs.mkdir(path.join(OUT_DIR, spec.group), { recursive: true });
       if (existing && existing.file !== file) await fs.rm(path.join(OUT_DIR, existing.file), { force: true });
       await fs.writeFile(path.join(OUT_DIR, file), glb);
-      const bounds = getBounds(doc.getRoot().getDefaultScene() ?? doc.getRoot().listScenes()[0]!);
+      const box = getBounds(doc.getRoot().getDefaultScene() ?? doc.getRoot().listScenes()[0]!);
+      const finite = box.min.every(Number.isFinite);
+      const bounds = finite ? box : { min: [0, 0, 0], max: [0, 0, 0] };
       models[spec.id] = {
         file,
         bytes: glb.length,
         triangles: triangles(doc),
         bounds: { min: bounds.min as [number, number, number], max: bounds.max as [number, number, number] },
-        source: 'Poly Haven',
+        source: fetched.source,
         name: fetched.name,
         url: fetched.url,
         authors: fetched.authors,
         license: 'CC0-1.0',
+        ...(clips ? { clips } : {}),
       };
       console.log(`ok   ${spec.id} ← ${fetched.name}: ${before} → ${models[spec.id]!.triangles} tris, ${(glb.length / 1024).toFixed(0)} KB`);
     }

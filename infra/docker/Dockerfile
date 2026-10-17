@@ -31,10 +31,11 @@ ENTRYPOINT ["dev-entrypoint"]
 EXPOSE 3000
 CMD ["pnpm", "dev"]
 
-# Build-time media tooling (voice bank): the dev image plus ffmpeg from Debian's archive.
+# Build-time media tooling (voice bank, textures, models): the dev image plus ffmpeg and unzip
+# from Debian's archive.
 FROM dev AS media
 RUN apt-get update \
- && apt-get install -y --no-install-recommends ffmpeg \
+ && apt-get install -y --no-install-recommends ffmpeg unzip \
  && rm -rf /var/lib/apt/lists/*
 
 FROM deps AS build

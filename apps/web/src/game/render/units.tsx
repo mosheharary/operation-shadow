@@ -3,12 +3,17 @@
 import { SPECIALIST_PROFILES } from '@operation-shadow/content';
 import { CellFlag, type Guard, type Vec2 } from '@operation-shadow/engine';
 import { useFrame } from '@react-three/fiber';
-import { useMemo, useRef, useSyncExternalStore } from 'react';
+import { useCallback, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import * as THREE from 'three';
 import type { GameController } from '../runtime/controller';
+import { useSettings } from '../runtime/settings';
 import { type HoverTarget, useGameUi } from '../runtime/store';
-import { createFigure, type FigurePose, type FigureRig, poseFigure } from './figure';
+import { createCharacterRig } from './characters/character-rig';
+import type { CharacterLibrary } from './characters/library';
+import { CharacterLibraryLoader } from './characters/library-loader';
+import type { FigureLook, FigurePose } from './figure';
 import { DISGUISED_LOOK, guardLook, PRISONER_LOOK, SQUAD_LOOKS } from './looks';
+import { proceduralRig, type UnitRig } from './rig';
 
 type IconKind = 'eye' | 'question' | 'alert' | 'talk' | 'sleep';
 
@@ -79,8 +84,11 @@ function guardIcon(g: Guard): IconKind | null {
 }
 
 interface RigEntry {
-  rig: FigureRig;
+  rig: UnitRig;
   key: string;
+  /** Last rendered position, for the ground speed that paces the walk cycle. */
+  last: Vec2 | null;
+  speed: number;
 }
 
 function unitKey(controller: GameController): string {
@@ -103,6 +111,10 @@ export function Units({ controller }: UnitsProps) {
   const icons = useRef(new Map<string, THREE.Sprite>());
   const hitboxes = useRef(new Map<string, THREE.Mesh>());
   const key = useSyncExternalStore(controller.subscribeHud, () => unitKey(controller), () => '');
+  const authored = useSettings((s) => s.models);
+  const [library, setLibrary] = useState<CharacterLibrary | null>(null);
+  const onLibrary = useCallback((lib: CharacterLibrary) => setLibrary(lib), []);
+  const lib = authored ? library : null;
 
   const lists = useMemo(() => {
     const [ops = '', guards = '', prisoners = ''] = key.split('|');
@@ -122,14 +134,30 @@ export function Units({ controller }: UnitsProps) {
     return Math.max(grid.heightAt(pos), level.cellHeight[cell]!);
   };
 
-  const ensureRig = (id: string, lookKey: string, build: () => FigureRig): FigureRig => {
+  /** The rig for a unit, rebuilt when its look changes or the authored library arrives. */
+  const ensureRig = (id: string, lookKey: string, look: () => FigureLook): RigEntry => {
+    const key = `${lookKey}|${lib ? 'authored' : 'procedural'}`;
     const existing = rigs.current.get(id);
-    if (existing && existing.key === lookKey) return existing.rig;
-    if (existing) group.current?.remove(existing.rig.root);
-    const rig = build();
+    if (existing && existing.key === key) return existing;
+    if (existing) {
+      group.current?.remove(existing.rig.root);
+      existing.rig.dispose();
+    }
+    const rig = lib ? createCharacterRig(look(), lib) : proceduralRig(look());
     group.current?.add(rig.root);
-    rigs.current.set(id, { rig, key: lookKey });
-    return rig;
+    const entry: RigEntry = { rig, key, last: existing?.last ?? null, speed: 0 };
+    rigs.current.set(id, entry);
+    return entry;
+  };
+
+  /** Smoothed ground speed of a unit from its rendered positions. */
+  const trackSpeed = (entry: RigEntry, pos: Vec2, dt: number): number => {
+    if (entry.last && dt > 0) {
+      const v = Math.hypot(pos.x - entry.last.x, pos.z - entry.last.z) / dt;
+      entry.speed += (Math.min(v, 12) - entry.speed) * Math.min(1, dt * 6);
+    }
+    entry.last = { x: pos.x, z: pos.z };
+    return entry.speed;
   };
 
   useFrame((frame, dt) => {
@@ -147,7 +175,8 @@ export function Units({ controller }: UnitsProps) {
 
     for (const op of s.operatives) {
       const look = op.disguised ? DISGUISED_LOOK : SQUAD_LOOKS[op.role];
-      const rig = ensureRig(op.id, op.disguised ? 'disguised' : op.role, () => ({ ...createFigure(look) }));
+      const entry = ensureRig(op.id, op.disguised ? 'disguised' : op.role, () => look);
+      const rig = entry.rig;
       const pos = controller.interpolate(op.id, op.pos);
       const cell = world.grid.cellAt(op.pos);
       const swimming = world.grid.hasFlag(cell, CellFlag.Deep);
@@ -170,7 +199,7 @@ export function Units({ controller }: UnitsProps) {
         swimming,
         climbing: (action?.kind === 'move' || action?.kind === 'approach') && action.linkProgress > 0,
       };
-      poseFigure(rig, pose, dt, time);
+      rig.update(pose, dt, time, trackSpeed(entry, pos, dt));
 
       let ring = rings.current.get(op.id);
       if (!ring && group.current) {
@@ -190,7 +219,8 @@ export function Units({ controller }: UnitsProps) {
     }
 
     for (const g of s.guards) {
-      const rig = ensureRig(g.id, `${g.rank}-${g.carriesLantern}`, () => createFigure(guardLook(g)));
+      const entry = ensureRig(g.id, `${g.rank}-${g.carriesLantern}`, () => guardLook(g));
+      const rig = entry.rig;
       const carrier = g.carriedBy ? world.operative(g.carriedBy) : undefined;
       const pos = carrier ? controller.interpolate(carrier.id, carrier.pos) : controller.interpolate(g.id, g.pos);
       const elevated = g.eyeElevation > 0 && g.status === 'active' && g.path === null;
@@ -211,7 +241,7 @@ export function Units({ controller }: UnitsProps) {
         swimming: false,
         climbing: false,
       };
-      poseFigure(rig, pose, dt, time);
+      rig.update(pose, dt, time, trackSpeed(entry, pos, dt));
       if (rig.lanternLight) rig.lanternLight.visible = g.status === 'active';
 
       const iconKind = guardIcon(g);
@@ -235,7 +265,8 @@ export function Units({ controller }: UnitsProps) {
 
     for (const obj of s.objects) {
       if (obj.type !== 'prisoner') continue;
-      const rig = ensureRig(obj.id, 'prisoner', () => createFigure(PRISONER_LOOK));
+      const entry = ensureRig(obj.id, 'prisoner', () => PRISONER_LOOK);
+      const rig = entry.rig;
       const pos = controller.interpolate(obj.id, obj.pos);
       const leader = obj.following ? world.operative(obj.following) : undefined;
       const facing = leader ? Math.atan2(leader.pos.z - obj.pos.z, leader.pos.x - obj.pos.x) : 0;
@@ -243,7 +274,8 @@ export function Units({ controller }: UnitsProps) {
       rig.root.position.set(pos.x, groundY(pos), pos.z);
       rig.root.rotation.y = -facing;
       const moving = Boolean(leader) && Math.hypot(leader!.pos.x - obj.pos.x, leader!.pos.z - obj.pos.z) > 1.9;
-      poseFigure(rig, { stance: 'stand', moving, running: false, lying: obj.alive ? 'none' : 'back', carrying: false, carried: false, aiming: false, talking: false, swimming: false, climbing: false }, dt, time);
+      const prisonerPose: FigurePose = { stance: 'stand', moving, running: false, lying: obj.alive ? 'none' : 'back', carrying: false, carried: false, aiming: false, talking: false, swimming: false, climbing: false };
+      rig.update(prisonerPose, dt, time, trackSpeed(entry, pos, dt));
       placeHitbox(obj.id, pos, groundY(pos), obj.alive && !obj.extracted);
     }
   });
@@ -263,6 +295,7 @@ export function Units({ controller }: UnitsProps) {
 
   return (
     <group ref={group} name="units">
+      {authored && <CharacterLibraryLoader onReady={onLibrary} />}
       {lists.ops.map((id) => hit(id, 'operative'))}
       {lists.guards.map((id) => hit(id, 'guard'))}
       {lists.prisoners.map((id) => hit(id, 'object'))}

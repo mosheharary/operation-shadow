@@ -11,9 +11,11 @@ export interface ModelEntry {
   url: string;
   authors: string[];
   license: string;
+  /** Animation library only: clip length (s) and ground speed of the root-motion version (m/s). */
+  clips?: Record<string, { duration: number; speed: number }>;
 }
 
-const MODELS: Record<string, ModelEntry> = manifest.models;
+const MODELS: Record<string, ModelEntry> = manifest.models as Record<string, ModelEntry>;
 
 export type ModelId = keyof typeof manifest.models;
 

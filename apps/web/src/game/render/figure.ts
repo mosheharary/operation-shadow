@@ -277,7 +277,7 @@ const DARK_LEATHER = '#2a211b';
 
 // ── Head ──────────────────────────────────────────────────────────────────────────────────────
 
-function buildHead(p: Parts, look: FigureLook): void {
+function buildHead(p: Parts, look: FigureLook, gearParts: Parts): void {
   const skin = look.skin;
   const gear = new Set(look.gear ?? []);
   const female = (look.build ?? 1) < 0.95;
@@ -306,9 +306,9 @@ function buildHead(p: Parts, look: FigureLook): void {
     p.add(boxG(0.012, 0.03, 0.08), '#2c3326', SKIN, at(0.096, 0.155, 0));
   }
   if (gear.has('glasses')) {
-    for (const side of [-1, 1]) p.add(new THREE.TorusGeometry(0.019, 0.003, 5, 14), '#1d1b19', METAL, at(0.1, 0.128, side * 0.032, 0, Math.PI / 2, 0));
-    p.add(boxG(0.004, 0.004, 0.026), '#1d1b19', METAL, at(0.102, 0.13, 0));
-    for (const side of [-1, 1]) p.add(boxG(0.09, 0.004, 0.004), '#1d1b19', METAL, at(0.05, 0.132, side * 0.088));
+    for (const side of [-1, 1]) gearParts.add(new THREE.TorusGeometry(0.019, 0.003, 5, 14), '#1d1b19', METAL, at(0.1, 0.128, side * 0.032, 0, Math.PI / 2, 0));
+    gearParts.add(boxG(0.004, 0.004, 0.026), '#1d1b19', METAL, at(0.102, 0.13, 0));
+    for (const side of [-1, 1]) gearParts.add(boxG(0.09, 0.004, 0.004), '#1d1b19', METAL, at(0.05, 0.132, side * 0.088));
   }
   // Hair (visible under or without headgear).
   const hair = look.hair;
@@ -394,6 +394,12 @@ function buildHeadgear(p: Parts, look: FigureLook): void {
 
 interface Built {
   pelvis: Parts;
+  /** Belt and what hangs from it (pelvis space). */
+  pelvisGear: Parts;
+  /** Straps, packs, rope and slung kit (torso space). */
+  chestGear: Parts;
+  /** Headgear and glasses (head space). */
+  headGear: Parts;
   /** Coat skirt: its own mesh so it can follow the thighs when crouching or lying. */
   skirt: Parts;
   chest: Parts;
@@ -433,6 +439,9 @@ function bulkOf(look: FigureLook): number {
 function buildBody(look: FigureLook): Built {
   const b: Built = {
     pelvis: new Parts(),
+    pelvisGear: new Parts(),
+    chestGear: new Parts(),
+    headGear: new Parts(),
     skirt: new Parts(),
     chest: new Parts(),
     head: new Parts(),
@@ -458,30 +467,30 @@ function buildBody(look: FigureLook): Built {
   pelvis.add(cyl(0.142 * build + bulk, 0.15 * build + bulk, 0.11, 16), coat, coatSurface, at(0, 0.075, 0, 0, 0, 0, 0.72, 1, 1));
   // Belt with buckle.
   const beltColor = outfit === 'wetsuit' ? '#3b3f35' : outfit === 'greatcoat' || outfit === 'officer-coat' ? LEATHER_BROWN : outfit === 'trench-coat' ? coat : '#4a4231';
-  pelvis.add(cyl(0.152 * build + bulk, 0.152 * build + bulk, 0.045, 18, true), beltColor, LEATHER, at(0, 0.09, 0, 0, 0, 0, 0.74, 1, 1.01));
-  pelvis.add(boxG(0.012, 0.045, 0.05), outfit === 'trench-coat' ? shade(coat, 0.8) : BRASS_COLOR, outfit === 'trench-coat' ? LEATHER : BRASS, at(0.113 * build + bulk, 0.09, 0));
+  b.pelvisGear.add(cyl(0.152 * build + bulk, 0.152 * build + bulk, 0.045, 18, true), beltColor, LEATHER, at(0, 0.09, 0, 0, 0, 0, 0.74, 1, 1.01));
+  b.pelvisGear.add(boxG(0.012, 0.045, 0.05), outfit === 'trench-coat' ? shade(coat, 0.8) : BRASS_COLOR, outfit === 'trench-coat' ? LEATHER : BRASS, at(0.113 * build + bulk, 0.09, 0));
   if (gear.has('belt-pouches') || outfit === 'work-shirt' || outfit === 'field-jacket') {
     for (const side of [-1, 1]) {
-      pelvis.add(boxG(0.05, 0.06, 0.07), outfit === 'greatcoat' ? LEATHER_BROWN : '#5a5338', LEATHER, at(0.09, 0.075, side * 0.095, 0, side * 0.6, 0));
-      pelvis.add(boxG(0.054, 0.014, 0.074), outfit === 'greatcoat' ? shade(LEATHER_BROWN, 0.8) : '#4c4630', LEATHER, at(0.092, 0.105, side * 0.095, 0, side * 0.6, 0));
+      b.pelvisGear.add(boxG(0.05, 0.06, 0.07), outfit === 'greatcoat' ? LEATHER_BROWN : '#5a5338', LEATHER, at(0.09, 0.075, side * 0.095, 0, side * 0.6, 0));
+      b.pelvisGear.add(boxG(0.054, 0.014, 0.074), outfit === 'greatcoat' ? shade(LEATHER_BROWN, 0.8) : '#4c4630', LEATHER, at(0.092, 0.105, side * 0.095, 0, side * 0.6, 0));
     }
   }
   if (gear.has('knife')) {
-    pelvis.add(boxG(0.035, 0.2, 0.02), DARK_LEATHER, LEATHER, at(0.02, -0.06, -0.17, 0, 0, 0.1));
-    pelvis.add(cyl(0.012, 0.012, 0.07, 8), '#3a2f25', WOOD, at(0.03, 0.07, -0.17, 0, 0, 0.1));
+    b.pelvisGear.add(boxG(0.035, 0.2, 0.02), DARK_LEATHER, LEATHER, at(0.02, -0.06, -0.17, 0, 0, 0.1));
+    b.pelvisGear.add(cyl(0.012, 0.012, 0.07, 8), '#3a2f25', WOOD, at(0.03, 0.07, -0.17, 0, 0, 0.1));
   }
   if (gear.has('medic-bag')) {
-    pelvis.add(boxG(0.09, 0.15, 0.2), '#6b5a3c', LEATHER, at(0.03, -0.03, 0.2));
-    pelvis.add(boxG(0.094, 0.07, 0.204), shade('#6b5a3c', 0.85), LEATHER, at(0.03, 0.03, 0.2));
-    pelvis.add(boxG(0.006, 0.07, 0.022), '#f0ece0', CLOTH, at(0.077, -0.03, 0.2));
-    pelvis.add(boxG(0.006, 0.022, 0.07), '#f0ece0', CLOTH, at(0.077, -0.03, 0.2));
-    pelvis.add(boxG(0.008, 0.05, 0.014), '#2e7d4f', CLOTH, at(0.079, -0.03, 0.2));
-    pelvis.add(boxG(0.008, 0.014, 0.05), '#2e7d4f', CLOTH, at(0.079, -0.03, 0.2));
+    b.pelvisGear.add(boxG(0.09, 0.15, 0.2), '#6b5a3c', LEATHER, at(0.03, -0.03, 0.2));
+    b.pelvisGear.add(boxG(0.094, 0.07, 0.204), shade('#6b5a3c', 0.85), LEATHER, at(0.03, 0.03, 0.2));
+    b.pelvisGear.add(boxG(0.006, 0.07, 0.022), '#f0ece0', CLOTH, at(0.077, -0.03, 0.2));
+    b.pelvisGear.add(boxG(0.006, 0.022, 0.07), '#f0ece0', CLOTH, at(0.077, -0.03, 0.2));
+    b.pelvisGear.add(boxG(0.008, 0.05, 0.014), '#2e7d4f', CLOTH, at(0.079, -0.03, 0.2));
+    b.pelvisGear.add(boxG(0.008, 0.014, 0.05), '#2e7d4f', CLOTH, at(0.079, -0.03, 0.2));
   }
   if (gear.has('satchel')) {
-    pelvis.add(boxG(0.07, 0.15, 0.18), '#6a4a2e', LEATHER, at(0.02, -0.02, -0.2));
-    pelvis.add(boxG(0.074, 0.08, 0.184), shade('#6a4a2e', 0.82), LEATHER, at(0.022, 0.025, -0.2));
-    pelvis.add(boxG(0.012, 0.02, 0.02), BRASS_COLOR, BRASS, at(0.06, 0.0, -0.2));
+    b.pelvisGear.add(boxG(0.07, 0.15, 0.18), '#6a4a2e', LEATHER, at(0.02, -0.02, -0.2));
+    b.pelvisGear.add(boxG(0.074, 0.08, 0.184), shade('#6a4a2e', 0.82), LEATHER, at(0.022, 0.025, -0.2));
+    b.pelvisGear.add(boxG(0.012, 0.02, 0.02), BRASS_COLOR, BRASS, at(0.06, 0.0, -0.2));
   }
   if (longSkirt) {
     // Coat skirt from the waist to below the knee (officer: mid-calf), slightly open at the front.
@@ -559,65 +568,65 @@ function buildBody(look: FigureLook): Built {
   if (gear.has('cross-straps')) {
     // Leather cross-straps over the chest and back (NCOs).
     for (const side of [-1, 1]) {
-      chest.add(boxG(0.01, 0.6, 0.05), '#7a3e26', LEATHER, at(0.135 * build + bulk, 0.25, 0, side * 0.6, 0, 0));
-      chest.add(boxG(0.01, 0.6, 0.05), '#7a3e26', LEATHER, at(-0.13 * build - bulk, 0.25, 0, side * 0.6, 0, 0));
+      b.chestGear.add(boxG(0.01, 0.6, 0.05), '#7a3e26', LEATHER, at(0.135 * build + bulk, 0.25, 0, side * 0.6, 0, 0));
+      b.chestGear.add(boxG(0.01, 0.6, 0.05), '#7a3e26', LEATHER, at(-0.13 * build - bulk, 0.25, 0, side * 0.6, 0, 0));
     }
   }
   if (gear.has('suspenders')) {
     for (const side of [-1, 1]) {
-      chest.add(boxG(0.008, 0.48, 0.03), '#6b5c3a', LEATHER, at(0.122 * build + bulk, 0.23, side * 0.065, side * 0.08, 0, 0));
-      chest.add(boxG(0.008, 0.48, 0.03), '#6b5c3a', LEATHER, at(-0.12 * build - bulk, 0.23, side * 0.06, side * -0.08, 0, 0));
+      b.chestGear.add(boxG(0.008, 0.48, 0.03), '#6b5c3a', LEATHER, at(0.122 * build + bulk, 0.23, side * 0.065, side * 0.08, 0, 0));
+      b.chestGear.add(boxG(0.008, 0.48, 0.03), '#6b5c3a', LEATHER, at(-0.12 * build - bulk, 0.23, side * 0.06, side * -0.08, 0, 0));
     }
   }
   if (gear.has('satchel') || gear.has('medic-bag')) {
     // Strap from one shoulder across to the opposite hip.
     const side = gear.has('medic-bag') ? 1 : -1;
-    chest.add(boxG(0.008, 0.62, 0.035), LEATHER_BROWN, LEATHER, at(0.125 * build + bulk, 0.22, 0, -side * 0.62, 0, 0));
-    chest.add(boxG(0.008, 0.62, 0.035), LEATHER_BROWN, LEATHER, at(-0.12 * build - bulk, 0.22, 0, side * 0.62, 0, 0));
+    b.chestGear.add(boxG(0.008, 0.62, 0.035), LEATHER_BROWN, LEATHER, at(0.125 * build + bulk, 0.22, 0, -side * 0.62, 0, 0));
+    b.chestGear.add(boxG(0.008, 0.62, 0.035), LEATHER_BROWN, LEATHER, at(-0.12 * build - bulk, 0.22, 0, side * 0.62, 0, 0));
   }
   if (gear.has('rope')) {
     // Coiled climbing rope worn bandolier-style.
     for (let i = 0; i < 3; i += 1) {
-      chest.add(new THREE.TorusGeometry(0.21, 0.018, 6, 24), i === 1 ? '#a88d5c' : '#b39b6a', WOOD, at(0.004 * i, 0.27 + i * 0.012, 0.0, Math.PI / 2 - 0.75, 0, 0, 0.7, 1.1, 1));
+      b.chestGear.add(new THREE.TorusGeometry(0.21, 0.018, 6, 24), i === 1 ? '#a88d5c' : '#b39b6a', WOOD, at(0.004 * i, 0.27 + i * 0.012, 0.0, Math.PI / 2 - 0.75, 0, 0, 0.7, 1.1, 1));
     }
   }
   if (gear.has('binoculars')) {
-    for (const side of [-1, 1]) chest.add(cyl(0.022, 0.022, 0.09, 10), '#232523', METAL, at(0.155, 0.3, side * 0.026, 0, 0, Math.PI / 2));
-    chest.add(boxG(0.03, 0.03, 0.03), '#232523', METAL, at(0.15, 0.3, 0));
-    chest.add(new THREE.TorusGeometry(0.11, 0.004, 4, 16, Math.PI), DARK_LEATHER, LEATHER, at(0.13, 0.33, 0, 0, Math.PI / 2, Math.PI));
+    for (const side of [-1, 1]) b.chestGear.add(cyl(0.022, 0.022, 0.09, 10), '#232523', METAL, at(0.155, 0.3, side * 0.026, 0, 0, Math.PI / 2));
+    b.chestGear.add(boxG(0.03, 0.03, 0.03), '#232523', METAL, at(0.15, 0.3, 0));
+    b.chestGear.add(new THREE.TorusGeometry(0.11, 0.004, 4, 16, Math.PI), DARK_LEATHER, LEATHER, at(0.13, 0.33, 0, 0, Math.PI / 2, Math.PI));
   }
   const pack = look.packColor ?? '#5a5338';
   if (gear.has('large-pack')) {
-    chest.add(boxG(0.18, 0.36, 0.3), pack, CLOTH, at(-0.21, 0.27, 0));
-    chest.add(boxG(0.05, 0.16, 0.24), shade(pack, 0.9), CLOTH, at(-0.31, 0.22, 0));
-    for (const side of [-1, 1]) chest.add(boxG(0.1, 0.12, 0.06), shade(pack, 0.95), CLOTH, at(-0.21, 0.18, side * 0.18));
-    for (const side of [-1, 1]) chest.add(boxG(0.03, 0.4, 0.035), LEATHER_BROWN, LEATHER, at(0.1, 0.25, side * 0.09, 0, 0, 0.05));
+    b.chestGear.add(boxG(0.18, 0.36, 0.3), pack, CLOTH, at(-0.21, 0.27, 0));
+    b.chestGear.add(boxG(0.05, 0.16, 0.24), shade(pack, 0.9), CLOTH, at(-0.31, 0.22, 0));
+    for (const side of [-1, 1]) b.chestGear.add(boxG(0.1, 0.12, 0.06), shade(pack, 0.95), CLOTH, at(-0.21, 0.18, side * 0.18));
+    for (const side of [-1, 1]) b.chestGear.add(boxG(0.03, 0.4, 0.035), LEATHER_BROWN, LEATHER, at(0.1, 0.25, side * 0.09, 0, 0, 0.05));
   }
   if (gear.has('small-pack')) {
-    chest.add(boxG(0.13, 0.26, 0.24), pack, CLOTH, at(-0.18, 0.28, 0));
-    chest.add(boxG(0.135, 0.06, 0.244), shade(pack, 0.85), CLOTH, at(-0.18, 0.37, 0));
+    b.chestGear.add(boxG(0.13, 0.26, 0.24), pack, CLOTH, at(-0.18, 0.28, 0));
+    b.chestGear.add(boxG(0.135, 0.06, 0.244), shade(pack, 0.85), CLOTH, at(-0.18, 0.37, 0));
   }
-  if (gear.has('bedroll')) chest.add(cyl(0.07, 0.07, 0.44, 12), '#706a52', WOOL, at(-0.2, 0.5, 0, Math.PI / 2, 0, 0));
+  if (gear.has('bedroll')) b.chestGear.add(cyl(0.07, 0.07, 0.44, 12), '#706a52', WOOL, at(-0.2, 0.5, 0, Math.PI / 2, 0, 0));
   if (gear.has('tools')) {
-    chest.add(cyl(0.014, 0.014, 0.42, 8), '#5a4632', WOOD, at(-0.27, 0.42, 0.12, 0.2, 0, 0.25));
-    chest.add(boxG(0.03, 0.03, 0.14), '#3d4044', METAL, at(-0.33, 0.62, 0.15, 0.2, 0, 0.25));
-    chest.add(cyl(0.012, 0.012, 0.3, 8), '#2f3236', METAL, at(-0.25, 0.4, -0.13, -0.25, 0, 0.15));
+    b.chestGear.add(cyl(0.014, 0.014, 0.42, 8), '#5a4632', WOOD, at(-0.27, 0.42, 0.12, 0.2, 0, 0.25));
+    b.chestGear.add(boxG(0.03, 0.03, 0.14), '#3d4044', METAL, at(-0.33, 0.62, 0.15, 0.2, 0, 0.25));
+    b.chestGear.add(cyl(0.012, 0.012, 0.3, 8), '#2f3236', METAL, at(-0.25, 0.4, -0.13, -0.25, 0, 0.15));
   }
   if (gear.has('dinghy')) {
-    chest.add(new THREE.CapsuleGeometry(0.17, 0.42, 6, 14), '#4b5a3c', RUBBER, at(-0.25, 0.3, 0, 0, 0, 0.12, 0.8, 1, 1));
-    chest.add(new THREE.TorusGeometry(0.15, 0.016, 6, 20), '#b39b6a', WOOD, at(-0.12, 0.3, 0.17, 0, 0, 0));
+    b.chestGear.add(new THREE.CapsuleGeometry(0.17, 0.42, 6, 14), '#4b5a3c', RUBBER, at(-0.25, 0.3, 0, 0, 0, 0.12, 0.8, 1, 1));
+    b.chestGear.add(new THREE.TorusGeometry(0.15, 0.016, 6, 20), '#b39b6a', WOOD, at(-0.12, 0.3, 0.17, 0, 0, 0));
   }
   if (gear.has('fins')) {
-    for (const side of [-1, 1]) chest.add(boxG(0.02, 0.36, 0.11), '#1b1f24', RUBBER, at(-0.36, 0.22, side * 0.07, 0, 0, 0.08));
+    for (const side of [-1, 1]) b.chestGear.add(boxG(0.02, 0.36, 0.11), '#1b1f24', RUBBER, at(-0.36, 0.22, side * 0.07, 0, 0, 0.08));
   }
   if (gear.has('cape')) {
     const cape = new THREE.LatheGeometry([new THREE.Vector2(0.09, 0.53), new THREE.Vector2(0.22, 0.42), new THREE.Vector2(0.3, 0.2), new THREE.Vector2(0.31, 0.18)], 20);
-    chest.add(cape, coat, coatSurface, at(0, 0, 0, 0, 0, 0, 0.82, 1, 1));
+    b.chestGear.add(cape, coat, coatSurface, at(0, 0, 0, 0, 0, 0, 0.82, 1, 1));
   }
 
   // Head (head space; neck joint at y = 0).
-  buildHead(b.head, look);
-  buildHeadgear(b.head, look);
+  buildHead(b.head, look, b.headGear);
+  buildHeadgear(b.headGear, look);
 
   // Arms: upper arm from the shoulder, forearm and hand from the elbow.
   const sleeve = outfit === 'work-shirt' ? '#5f6872' : coat;
@@ -743,17 +752,20 @@ export function createFigure(look: FigureLook): FigureRig {
   hips.position.y = 0.95;
   body.add(hips);
   attach(hips, built.pelvis);
+  attach(hips, built.pelvisGear);
   const skirt = attach(hips, built.skirt);
 
   const torso = new THREE.Group();
   torso.position.y = 0.07;
   hips.add(torso);
   const chest = attach(torso, built.chest) ?? new THREE.Object3D();
+  attach(torso, built.chestGear);
 
   const head = new THREE.Group();
   head.position.y = 0.56;
   torso.add(head);
   attach(head, built.head);
+  attach(head, built.headGear);
 
   const build = look.build ?? 1;
   const makeArm = (i: 0 | 1, side: -1 | 1) => {
@@ -815,6 +827,34 @@ export function createFigure(look: FigureLook): FigureRig {
     phase: 0,
   };
   return rig;
+}
+
+/**
+ * The figure's kit without its body, for the skinned characters: each mesh is in the same space
+ * as on the procedural figure (head: neck joint, +y up; chest: waist; pelvis: hip joint; all
+ * facing +x), so it can be hung on the matching bone.
+ */
+export interface FigureAttachments {
+  head: THREE.Mesh | null;
+  chest: THREE.Mesh | null;
+  pelvis: THREE.Mesh | null;
+  /** Coat skirt (greatcoats, officer and trench coats), hung from the hips. */
+  skirt: THREE.Mesh | null;
+  weapon: THREE.Object3D | null;
+  lantern: THREE.Object3D | null;
+}
+
+export function buildAttachments(look: FigureLook): FigureAttachments {
+  const built = buildBody(look);
+  for (const parts of [built.pelvis, built.chest, built.head, ...built.upper, ...built.fore, ...built.thigh, ...built.shin]) parts.build()?.dispose();
+  return {
+    head: segmentMesh(built.headGear),
+    chest: segmentMesh(built.chestGear),
+    pelvis: segmentMesh(built.pelvisGear),
+    skirt: segmentMesh(built.skirt),
+    weapon: buildWeapon(look.weapon ?? 'none'),
+    lantern: look.lantern ? buildLantern() : null,
+  };
 }
 
 // ── Animation ─────────────────────────────────────────────────────────────────────────────────

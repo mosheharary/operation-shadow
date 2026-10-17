@@ -13,9 +13,14 @@ const MESHOPT = false;
 
 /** Loads a processed model (suspends until it is ready; shared and cached per URL). */
 export function useModel(id: ModelId): THREE.Group {
+  return useModelFile(id).scene;
+}
+
+/** Like `useModel`, with the file's animation clips. */
+export function useModelFile(id: ModelId): { scene: THREE.Group; animations: THREE.AnimationClip[] } {
   const gltf = useGLTF(modelUrl(id), DRACO, MESHOPT);
   useEffect(() => useAssetStatus.getState().markLoaded(id), [id]);
-  return gltf.scene;
+  return gltf;
 }
 
 /** Starts downloading models before they are first rendered. */
