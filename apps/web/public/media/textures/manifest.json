@@ -288,6 +288,66 @@
         "normal": "snow/normal.webp",
         "rough": "snow/rough.webp"
       }
+    },
+    "hessian": {
+      "source": "Poly Haven",
+      "id": "hessian_230",
+      "name": "Hessian 230",
+      "url": "https://polyhaven.com/a/hessian_230",
+      "authors": [
+        "colormass",
+        "Rico Cilliers"
+      ],
+      "license": "CC0-1.0",
+      "tileMeters": [
+        0.269,
+        0.267
+      ],
+      "files": {
+        "color": "hessian/color.webp",
+        "normal": "hessian/normal.webp",
+        "rough": "hessian/rough.webp"
+      }
+    },
+    "concrete-cast": {
+      "source": "Poly Haven",
+      "id": "concrete_wall_006",
+      "name": "Concrete Wall 006",
+      "url": "https://polyhaven.com/a/concrete_wall_006",
+      "authors": [
+        "Dario Barresi",
+        "Charlotte Baglioni"
+      ],
+      "license": "CC0-1.0",
+      "tileMeters": [
+        2,
+        2
+      ],
+      "files": {
+        "color": "concrete-cast/color.webp",
+        "normal": "concrete-cast/normal.webp",
+        "rough": "concrete-cast/rough.webp"
+      }
+    },
+    "corrugated": {
+      "source": "Poly Haven",
+      "id": "corrugated_iron",
+      "name": "Corrugated Iron",
+      "url": "https://polyhaven.com/a/corrugated_iron",
+      "authors": [
+        "Jenelle van Heerden",
+        "Dimitrios Savva"
+      ],
+      "license": "CC0-1.0",
+      "tileMeters": [
+        1.12,
+        1.12
+      ],
+      "files": {
+        "color": "corrugated/color.webp",
+        "normal": "corrugated/normal.webp",
+        "rough": "corrugated/rough.webp"
+      }
     }
   }
 }

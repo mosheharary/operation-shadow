@@ -31,6 +31,9 @@ const SETS: Record<string, string> = {
   concrete: 'chipped_concrete',
   metal: 'rusty_metal_02',
   snow: 'snow_02',
+  hessian: 'hessian_230',
+  'concrete-cast': 'concrete_wall_006',
+  corrugated: 'corrugated_iron',
 };
 
 const MAPS = { color: 'Diffuse', normal: 'nor_gl', rough: 'Rough' } as const;

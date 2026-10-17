@@ -5,6 +5,7 @@ import { useFrame } from '@react-three/fiber';
 import { useLayoutEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+import { concertina, gateFrame, sandbagGeometry } from './buildings/fortifications';
 import { doorHood, downpipe, downpipeEnds, facadeMatrix, gutter, KitBatch, SHUTTER_WIDTH, shutterLeaf, WINDOW, windowFrame, windowGlass, windowStone } from './buildings/pieces';
 import { box, merge, shade, tinted } from './geom';
 import { surfaceMaterial, withMetreUvs } from './materials/surface';
@@ -93,6 +94,8 @@ function mergeUv(list: THREE.BufferGeometry[]): THREE.BufferGeometry | null {
 }
 
 function wallSurface(s: StructureDef): { key: SurfaceKey; tint: string; scale: number } {
+  // Bunkers are poured concrete: board-formed, stained and patched.
+  if (s.kind === 'bunker') return { key: 'concrete-cast', tint: '#c4c0b6', scale: 2.4 };
   const pick = <T,>(list: readonly T[]) => list[Math.floor(hash2(Math.round(s.pos.x * 10), Math.round(s.pos.z * 10), 5) * list.length)]!;
   switch (s.material) {
     case 'stone':
@@ -225,9 +228,23 @@ function buildBuildings(level: LevelData): BuildingMeshes {
         }
       }
       if (bunker) {
-        // Firing slit along the seaward walls.
+        // Firing slit along each wall, in a stepped, splayed embrasure frame.
+        const slitW = Math.min(3, len - 1);
         const slit = at(len / 2, WALL_T / 2 + 0.01);
-        batches.add('glass-dark', darkMat, box(Math.min(3, len - 1), 0.22, 0.04, slit.x, s.baseHeight + 2.1, slit.z, rot));
+        batches.add('glass-dark', darkMat, box(slitW, 0.22, 0.04, slit.x, s.baseHeight + 2.1, slit.z, rot));
+        for (const [w, h, d, step] of [
+          [slitW + 0.5, 0.75, 0.12, 0],
+          [slitW + 0.25, 0.5, 0.2, 1],
+        ] as const) {
+          for (const dy of [1, -1]) {
+            const lip = at(len / 2, WALL_T / 2 + d / 2);
+            batches.add(wallId, wallMat, tinted(box(w, (h - 0.22) / 2, d, lip.x, s.baseHeight + 2.1 + dy * ((h - 0.22) / 4 + 0.11), lip.z, rot), shade(0.92 - step * 0.05, 0.04, random)));
+          }
+          for (const dx of [1, -1]) {
+            const jamb = at(len / 2 + dx * (slitW / 2 + (w - slitW) / 4), WALL_T / 2 + d / 2);
+            batches.add(wallId, wallMat, tinted(box((w - slitW) / 2, 0.22, d, jamb.x, s.baseHeight + 2.1, jamb.z, rot), shade(0.9, 0.04, random)));
+          }
+        }
       }
     }
 
@@ -363,7 +380,15 @@ function buildBuildings(level: LevelData): BuildingMeshes {
         }
       }
     }
-    const roofKey: SurfaceKey = s.roof === 'gable' ? (hash2(Math.round(s.pos.x), 3, 11) > 0.7 ? 'roof-clay' : 'roof-slate') : bunker || s.material === 'stone' ? 'concrete' : 'planks';
+    const roofKey: SurfaceKey = s.roof === 'gable' ? (hash2(Math.round(s.pos.x), 3, 11) > 0.7 ? 'roof-clay' : 'roof-slate') : bunker ? 'concrete-cast' : s.material === 'stone' ? 'concrete' : 'planks';
+    if (bunker) {
+      // Ventilation stack with a cowl, and a periscope housing on the roof slab.
+      const roofTop = top + 0.65;
+      extraParts.push(tinted(new THREE.CylinderGeometry(0.14, 0.14, 0.9, 10).translate(s.pos.x - s.size.x * 0.25, roofTop + 0.45, s.pos.z + s.size.z * 0.2), '#6f736e'));
+      extraParts.push(tinted(new THREE.CylinderGeometry(0.24, 0.16, 0.18, 10).translate(s.pos.x - s.size.x * 0.25, roofTop + 0.95, s.pos.z + s.size.z * 0.2), '#5f635e'));
+      extraParts.push(tinted(box(0.5, 0.35, 0.5, s.pos.x + s.size.x * 0.2, roofTop + 0.17, s.pos.z - s.size.z * 0.15), '#9b978f'));
+      extraParts.push(tinted(new THREE.CylinderGeometry(0.06, 0.06, 0.5, 8).translate(s.pos.x + s.size.x * 0.2, roofTop + 0.6, s.pos.z - s.size.z * 0.15), '#3e4140'));
+    }
     const roofMat = surfaceMaterial(roofKey, {
       scale: roofKey.startsWith('roof') ? 2.2 : 2.6,
       projection: s.roof === 'gable' ? 'uv' : 'triplanar',
@@ -386,41 +411,38 @@ function buildBuildings(level: LevelData): BuildingMeshes {
   return { batches: batches.build(), roofs, kit: Object.values(kit).filter((k) => k.matrices.length > 0) };
 }
 
-/** Pillow-shaped sandbag (about 0.6 × 0.24 × 0.34 m). */
-function sandbagGeometry(): THREE.BufferGeometry {
-  const g = new THREE.BoxGeometry(0.62, 0.24, 0.34, 4, 2, 3);
-  const pos = g.attributes.position as THREE.BufferAttribute;
-  for (let i = 0; i < pos.count; i += 1) {
-    const x = pos.getX(i) / 0.31;
-    const y = pos.getY(i) / 0.12;
-    const z = pos.getZ(i) / 0.17;
-    const pinch = 1 - 0.18 * x * x;
-    pos.setXYZ(i, pos.getX(i) * (1 - 0.06 * y * y), pos.getY(i) * pinch * (1 - 0.2 * z * z), pos.getZ(i) * (1 - 0.12 * y * y) * pinch);
-  }
-  g.computeVertexNormals();
-  return g;
-}
-
 interface Fortifications {
   batches: { geometry: THREE.BufferGeometry; material: THREE.Material }[];
-  bags: THREE.Matrix4[];
+  bags: { matrix: THREE.Matrix4; color: THREE.Color }[];
   fencePanels: THREE.BufferGeometry | null;
 }
 
+/** Hessian weathers unevenly: fresh, sun-bleached, damp and muddy bags side by side. */
+const BAG_TONES = ['#d2bd92', '#bfa77c', '#a99470', '#c9b89a', '#8f7d5f'];
+
 function buildFortifications(level: LevelData): Fortifications {
   const batches = new Batches();
-  const bags: THREE.Matrix4[] = [];
+  const bags: Fortifications['bags'] = [];
   const panels: THREE.BufferGeometry[] = [];
   const random = prng(level.seed ^ 0xf0f7);
   const timber = surfaceMaterial('planks', { scale: 1.6, vertexColors: true, roughness: 0.8 });
   const concrete = surfaceMaterial('concrete', { scale: 2.5, vertexColors: true, tint: '#b9b6ae' });
+  const castConcrete = surfaceMaterial('concrete-cast', { scale: 2.2, vertexColors: true, tint: '#c9c6bd', moss: 0.15 });
+  const wire = surfaceMaterial('metal', { scale: 0.6, vertexColors: true, tint: '#8e9397', metalness: 0.75, roughness: 0.4 });
+  const corrugated = surfaceMaterial('corrugated', { scale: 1.1, vertexColors: true, metalness: 0.4, roughness: 0.6 });
   const iron = surfaceMaterial('metal', { scale: 1, vertexColors: true, tint: '#3f4245', metalness: 0.5, roughness: 0.6 });
-  const slate = surfaceMaterial('roof-slate', { scale: 1.6, vertexColors: true });
   const railSteel = surfaceMaterial('metal', { scale: 1, tint: '#5b5550', metalness: 0.8, roughness: 0.35 });
   const bag = (x: number, y: number, z: number, rotY: number) => {
-    const m = new THREE.Matrix4().makeRotationY(rotY + (random() - 0.5) * 0.18);
-    m.setPosition(x, y, z);
-    bags.push(m);
+    // Each bag a little different in size, angle and weathering; tied ends face either way.
+    const flip = random() < 0.5 ? Math.PI : 0;
+    const k = 0.93 + random() * 0.14;
+    const m = new THREE.Matrix4().compose(
+      new THREE.Vector3(x, y, z),
+      new THREE.Quaternion().setFromEuler(new THREE.Euler((random() - 0.5) * 0.05, rotY + flip + (random() - 0.5) * 0.16, (random() - 0.5) * 0.05)),
+      new THREE.Vector3(k, 0.95 + random() * 0.1, k),
+    );
+    const color = new THREE.Color(BAG_TONES[Math.floor(random() * BAG_TONES.length)]!).multiplyScalar(0.92 + random() * 0.16);
+    bags.push({ matrix: m, color });
   };
 
   for (const s of level.structures) {
@@ -442,11 +464,43 @@ function buildFortifications(level: LevelData): Fortifications {
         arm.translate(x, s.baseHeight + s.height + 0.38, z);
         batches.add('iron', iron, arm);
       }
+      const out = { x: dir.z, z: -dir.x };
       for (const piece of wallPieces({ a, b }, (s.doors ?? []).map((pos) => ({ pos, width: 3.6 })))) {
-        if (piece.door) continue;
+        if (piece.door) {
+          // Gate: heavy posts either side and two chain-link leaves standing open.
+          const width = piece.to - piece.from;
+          const leafW = width / 2 - 0.08;
+          const leafH = s.height * 0.95;
+          for (const [t, closedDir] of [
+            [piece.from, 1],
+            [piece.to, -1],
+          ] as const) {
+            const hx = a.x + dir.x * t;
+            const hz = a.z + dir.z * t;
+            batches.add('concrete', concrete, tinted(box(0.24, s.height + 0.35, 0.24, hx, s.baseHeight + (s.height + 0.35) / 2, hz), shade(0.9, 0.08, random)));
+            // Swung open by 70°, out of the compound.
+            const swing = 70 * (Math.PI / 180);
+            const vx = closedDir * dir.x * Math.cos(swing) + out.x * Math.sin(swing);
+            const vz = closedDir * dir.z * Math.cos(swing) + out.z * Math.sin(swing);
+            const leafRot = -Math.atan2(vz, vx);
+            const place = (g: THREE.BufferGeometry) => g.rotateY(leafRot).translate(hx + vx * 0.14, s.baseHeight + 0.04, hz + vz * 0.14);
+            for (const tube of gateFrame(leafW, leafH)) batches.add('wire', wire, tinted(place(tube), '#ffffff'));
+            const leaf = new THREE.PlaneGeometry(leafW, leafH - 0.1);
+            const luv = leaf.attributes.uv as THREE.BufferAttribute;
+            for (let i = 0; i < luv.count; i += 1) luv.setXY(i, luv.getX(i) * leafW, luv.getY(i) * (leafH - 0.1));
+            leaf.translate(leafW / 2, leafH / 2, 0);
+            panels.push(place(leaf));
+          }
+          continue;
+        }
         const mid = (piece.from + piece.to) / 2;
         const mx = a.x + dir.x * mid;
         const mz = a.z + dir.z * mid;
+        // Concertina wire coiled along the top, between the cranked arms.
+        const coil = concertina(piece.to - piece.from, 0.26);
+        coil.rotateY(rot);
+        coil.translate(a.x + dir.x * piece.from + out.x * 0.12, s.baseHeight + s.height + 0.14, a.z + dir.z * piece.from + out.z * 0.12);
+        batches.add('wire', wire, tinted(coil, '#ffffff'));
         for (const [dy, off] of [
           [0.25, 0],
           [0.45, 0.12],
@@ -464,10 +518,21 @@ function buildFortifications(level: LevelData): Fortifications {
       }
     } else if (s.kind === 'gun-emplacement') {
       const r = s.size.x / 2;
-      const floor = new THREE.CylinderGeometry(r - 0.15, r, 0.16, 10);
-      floor.rotateY(Math.PI / 10);
+      const floor = new THREE.CylinderGeometry(r - 0.15, r, 0.16, 20);
       floor.translate(s.pos.x, s.baseHeight + 0.08, s.pos.z);
-      batches.add('concrete', concrete, tinted(floor, shade(0.9, 0.05, random)));
+      batches.add('cast', castConcrete, tinted(floor, shade(0.9, 0.05, random)));
+      // Holdfast ring for the gun and a low cast curb inside the sandbags, open at the rear.
+      const ring = new THREE.TorusGeometry(1.1, 0.06, 6, 28).rotateX(Math.PI / 2).translate(s.pos.x, s.baseHeight + 0.17, s.pos.z);
+      batches.add('iron', iron, tinted(ring, '#ffffff'));
+      for (let k = 0; k < 20; k += 1) {
+        const seg = Math.floor(k / 2);
+        if (seg === 2 || seg === 3) continue;
+        const ang = ((k + 0.5) / 20) * Math.PI * 2;
+        const curb = box(0.3, 0.3, (2 * Math.PI * (r - 0.55)) / 20, 0, 0, 0);
+        curb.rotateY(-ang);
+        curb.translate(s.pos.x + Math.cos(ang) * (r - 0.55), s.baseHeight + 0.3, s.pos.z + Math.sin(ang) * (r - 0.55));
+        batches.add('cast', castConcrete, tinted(curb, shade(0.85, 0.06, random)));
+      }
       // Three courses of sandbags around the ring, leaving the rear entrance open.
       for (let course = 0; course < 4; course += 1) {
         const ringR = r - 0.05 - course * 0.04;
@@ -505,21 +570,39 @@ function buildFortifications(level: LevelData): Fortifications {
           batches.add('timber', timber, tinted(brace, shade(0.7, 0.1, random)));
         }
       }
+      // Concrete footings under the legs.
+      for (const [dx, dz] of legs) batches.add('cast', castConcrete, tinted(box(0.5, 0.3, 0.5, s.pos.x + dx, s.baseHeight + 0.1, s.pos.z + dz), shade(0.85, 0.08, random)));
       for (let i = 0; i < 12; i += 1) {
         batches.add('timber', timber, tinted(box(3.3, 0.08, 0.26, s.pos.x, s.baseHeight + 5.1, s.pos.z - 1.55 + i * 0.28), shade(0.95, 0.25, random)));
       }
-      for (const [dx, dz, w, d] of [
-        [0, -1.6, 3.3, 0.08],
-        [0, 1.6, 3.3, 0.08],
-        [-1.6, 0, 0.08, 3.3],
-        [1.6, 0, 0.08, 3.3],
+      // Parapet: a top rail and vertical cladding boards (with gaps) on each side.
+      for (const [dx, dz, alongX] of [
+        [0, -1.6, true],
+        [0, 1.6, true],
+        [-1.6, 0, false],
+        [1.6, 0, false],
       ] as const) {
-        batches.add('timber', timber, tinted(box(w, 0.8, d, s.pos.x + dx, s.baseHeight + 5.65, s.pos.z + dz), shade(0.85, 0.15, random)));
+        const rail = alongX ? box(3.4, 0.08, 0.12, s.pos.x + dx, s.baseHeight + 6.08, s.pos.z + dz) : box(0.12, 0.08, 3.4, s.pos.x + dx, s.baseHeight + 6.08, s.pos.z + dz);
+        batches.add('timber', timber, tinted(rail, shade(0.7, 0.1, random)));
+        for (let u = -1.5; u <= 1.5; u += 0.19) {
+          const board = alongX ? box(0.16, 0.9, 0.04, s.pos.x + u, s.baseHeight + 5.6, s.pos.z + dz) : box(0.04, 0.9, 0.16, s.pos.x + dx, s.baseHeight + 5.6, s.pos.z + u);
+          batches.add('timber', timber, tinted(board, shade(0.85, 0.22, random)));
+        }
       }
-      const roof = new THREE.ConeGeometry(2.7, 1.3, 4, 1);
+      // Corner posts carry a corrugated-iron hip roof.
+      for (const [dx, dz] of [
+        [-1.55, -1.55],
+        [1.55, -1.55],
+        [1.55, 1.55],
+        [-1.55, 1.55],
+      ] as const) {
+        batches.add('timber', timber, tinted(box(0.12, 1.75, 0.12, s.pos.x + dx, s.baseHeight + 6.0, s.pos.z + dz), shade(0.7, 0.1, random)));
+      }
+      const roof = new THREE.ConeGeometry(2.75, 1.1, 4, 1, true);
       roof.rotateY(Math.PI / 4);
-      roof.translate(s.pos.x, s.baseHeight + 7.45, s.pos.z);
-      batches.add('slate', slate, roof);
+      roof.translate(s.pos.x, s.baseHeight + 7.42, s.pos.z);
+      batches.add('corrugated', corrugated, tinted(roof, shade(0.85, 0.1, random)));
+      batches.add('timber', timber, tinted(box(3.6, 0.1, 3.6, s.pos.x, s.baseHeight + 6.86, s.pos.z), shade(0.6, 0.08, random)));
       for (let y = 0.4; y < 5.1; y += 0.35) batches.add('timber', timber, tinted(box(0.06, 0.06, 0.55, s.pos.x + 1.32, s.baseHeight + y, s.pos.z), new THREE.Color('#6d5a44')));
       for (const side of [-0.28, 0.28]) batches.add('timber', timber, tinted(box(0.07, 5.3, 0.07, s.pos.x + 1.32, s.baseHeight + 2.65, s.pos.z + side), new THREE.Color('#6d5a44')));
     } else if (s.kind === 'rail' && s.path && s.path.length >= 2) {
@@ -607,7 +690,7 @@ export function Structures({ level, cutawayRegions }: StructuresProps) {
   const buildings = useMemo(() => buildBuildings(level), [level]);
   const forts = useMemo(() => buildFortifications(level), [level]);
   const bagGeometry = useMemo(() => sandbagGeometry(), []);
-  const bagMaterial = useMemo(() => surfaceMaterial('plaster', { scale: 0.9, tint: '#b6a37e', roughness: 1, macro: 0.5 }), []);
+  const bagMaterial = useMemo(() => surfaceMaterial('hessian', { scale: 0.3, roughness: 1, macro: 0.4, normalStrength: 1.4 }), []);
   const fenceMaterial = useMemo(
     () => new THREE.MeshStandardMaterial({ map: chainLinkTexture(), alphaTest: 0.4, side: THREE.DoubleSide, metalness: 0.6, roughness: 0.5, color: '#9aa0a4' }),
     [],
@@ -618,8 +701,12 @@ export function Structures({ level, cutawayRegions }: StructuresProps) {
   useLayoutEffect(() => {
     const mesh = bagMesh.current;
     if (!mesh) return;
-    forts.bags.forEach((m, i) => mesh.setMatrixAt(i, m));
+    forts.bags.forEach(({ matrix, color }, i) => {
+      mesh.setMatrixAt(i, matrix);
+      mesh.setColorAt(i, color);
+    });
     mesh.instanceMatrix.needsUpdate = true;
+    if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
     mesh.computeBoundingSphere();
   }, [forts]);
 

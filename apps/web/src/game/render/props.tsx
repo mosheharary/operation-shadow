@@ -282,27 +282,49 @@ function proceduralParts(kind: PropKind): Part[] {
         { geometry: t(new THREE.SphereGeometry(0.12, 6, 4), (g) => g.translate(0, 9.05, 0)), material: material('#ff5040', { emissive: '#ff3020', emissiveIntensity: 3 }) },
       ];
     }
-    case 'gun':
+    case 'gun': {
+      // Coastal gun on a pedestal mount: base plate and pedestal, cradle with trunnions and
+      // recoil cylinders, a long hooped barrel with a breech ring, and a bent shield with wings.
+      const steel = surfaceMaterial('metal', { scale: 0.9, tint: '#4c5348', metalness: 0.45, roughness: 0.55 });
+      const tube = (r0: number, r1: number, len: number, x: number, y: number, z = 0, seg = 18) =>
+        t(new THREE.CylinderGeometry(r1, r0, len, seg), (g) => { g.rotateZ(-Math.PI / 2); g.translate(x, y, z); });
+      const elevation = -0.08;
+      const barrel = merge([
+        tube(0.16, 0.115, 3.6, 2.1, 0),
+        tube(0.13, 0.13, 0.22, 3.95, 0),
+        tube(0.19, 0.19, 0.5, 0.3, 0),
+        ...[0.9, 1.6, 2.4].map((x) => tube(0.15, 0.15, 0.08, x, 0)),
+        tube(0.21, 0.21, 0.34, -0.05, 0),
+      ])!;
+      barrel.rotateZ(elevation);
+      barrel.translate(0, 1.38, 0);
+      const cradle = merge([
+        box(1.5, 0.3, 0.42, 0.45, 1.2, 0),
+        tube(0.06, 0.06, 1.3, 0.75, 1.07, 0.16, 8),
+        tube(0.06, 0.06, 1.3, 0.75, 1.07, -0.16, 8),
+        t(new THREE.CylinderGeometry(0.09, 0.09, 0.62, 10), (g) => { g.rotateX(Math.PI / 2); g.translate(0.15, 1.3, 0); }),
+        box(0.5, 0.42, 0.08, 0.15, 1.05, 0.27),
+        box(0.5, 0.42, 0.08, 0.15, 1.05, -0.27),
+        t(new THREE.TorusGeometry(0.16, 0.02, 6, 16), (g) => { g.translate(-0.15, 1.0, 0.42); }),
+      ])!;
+      const mount = merge([
+        t(new THREE.CylinderGeometry(0.75, 0.82, 0.12, 20), (g) => g.translate(0, 0.06, 0)),
+        t(new THREE.CylinderGeometry(0.3, 0.55, 0.75, 14), (g) => g.translate(0, 0.5, 0)),
+        t(new THREE.CylinderGeometry(0.5, 0.5, 0.1, 16), (g) => g.translate(0, 0.9, 0)),
+        ...Array.from({ length: 10 }, (_, i) => t(new THREE.CylinderGeometry(0.025, 0.025, 0.06, 6), (g) => g.translate(Math.cos((i / 10) * Math.PI * 2) * 0.68, 0.14, Math.sin((i / 10) * Math.PI * 2) * 0.68))),
+      ])!;
+      const shield = merge([
+        t(new THREE.BoxGeometry(0.06, 1.25, 1.7), (g) => { g.rotateZ(0.12); g.translate(0.95, 1.35, 0); }),
+        t(new THREE.BoxGeometry(0.06, 1.25, 0.75), (g) => { g.rotateY(0.6); g.rotateZ(0.12); g.translate(0.68, 1.35, 1.1); }),
+        t(new THREE.BoxGeometry(0.06, 1.25, 0.75), (g) => { g.rotateY(-0.6); g.rotateZ(0.12); g.translate(0.68, 1.35, -1.1); }),
+        t(new THREE.BoxGeometry(0.6, 0.05, 1.75), (g) => { g.rotateZ(-0.25); g.translate(0.7, 1.98, 0); }),
+      ])!;
       return [
-        {
-          geometry: merge([
-            t(new THREE.CylinderGeometry(0.11, 0.15, 3.6, 10), (g) => { g.rotateZ(Math.PI / 2 - 0.12); g.translate(1.6, 1.35, 0); }),
-            t(new THREE.CylinderGeometry(0.2, 0.2, 1.1, 10), (g) => { g.rotateZ(Math.PI / 2 - 0.12); g.translate(-0.1, 1.15, 0); }),
-            box(0.9, 0.55, 0.6, -0.35, 1.05, 0),
-            box(0.12, 1.15, 1.9, 0.45, 1.15, 0),
-            box(0.4, 0.5, 0.9, 0, 0.55, 0),
-            t(new THREE.BoxGeometry(2.4, 0.16, 0.16), (g) => { g.rotateY(0.35); g.translate(-1.3, 0.35, 0.42); }),
-            t(new THREE.BoxGeometry(2.4, 0.16, 0.16), (g) => { g.rotateY(-0.35); g.translate(-1.3, 0.35, -0.42); }),
-          ])!,
-          material: M.olive(),
-          shadow: true,
-        },
-        {
-          geometry: merge([-0.75, 0.75].map((z) => t(new THREE.CylinderGeometry(0.5, 0.5, 0.16, 14), (g) => { g.rotateX(Math.PI / 2); g.translate(0.05, 0.5, z); })))!,
-          material: M.iron(),
-          shadow: true,
-        },
+        { geometry: barrel, material: steel, shadow: true },
+        { geometry: merge([cradle, mount])!, material: M.iron(), shadow: true },
+        { geometry: shield, material: M.olive(), shadow: true },
       ];
+    }
     case 'truck':
       return [
         { geometry: merge([box(1.6, 1.5, 2.2, 1.7, 1.3, 0), box(1.0, 0.7, 2.1, 2.7, 0.95, 0), box(4.6, 0.25, 2.2, 0, 0.62, 0)])!, material: M.olive(), shadow: true },
