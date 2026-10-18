@@ -18,6 +18,7 @@ export type SoundName =
   | 'bell'
   | 'tool'
   | 'stinger-alert'
+  | 'all-clear'
   | 'stinger-spotted'
   | 'ui-click'
   | 'ui-deny'
@@ -238,6 +239,21 @@ const SOUNDS: Record<SoundName, { seconds: number; peak: number; fill: Fill }> =
         for (let h = 1; h <= 6; h += 1) addGlide(o, r, f * h, f * h, 1, 1 / h, (t) => env(t, 0.03, 0.7));
       }
       lowpass(o, 2400, r);
+    },
+  },
+  /** The all-clear: one long, steady siren note that swells and dies away. */
+  'all-clear': {
+    seconds: 5,
+    peak: 0.45,
+    fill: (o, r) => {
+      let phase = 0;
+      for (let i = 0; i < o.length; i += 1) {
+        const t = i / r;
+        const f = t < 0.8 ? 520 + 380 * (t / 0.8) : t > 4 ? 900 - 300 * (t - 4) : 900;
+        phase += (TAU * f) / r;
+        const amp = Math.min(1, t / 0.4) * (t > 4 ? 1 - (t - 4) : 1);
+        o[i] = (Math.sin(phase) * 0.8 + Math.sin(phase * 2) * 0.15) * amp;
+      }
     },
   },
   'stinger-spotted': {

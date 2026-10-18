@@ -594,6 +594,15 @@ export function dispatchToSearch(world: World, g: Guard, center: Vec2): void {
   startSearch(world, g, center);
 }
 
+/** Sends an alarm reinforcement back to its barracks once the alarm stands down. */
+export function sendToBarracks(world: World, g: Guard): void {
+  if (!g.barracks) return;
+  g.home = { pos: { ...g.barracks }, facing: g.home.facing };
+  g.focus = null;
+  g.suspicion = [];
+  returnToRoutine(world, g);
+}
+
 export function disableGuard(world: World, g: Guard, status: 'ko' | 'dead'): void {
   const s = world.state;
   g.status = status;

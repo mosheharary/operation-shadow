@@ -37,6 +37,9 @@ export function wireSessionEvents(controller: GameController, dialogue: Dialogue
         case 'alarm':
           if (e.level > e.previous) ui.toast(`Alarm: ${ALARM_LABELS[e.level]}`, e.level >= 3 ? 'danger' : 'warning');
           break;
+        case 'all-clear':
+          ui.toast('All clear: reinforcements are returning to barracks', 'info');
+          break;
         case 'operative-status': {
           const op = world.operative(e.unitId);
           if (!op) break;

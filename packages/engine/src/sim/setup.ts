@@ -191,7 +191,7 @@ export function createInitialState(level: LevelData, mission: MissionRuntime, se
     footprints: [],
     noises: [],
     smoke: [],
-    alarm: { level: 0, persistent: 0, since: 0, peak: 0, floor: 0, lastEscalationTick: 0, reinforcementsSent: 0, sirens: false },
+    alarm: { level: 0, persistent: 0, since: 0, peak: 0, floor: 0, lastEscalationTick: 0, lastContactTick: 0, reinforcementsSent: 0, sirens: false },
     objectives: mission.objectives.map((o) => ({ id: o.id, status: o.hidden ? 'hidden' : 'active', completedTick: null })),
     director: {
       fired: [],

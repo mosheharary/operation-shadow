@@ -315,6 +315,30 @@ describe('objectives, extraction and failure', () => {
     expect(world.state.alarm.persistent).toBeGreaterThanOrEqual(3);
   });
 
+  it('sounds the all-clear 30 s after reinforcements lose the squad, and sends them back to barracks', () => {
+    const lvl = level(undefined, { width: 120, depth: 40 });
+    const barracks = vec(115, 20);
+    const world = makeWorld(lvl, { ...makeMission(lvl), reinforcementSpawns: [{ sector: 'main', pos: barracks, count: 2 }] }, ['infiltrator']);
+    placeOperative(world, 'infiltrator', vec(3, 20), 'prone');
+    const reinforcements = (w: World) => w.state.guards.filter((g) => g.barracks);
+    world.raiseAlarm(4, 'Test alarm', 'main', vec(108, 20));
+    expect(reinforcements(world)).toHaveLength(2);
+    expect(world.state.alarm.sirens).toBe(true);
+
+    expect(runFor(world, 29).some((e) => e.type === 'all-clear')).toBe(false);
+    expect(world.state.alarm.persistent).toBe(4);
+    const events = runFor(world, 2);
+    expect(events.some((e) => e.type === 'all-clear')).toBe(true);
+    expect(world.state.alarm.sirens).toBe(false);
+    expect(world.state.alarm.persistent).toBeLessThan(3);
+    expect(reinforcements(world).every((g) => g.state === 'return' || g.state === 'post')).toBe(true);
+    expect(runUntil(world, (w) => reinforcements(w).length === 0, 30)).toBe(true);
+
+    // The barracks turns out again for the next alarm.
+    world.raiseAlarm(4, 'Test alarm', 'main', vec(108, 20));
+    expect(reinforcements(world)).toHaveLength(2);
+  });
+
   it('fails the mission at the stated alarm limit', () => {
     const lvl = level();
     const world = makeWorld(lvl, makeMission(lvl, { guards: [guard('g:1', vec(20, 20), WEST, { temperament: 'strict' })], failAtAlarm: 3 }), ['infiltrator']);

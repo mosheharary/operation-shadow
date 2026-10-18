@@ -249,6 +249,8 @@ export interface Guard {
   found: boolean;
   tagged: boolean;
   barked: boolean;
+  /** Alarm reinforcements only: the barracks they deployed from and return to when the alarm stands down. */
+  barracks?: Vec2;
 }
 
 // ── World objects ─────────────────────────────────────────────────────────────────────────────
@@ -342,6 +344,8 @@ export interface AlarmState {
   peak: AlarmLevel;
   floor: AlarmLevel;
   lastEscalationTick: number;
+  /** Last time a guard saw or fought the squad during a sector or full alert. */
+  lastContactTick: number;
   reinforcementsSent: number;
   sirens: boolean;
 }

@@ -43,6 +43,7 @@ export type GameEvent =
   | { type: 'door'; objectId: string; open: boolean }
   | { type: 'explosion'; pos: Vec2 }
   | { type: 'bell'; objectId: string; pos: Vec2 }
+  | { type: 'all-clear' }
   | { type: 'mission'; status: 'success' | 'failed'; code: OutcomeCode }
   | { type: 'rejected'; unitId: string; reason: string }
   | { type: 'message'; speaker: string; lineKey: string; text: string }

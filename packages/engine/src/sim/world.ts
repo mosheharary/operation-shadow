@@ -83,7 +83,9 @@ export class World {
   static restore(level: LevelData, mission: MissionRuntime, state: SimState): World {
     if (state.schemaVersion !== 1) throw new Error(`Unsupported save schema version ${String(state.schemaVersion)}`);
     if (state.levelId !== level.id || state.missionId !== mission.id) throw new Error('Saved state belongs to a different mission');
-    return new World(level, mission, structuredClone(state));
+    const copy = structuredClone(state);
+    copy.alarm.lastContactTick ??= copy.alarm.lastEscalationTick;
+    return new World(level, mission, copy);
   }
 
   snapshot(): SimState {
@@ -125,6 +127,11 @@ export class World {
   indexObject(obj: WorldObject): void {
     this.objects.set(obj.id, obj);
     if (obj.type === 'door') for (const cell of obj.cells) this.doorByCell.set(cell, obj.id);
+  }
+
+  removeGuard(id: string): void {
+    this.state.guards = this.state.guards.filter((g) => g.id !== id);
+    this.guards.delete(id);
   }
 
   removeObject(id: string): void {
@@ -301,9 +308,11 @@ export class World {
     return cached.points[cached.index] ?? null;
   }
 
-  spawnReinforcement(sector: string, pos: Vec2, searchCenter: Vec2): void {
+  /** `barracks`: an alarm reinforcement, which returns there and stands down once the alarm clears. */
+  spawnReinforcement(sector: string, pos: Vec2, searchCenter: Vec2, barracks = false): void {
     const id = this.newId('g:reinforcement');
     const guard = createGuard(this.level, { id, archetype: 'rifleman', rank: 'soldier', temperament: 'strict', sector, pos, radio: false });
+    if (barracks) guard.barracks = { ...pos };
     this.state.guards.push(guard);
     this.guards.set(guard.id, guard);
     dispatchToSearch(this, guard, searchCenter);

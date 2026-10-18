@@ -42,7 +42,7 @@ function fire(world: World, event: DirectorEventDef): void {
       case 'reinforce':
         for (let i = 0; i < action.count; i += 1) {
           const spawn = world.mission.reinforcementSpawns.find((r) => r.sector === action.sector);
-          if (spawn) world.spawnReinforcement(action.sector, { x: spawn.pos.x + i * 0.8, z: spawn.pos.z }, spawn.pos);
+          if (spawn) world.spawnReinforcement(action.sector, { x: spawn.pos.x + i * 0.8, z: spawn.pos.z }, spawn.pos, true);
         }
         break;
       case 'weather':

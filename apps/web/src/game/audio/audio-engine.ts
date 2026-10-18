@@ -259,6 +259,9 @@ export class AudioEngine {
         case 'bell':
           for (let i = 0; i < 4; i += 1) window.setTimeout(() => this.playAt('bell', e.pos, { gain: 0.9 }), i * 520);
           break;
+        case 'all-clear':
+          this.play2D('all-clear', { gain: 0.6 });
+          break;
         case 'detected':
           this.play2D('stinger-spotted', { gain: 0.8 });
           break;

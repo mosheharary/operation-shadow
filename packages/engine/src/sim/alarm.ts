@@ -1,4 +1,5 @@
-import type { Vec2 } from '../core/math';
+import { distance, type Vec2 } from '../core/math';
+import { sendToBarracks } from './guards';
 import { WEATHER_NOISE_FLOOR } from './rules';
 import { type AlarmLevel, type Guard, seconds } from './types';
 import type { World } from './world';
@@ -11,8 +12,10 @@ export const ALARM_LABELS: Record<AlarmLevel, string> = {
   4: 'Full alert',
 };
 
-/** How long a persistent escalation lasts without new escalations before stepping down. */
-const DECAY: Record<number, number> = { 2: seconds(60), 3: seconds(120), 4: seconds(180) };
+/** How long active investigation lasts without new escalations before stepping down. */
+const DECAY = seconds(60);
+/** A sector or full alert stands down after this long without a guard seeing or fighting the squad. */
+const STAND_DOWN = seconds(30);
 const SIREN_DB = 22;
 
 /** Raises the persistent alarm (never lowers it). Spawns reinforcements and sirens per level. */
@@ -23,6 +26,7 @@ export function raiseAlarm(world: World, level: AlarmLevel, reason: string, sect
   if (level <= a.persistent) return;
   const previous = a.level;
   a.persistent = level;
+  if (level >= 3 && a.persistent < 3) a.lastContactTick = s.tick;
   if (level > a.level) {
     a.level = level;
     a.since = s.tick;
@@ -51,7 +55,7 @@ function dispatchReinforcements(world: World, sector: string, pos: Vec2): void {
     s.director.fired.push(key);
     for (let i = 0; i < spawn.count; i += 1) {
       const offset = { x: spawn.pos.x + (i % 2) * 0.8, z: spawn.pos.z + Math.floor(i / 2) * 0.8 };
-      world.spawnReinforcement(spawn.sector, offset, pos);
+      world.spawnReinforcement(spawn.sector, offset, pos, true);
     }
     s.alarm.reinforcementsSent += spawn.count;
     world.log('danger', `Reinforcements deployed (${spawn.count})`);
@@ -69,11 +73,41 @@ function derivedLevel(guards: Guard[]): AlarmLevel {
   return level;
 }
 
+/** All clear: the alert ends, sirens stop and reinforcements march back to their barracks. */
+function standDown(world: World): void {
+  const s = world.state;
+  const a = s.alarm;
+  a.persistent = Math.max(a.floor, 1) as AlarmLevel;
+  a.lastEscalationTick = s.tick;
+  a.sirens = false;
+  for (const g of s.guards) if (g.status === 'active' && g.barracks) sendToBarracks(world, g);
+  // The barracks can turn out again for the next alarm.
+  s.director.fired = s.director.fired.filter((key) => !key.startsWith('reinforce:'));
+  world.emit({ type: 'all-clear' });
+  world.log('info', 'All clear: reinforcements returning to barracks');
+}
+
+/** Reinforcements back at their barracks go inside once the alert is over. */
+function retireReinforcements(world: World): void {
+  const s = world.state;
+  if (s.alarm.persistent >= 3) return;
+  for (const g of [...s.guards]) {
+    if (g.status === 'active' && g.barracks && g.state === 'post' && distance(g.pos, g.barracks) <= 0.6) world.removeGuard(g.id);
+  }
+}
+
 export function updateAlarm(world: World): void {
   const s = world.state;
   const a = s.alarm;
+  if (a.persistent >= 3) {
+    const contact = s.guards.some((g) => g.status === 'active' && g.state === 'combat');
+    for (const op of s.operatives) a.lastContactTick = Math.max(a.lastContactTick, op.lastSpottedTick ?? -1);
+    if (contact) a.lastContactTick = s.tick;
+    else if (s.tick - a.lastContactTick > STAND_DOWN) standDown(world);
+  }
+  retireReinforcements(world);
   const fighting = s.guards.some((g) => g.status === 'active' && (g.state === 'combat' || g.state === 'alerted'));
-  if (a.persistent >= 2 && !fighting && s.tick - a.lastEscalationTick > (DECAY[a.persistent] ?? seconds(60))) {
+  if (a.persistent === 2 && !fighting && s.tick - a.lastEscalationTick > DECAY) {
     const next = Math.max(a.floor, a.persistent - 1) as AlarmLevel;
     if (next < a.persistent) {
       a.persistent = next;
