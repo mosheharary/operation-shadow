@@ -25,8 +25,9 @@ export function raiseAlarm(world: World, level: AlarmLevel, reason: string, sect
   if (level >= 2) a.lastEscalationTick = s.tick;
   if (level <= a.persistent) return;
   const previous = a.level;
-  a.persistent = level;
+  // A new sector or full alert starts its stand-down clock now, not at the last contact of an earlier alert.
   if (level >= 3 && a.persistent < 3) a.lastContactTick = s.tick;
+  a.persistent = level;
   if (level > a.level) {
     a.level = level;
     a.since = s.tick;

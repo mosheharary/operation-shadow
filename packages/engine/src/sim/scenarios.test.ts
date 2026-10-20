@@ -339,6 +339,20 @@ describe('objectives, extraction and failure', () => {
     expect(reinforcements(world)).toHaveLength(2);
   });
 
+  it('times the stand-down from the moment a later alert is raised, so it cannot clear and re-raise every tick', () => {
+    const lvl = level(undefined, { width: 120, depth: 40 });
+    const barracks = vec(115, 20);
+    const world = makeWorld(lvl, { ...makeMission(lvl), reinforcementSpawns: [{ sector: 'main', pos: barracks, count: 2 }] }, ['infiltrator']);
+    placeOperative(world, 'infiltrator', vec(3, 20), 'prone');
+    runFor(world, 60);
+    world.raiseAlarm(4, 'Test alarm', 'main', vec(108, 20));
+    const events = runFor(world, 29);
+    expect(events.some((e) => e.type === 'all-clear')).toBe(false);
+    expect(world.state.alarm.persistent).toBe(4);
+    expect(world.state.guards.filter((g) => g.barracks)).toHaveLength(2);
+    expect(runFor(world, 2).some((e) => e.type === 'all-clear')).toBe(true);
+  });
+
   it('fails the mission at the stated alarm limit', () => {
     const lvl = level();
     const world = makeWorld(lvl, makeMission(lvl, { guards: [guard('g:1', vec(20, 20), WEST, { temperament: 'strict' })], failAtAlarm: 3 }), ['infiltrator']);
