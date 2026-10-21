@@ -66,6 +66,34 @@ test.describe('Saved games and progress', () => {
     expect((await probe(page)).tick).toBeLessThan(savedTick + 200);
   });
 
+  test('saved slots can be deleted from the pause menu and from Field HQ, after confirming', async ({ page }) => {
+    await signIn(page, 'B');
+    await play(page, '/play/boot-camp?squad=infiltrator,engineer&seed=7');
+    await page.keyboard.press('Escape');
+    await page.getByTestId('open-saves').click();
+    const slot = page.getByTestId('save-manual-3');
+    await slot.getByRole('button', { name: 'Save here' }).click();
+    await expect(slot).toContainText('Boot Camp');
+
+    // The first click only asks; Keep leaves the save alone.
+    await page.getByTestId('delete-manual-3').click();
+    await slot.getByRole('button', { name: 'Keep' }).click();
+    await expect(slot).toContainText('Boot Camp');
+    await page.getByTestId('delete-manual-3').click();
+    await page.getByTestId('delete-confirm-manual-3').click();
+    await expect(slot).toContainText('Empty');
+    expect((await page.request.get('/api/v1/saves/manual-3')).status()).toBe(404);
+
+    await slot.getByRole('button', { name: 'Save here' }).click();
+    await expect(slot).toContainText('Boot Camp');
+    await page.goto('/dashboard');
+    await expect(page.getByTestId('continue-manual-3')).toBeVisible();
+    await page.getByTestId('delete-save-manual-3').click();
+    await page.getByTestId('delete-save-manual-3-confirm').click();
+    await expect(page.getByTestId('continue-manual-3')).toHaveCount(0);
+    expect((await page.request.get('/api/v1/saves/manual-3')).status()).toBe(404);
+  });
+
   test('saves are private, validated and same-origin only', async ({ page, browser }) => {
     await signIn(page, 'B');
     expect((await page.request.get('/api/v1/saves/quick')).status()).toBe(404);

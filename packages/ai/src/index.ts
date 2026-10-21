@@ -1,6 +1,7 @@
 export { estimateCostUsd } from './cost';
 export { generateMission, PLAN_JSON_SCHEMA, type GenerateOptions, type GenerationOutcome, type GenerationReport, type GenerationStage, type UsageRecord } from './pipeline';
-export { allowedTemplates, buildPrompt, examplePlan, fallbackMission, planIssues, planToMission, type BuiltMission } from './plan';
+export { dossierImagePrompt, geminiImageProvider, type DossierImageProvider, type GeminiImageOptions, type ImageCall } from './image';
+export { allowedTemplates, buildPrompt, examplePlan, fallbackMission, inspirationFor, planIssues, planToMission, resolveRequest, type BuiltMission } from './plan';
 export {
   disabledProvider,
   geminiProvider,

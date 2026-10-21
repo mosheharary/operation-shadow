@@ -96,7 +96,7 @@ export async function generateMission(options: GenerateOptions): Promise<Generat
   if (provider.id === 'disabled') {
     fallbackReason = 'AI generation is not configured; the offline generator was used';
   } else {
-    const prompt = buildPrompt(request);
+    const prompt = buildPrompt(request, seed);
     let input = prompt;
     for (let round = 0; round < 2 && !built; round += 1) {
       attempts += 1;
@@ -110,7 +110,7 @@ export async function generateMission(options: GenerateOptions): Promise<Generat
       }
       if (round === 0) await options.onStage?.('validating');
       const parsed = parsePlan(call.text);
-      const problems = parsed.plan ? planIssues(parsed.plan, request) : parsed.issues;
+      const problems = parsed.plan ? planIssues(parsed.plan, request, seed) : parsed.issues;
       if (parsed.plan && problems.length === 0) {
         const candidate = planToMission(parsed.plan, key, seed);
         const template = getTemplate(candidate.spec.templateId)!;
@@ -143,9 +143,11 @@ export async function generateMission(options: GenerateOptions): Promise<Generat
   }
   if (!compiled) {
     source = 'fallback';
-    // The offline generator is validated across seeds in tests; try a few neighbours to be certain.
-    for (let i = 0; i < 4 && !compiled?.report.ok; i += 1) {
-      built = fallbackMission(request, key, (seed + i * 7919) >>> 0);
+    // The offline generator is validated across seeds in tests; try a few neighbours to be certain,
+    // then ease the garrison and objective count if the player's choices are too demanding.
+    const relaxed: GenerationRequest[] = [request, request, request, request, { ...request, density: 'standard' }, { ...request, density: 'light', objectives: '1' }];
+    for (let i = 0; i < relaxed.length && !compiled?.report.ok; i += 1) {
+      built = fallbackMission(relaxed[i]!, key, (seed + i * 7919) >>> 0);
       compiled = safeCompile(built);
     }
     if (!compiled?.report.ok) throw new Error('The offline generator could not build a valid mission');

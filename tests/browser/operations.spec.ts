@@ -35,7 +35,8 @@ test.describe('Generated operations', () => {
     await expect(page).toHaveURL(/\/missions\/op-[0-9a-f-]{36}$/, { timeout: 60_000 });
     await expect(page.getByRole('heading', { name: 'Operation Iron Wake' })).toBeVisible();
     await expect(page.getByTestId('mission-source')).toContainText('offline generator');
-    await expect(page.getByText(/^Corvan Junction · /)).toBeVisible();
+    // Each operation gets its own site; a railway one is named like "Kessel Junction".
+    await expect(page.getByText(/^[A-Z][a-z]+ (Junction|Sidings|Halt|Crossing|Yard) · /)).toBeVisible();
 
     // Rescue needs the Combat Engineer: it is locked in.
     await expect(page.getByTestId('pick-engineer')).toBeChecked();
@@ -47,6 +48,60 @@ test.describe('Generated operations', () => {
     // It is listed on the dashboard for replay.
     await page.goto('/dashboard');
     await expect(page.getByTestId('generated-mission').filter({ hasText: 'Iron Wake' }).first()).toBeVisible();
+  });
+
+  test('every choice starts on Random, and explicit choices are honoured', async ({ page }) => {
+    await signIn(page, 'B');
+    await page.goto('/operations/new');
+    for (const name of ['theatre', 'timeOfDay', 'weather', 'focus', 'objectives', 'density', 'alarm', 'angle']) {
+      await expect(page.locator(`select[name="${name}"]`)).toHaveValue('any');
+    }
+    await page.locator('select[name="density"]').selectOption('heavy');
+    await page.getByTestId('reset-random').click();
+    await expect(page.locator('select[name="density"]')).toHaveValue('any');
+
+    const created = await post(page, '/api/v1/generation-jobs', { theatre: 'coastal', objectives: '3', density: 'light', alarm: 'strict', angle: 'defector', offline: true }, { 'idempotency-key': `test-${randomUUID()}` });
+    const { job } = await created.json();
+    await expect
+      .poll(async () => (await (await post(page, `/api/v1/generation-jobs/${job.id}/advance`, {})).json()).job.stage, { timeout: 60_000 })
+      .toBe('ready');
+    const { missionKey } = (await (await page.request.get(`/api/v1/generation-jobs/${job.id}`)).json()).job as { missionKey: string };
+    await page.goto(`/missions/${missionKey}`);
+    await expect(page.getByText('defect').first()).toBeVisible();
+    await expect(page.getByText(/^[A-Z][a-z]+ (Cove|Point|Sound|Bay|Head|Strand) · /)).toBeVisible();
+    await expect(page.getByText('The mission fails if the garrison reaches full alarm.')).toBeVisible();
+    const bad = await post(page, '/api/v1/generation-jobs', { objectives: '9' }, { 'idempotency-key': `test-${randomUUID()}` });
+    expect(bad.status()).toBe(400);
+  });
+
+  test('a player deletes a generated operation from Field HQ, after confirming', async ({ page, browser }) => {
+    await signIn(page, 'B');
+    const created = await post(page, '/api/v1/generation-jobs', { theatre: 'alpine', codename: 'Glass Owl', offline: true }, { 'idempotency-key': `test-${randomUUID()}` });
+    const { job } = await created.json();
+    await expect
+      .poll(async () => (await (await post(page, `/api/v1/generation-jobs/${job.id}/advance`, {})).json()).job.stage, { timeout: 60_000 })
+      .toBe('ready');
+    const { missionKey } = (await (await page.request.get(`/api/v1/generation-jobs/${job.id}`)).json()).job as { missionKey: string };
+    const id = missionKey.replace(/^op-/, '');
+
+    // Nobody else can delete it.
+    const other = await browser.newContext();
+    const pageA = await other.newPage();
+    await signIn(pageA, 'A');
+    expect((await pageA.request.delete(`/api/v1/missions/${id}`, { headers: { origin: new URL(pageA.url()).origin } })).status()).toBe(404);
+    await other.close();
+    expect((await page.request.delete(`/api/v1/missions/${id}`, { headers: { origin: 'https://evil.example' } })).status()).toBe(403);
+
+    await page.goto('/dashboard');
+    const row = page.locator(`a[href="/missions/${missionKey}"]`);
+    await expect(row).toHaveCount(1);
+    await page.getByTestId(`delete-operation-${id}`).click();
+    await page.getByRole('button', { name: 'Keep' }).click();
+    await expect(row).toHaveCount(1);
+    await page.getByTestId(`delete-operation-${id}`).click();
+    await page.getByTestId(`delete-operation-${id}-confirm`).click();
+    await expect(row).toHaveCount(0);
+    expect((await page.goto(`/missions/${missionKey}`))?.status()).toBe(404);
   });
 
   test('the jobs API is idempotent, validated, same-origin only and private to its owner', async ({ page, browser }) => {

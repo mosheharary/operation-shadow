@@ -93,6 +93,19 @@ export async function listSaves(): Promise<SaveSummary[]> {
   }
 }
 
+/** Deletes a slot on the server, and any copy of it still waiting on this device. */
+export async function deleteSave(slot: SaveSlotId): Promise<{ ok: true } | { error: string }> {
+  await dropPending(slot);
+  try {
+    const res = await fetch(`/api/v1/saves/${slot}`, { method: 'DELETE' });
+    if (res.ok || res.status === 404) return { ok: true };
+    const json = (await res.json().catch(() => null)) as ApiError | null;
+    return { error: json && 'error' in json ? json.error.message : 'The save could not be deleted' };
+  } catch {
+    return { error: 'No connection' };
+  }
+}
+
 const post = (url: string, body: unknown) => fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
 
 // ── Session wiring ─────────────────────────────────────────────────────────────────────────────

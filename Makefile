@@ -8,9 +8,9 @@ PHONY_EXTRA := scan-bundle audit
 help: ## Show this help
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[33m%-18s\033[0m %s\n", $$1, $$2}'
 
-up: ## Start Postgres, run migrations and seed, then the dev server on http://localhost:3000
+up: ## Start Postgres, run migrations and seed, then the dev server on http://localhost:4000
 	$(COMPOSE) up -d --build --wait app
-	@echo "Operation Shadow is running at http://localhost:3000"
+	@echo "Operation Shadow is running at http://localhost:4000"
 
 down: ## Stop the stack (keeps the database volume)
 	$(COMPOSE) --profile prod --profile e2e --profile e2e-prod down

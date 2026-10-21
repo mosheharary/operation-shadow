@@ -203,7 +203,7 @@ Decisions D32–D37.
 
 - [x] Level kit and three new templates: Whitecrown Ridge (alpine, snow layer, gorge, bridge, radar plateau), Corvan Junction (rail yard, wagons, water tower), Boot Camp (training ground)
 - [x] `MissionSpec` v1, compiler and validator, deterministic offline fallback generator
-- [x] Six-mission campaign with briefings: Boot Camp, Silent Tide, White Silence, Iron Junction, Frozen Ledger, Last Light
+- [x] Four starting missions with briefings, one per hand-built map: Boot Camp, Silent Tide, White Silence, Iron Junction (Frozen Ledger and Last Light removed as map duplicates, D77)
 - [x] Guided tutorial (15 steps): select, move, camera, group orders, view cones, crouch in grass, silent takedown, tie up, hide a body, lock-pick, steal, get past a fence, regroup, extract
 - [x] Engine fixes: endless climb re-plan; fence orders cut where clicked
 

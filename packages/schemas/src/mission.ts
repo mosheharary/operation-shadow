@@ -3,12 +3,31 @@ import { z } from 'zod';
 // Contracts for generated operations. The model may only choose ids, slots, counts and enum values;
 // coordinates, geometry, code, URLs and markup are never accepted (plan §8.2, §8.5).
 
-export const GENERATOR_TEMPLATE_IDS = ['coastal-harbor', 'alpine-ridge', 'rail-junction'] as const;
+/** Generated operations are played on a site laid out from the job's seed: `site-<theatre>-<seed>`. */
+export const SITE_TEMPLATE_ID = /^site-[a-z]+-\d{1,10}$/;
 export const SPECIALIST_IDS = ['infiltrator', 'recon', 'engineer', 'deception', 'medic', 'marine'] as const;
 export const WEATHER_IDS = ['clear', 'rain', 'fog', 'snow'] as const;
 export const TIME_OF_DAY_IDS = ['dawn', 'day', 'dusk', 'night'] as const;
 export const DENSITY_IDS = ['light', 'standard', 'heavy'] as const;
 export const OBJECTIVE_KIND_IDS = ['sabotage', 'steal', 'rescue'] as const;
+export const THEATRE_IDS = ['coastal', 'alpine', 'rail', 'forest', 'farmland'] as const;
+export const ALARM_RULE_IDS = ['strict', 'lenient'] as const;
+export const OBJECTIVE_COUNT_IDS = ['1', '2', '3'] as const;
+
+/** Story angles the player can ask for; each steers the premise (the model writes the story). */
+export const STORY_ANGLES = {
+  'supply-raid': 'Cut a supply line the garrison depends on before the next convoy arrives.',
+  'double-agent': 'A Coalition double agent inside the garrison is about to be exposed and must be protected or pulled out.',
+  'race-against-time': 'Something leaves or arrives at first light, so the squad has one night and no second chance.',
+  diversion: 'A Coalition raid elsewhere is a decoy; this quiet job is the real target.',
+  'stolen-plans': 'The Dominion has captured Coalition plans and is about to pass them up the chain of command.',
+  defector: 'A Dominion officer has offered to defect and must be brought out with what they know.',
+  reprisal: 'A Dominion commander is preparing reprisals against the local villagers; stop it without a fight.',
+  prototype: 'The Dominion is testing a new prototype device here, and the Coalition wants it stopped or studied.',
+  'traitor-hunt': 'A leak in the Coalition network has been traced to this place; find out who has been talking.',
+  'lost-team': 'Another Coalition team went silent near here; learn their fate and finish their work.',
+} as const;
+export const STORY_ANGLE_IDS = Object.keys(STORY_ANGLES) as (keyof typeof STORY_ANGLES)[];
 
 /** Hour of day used for each time-of-day choice. */
 export const TIME_OF_DAY_HOURS: Record<(typeof TIME_OF_DAY_IDS)[number], number> = { dawn: 6, day: 13, dusk: 19, night: 23 };
@@ -33,10 +52,16 @@ export function isPlainText(s: string): boolean {
 
 /** What the player asks for. Only enumerated choices and an optional sanitized codename reach the prompt. */
 export const generationRequestSchema = z.strictObject({
-  theatre: z.enum(['any', 'coastal', 'alpine', 'rail']).default('any'),
+  // 'any' is shown to players as "Random": the server picks a value per job (see resolveRequest).
+  theatre: z.enum(['any', ...THEATRE_IDS]).default('any'),
   timeOfDay: z.enum(['any', ...TIME_OF_DAY_IDS]).default('any'),
   weather: z.enum(['any', ...WEATHER_IDS]).default('any'),
   focus: z.enum(['any', ...OBJECTIVE_KIND_IDS]).default('any'),
+  density: z.enum(['any', ...DENSITY_IDS]).default('any'),
+  /** strict: the mission fails at full alarm. */
+  alarm: z.enum(['any', ...ALARM_RULE_IDS]).default('any'),
+  objectives: z.enum(['any', ...OBJECTIVE_COUNT_IDS]).default('any'),
+  angle: z.enum(['any', ...(STORY_ANGLE_IDS as [keyof typeof STORY_ANGLES, ...(keyof typeof STORY_ANGLES)[]])]).default('any'),
   codename: z
     .string()
     .trim()
@@ -52,7 +77,7 @@ export type GenerationRequest = z.infer<typeof generationRequestSchema>;
 
 export const missionPlanSchema = z.strictObject({
   codename: plain(3, 40),
-  templateId: z.enum(GENERATOR_TEMPLATE_IDS),
+  templateId: z.string().max(40).regex(SITE_TEMPLATE_ID),
   timeOfDay: z.enum(TIME_OF_DAY_IDS),
   weather: z.enum(WEATHER_IDS),
   density: z.enum(DENSITY_IDS),
@@ -78,6 +103,8 @@ export const missionPlanSchema = z.strictObject({
   failOnFullAlarm: z.boolean(),
   recommended: z.array(z.enum(SPECIALIST_IDS)).min(1).max(4),
   debrief: z.strictObject({ success: plain(10, 240), failure: plain(10, 240) }),
+  /** One or two sentences describing the reconnaissance sketch for the dossier: the place, light and weather, no people. */
+  sceneDescription: plain(20, 300),
 });
 export type MissionPlan = z.infer<typeof missionPlanSchema>;
 
@@ -140,6 +167,8 @@ export const generatedBriefingSchema = z.strictObject({
   extraction: z.string().max(200),
   recommended: z.array(z.enum(SPECIALIST_IDS)).max(6),
   debrief: z.strictObject({ success: z.string().max(240), failure: z.string().max(240) }),
+  /** What the dossier sketch shows; the image is drawn from it (plain text, no names of real places). */
+  sceneDescription: z.string().max(400).optional(),
 });
 export type GeneratedBriefing = z.infer<typeof generatedBriefingSchema>;
 
@@ -152,12 +181,14 @@ export const generatedMissionSchema = z.strictObject({
   source: missionSourceSchema,
   spec: missionSpecSchema,
   briefing: generatedBriefingSchema,
+  /** The operation's own dossier sketch, when one was drawn (otherwise the theatre's stock sketch). */
+  dossierImage: z.string().regex(/^\/api\/v1\/missions\/[0-9a-f-]{36}\/image$/).optional(),
 });
 export type GeneratedMission = z.infer<typeof generatedMissionSchema>;
 
 // ── Generation jobs API ────────────────────────────────────────────────────────────────────────
 
-export const JOB_STAGES = ['queued', 'drafting', 'validating', 'building', 'ready', 'failed', 'cancelled'] as const;
+export const JOB_STAGES = ['queued', 'drafting', 'validating', 'building', 'illustrating', 'ready', 'failed', 'cancelled'] as const;
 export const jobStageSchema = z.enum(JOB_STAGES);
 export type JobStage = z.infer<typeof jobStageSchema>;
 

@@ -97,7 +97,7 @@ function playable(world: World, card: DeckCard, complications: number): boolean 
 export function deckMessage(card: DeckCard): { lineKey: string; text: string } {
   switch (card.kind) {
     case 'patrol':
-      return { lineKey: `deck-patrol-${card.sector}`, text: `A Dominion patrol is sweeping the ${card.sector}. Keep clear of it.` };
+      return { lineKey: `deck-patrol-${card.sector.replace(/\s+/g, '-')}`, text: `A Dominion patrol is sweeping the ${card.sector}. Keep clear of it.` };
     case 'weather':
       return { lineKey: `deck-weather-${card.weather}`, text: WEATHER_TEXT[card.weather] };
     case 'intel':

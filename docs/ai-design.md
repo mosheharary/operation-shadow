@@ -10,7 +10,7 @@ Code: `packages/ai` (providers, prompt, validation, pipeline), `packages/schemas
 
 ## What the model may choose
 
-The plan (`missionPlanSchema`): codename, one of three templates, time of day, weather, guard density, 1–3 objectives
+The plan (`missionPlanSchema`): codename, the job's own site (`site-<theatre>-<seed>`, laid out from the job seed before the prompt is written; the prompt lists only that site), time of day, weather, guard density, 1–3 objectives
 (kind + a **named slot** from the template catalog, title, description, required, optional reveal time), up to 3 radio
 lines with a time, whether full alert fails the mission, recommended specialists, and debrief lines.
 

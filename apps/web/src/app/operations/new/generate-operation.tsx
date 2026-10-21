@@ -7,46 +7,90 @@ import styles from './operations.module.css';
 
 type Choices = Required<Omit<GenerationRequest, 'codename' | 'offline'>> & { codename: string };
 
+// Every choice starts on "Random": the server picks a fresh value for each operation.
 const OPTIONS = {
   theatre: [
-    ['any', 'Any theatre'],
-    ['coastal', 'Coastal harbour'],
-    ['alpine', 'Alpine ridge'],
-    ['rail', 'Rail junction'],
+    ['any', 'Random'],
+    ['coastal', 'Coast'],
+    ['alpine', 'Mountains'],
+    ['rail', 'Railway'],
+    ['forest', 'Forest'],
+    ['farmland', 'Farmland'],
   ],
   timeOfDay: [
-    ['any', 'Any time'],
+    ['any', 'Random'],
     ['dawn', 'Dawn'],
     ['day', 'Day'],
     ['dusk', 'Dusk'],
     ['night', 'Night'],
   ],
   weather: [
-    ['any', 'Any weather'],
+    ['any', 'Random'],
     ['clear', 'Clear'],
     ['rain', 'Rain'],
     ['fog', 'Fog'],
     ['snow', 'Snow (alpine only)'],
   ],
   focus: [
-    ['any', 'Any objective'],
+    ['any', 'Random'],
     ['sabotage', 'Sabotage'],
     ['steal', 'Steal documents'],
     ['rescue', 'Rescue a prisoner'],
   ],
+  objectives: [
+    ['any', 'Random'],
+    ['1', 'One: a single clean job'],
+    ['2', 'Two'],
+    ['3', 'Three: a long night'],
+  ],
+  density: [
+    ['any', 'Random'],
+    ['light', 'Light: a skeleton crew'],
+    ['standard', 'Standard'],
+    ['heavy', 'Heavy: a full garrison'],
+  ],
+  alarm: [
+    ['any', 'Random'],
+    ['lenient', 'Fight on: the mission continues'],
+    ['strict', 'Fail: full alarm ends the mission'],
+  ],
+  angle: [
+    ['any', 'Random'],
+    ['supply-raid', 'Supply raid'],
+    ['double-agent', 'Double agent in danger'],
+    ['race-against-time', 'Race against time'],
+    ['diversion', 'The real job behind a diversion'],
+    ['stolen-plans', 'Stolen plans'],
+    ['defector', 'An officer wants to defect'],
+    ['reprisal', 'Stop the reprisals'],
+    ['prototype', 'A prototype device'],
+    ['traitor-hunt', 'Hunt the traitor'],
+    ['lost-team', 'The lost team'],
+  ],
 } as const;
 
-const LABELS: Record<keyof typeof OPTIONS, string> = { theatre: 'Theatre', timeOfDay: 'Time of day', weather: 'Weather', focus: 'Primary objective' };
+const LABELS: Record<keyof typeof OPTIONS, string> = {
+  theatre: 'Theatre',
+  timeOfDay: 'Time of day',
+  weather: 'Weather',
+  focus: 'Primary objective',
+  objectives: 'Number of objectives',
+  density: 'Garrison strength',
+  alarm: 'If the full alarm sounds',
+  angle: 'Story',
+};
+
+const RANDOM: Choices = { theatre: 'any', timeOfDay: 'any', weather: 'any', focus: 'any', objectives: 'any', density: 'any', alarm: 'any', angle: 'any', codename: '' };
 
 const STEPS: { stage: JobStage; label: string }[] = [
   { stage: 'queued', label: 'Request received' },
   { stage: 'drafting', label: 'Drafting the plan' },
   { stage: 'validating', label: 'Checking it against field intelligence' },
   { stage: 'building', label: 'Surveying the ground, testing a silent route' },
+  { stage: 'illustrating', label: 'Sketching the reconnaissance dossier' },
   { stage: 'ready', label: 'Ready' },
 ];
-const ORDER = STEPS.map((s) => s.stage);
-const ACTIVE: JobStage[] = ['queued', 'drafting', 'validating', 'building'];
+const ACTIVE: JobStage[] = ['queued', 'drafting', 'validating', 'building', 'illustrating'];
 
 async function call(url: string, init?: RequestInit): Promise<{ job: GenerationJob }> {
   const res = await fetch(url, { ...init, headers: { 'content-type': 'application/json', ...init?.headers } });
@@ -57,7 +101,7 @@ async function call(url: string, init?: RequestInit): Promise<{ job: GenerationJ
 
 export function GenerateOperation({ aiAvailable }: { aiAvailable: boolean }) {
   const router = useRouter();
-  const [choices, setChoices] = useState<Choices>({ theatre: 'any', timeOfDay: 'any', weather: 'any', focus: 'any', codename: '' });
+  const [choices, setChoices] = useState<Choices>(RANDOM);
   const [job, setJob] = useState<GenerationJob | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -125,13 +169,15 @@ export function GenerateOperation({ aiAvailable }: { aiAvailable: boolean }) {
   };
 
   if (job) {
-    const current = ORDER.indexOf(job.stage);
+    // The offline generator draws no sketch.
+    const steps = STEPS.filter((s) => job.provider !== 'disabled' || s.stage !== 'illustrating');
+    const current = steps.findIndex((s) => s.stage === job.stage);
     const failed = job.stage === 'failed' || job.stage === 'cancelled';
     return (
       <section className={styles.progress} aria-live="polite" data-testid="generation-progress" data-stage={job.stage}>
         <h2>{failed ? job.message : job.stage === 'ready' ? 'Operation ready: opening the briefing' : job.message}</h2>
         <ol className={styles.steps}>
-          {STEPS.map((step, i) => (
+          {steps.map((step, i) => (
             <li key={step.stage} className={i < current || job.stage === 'ready' ? styles.done : i === current ? styles.current : undefined}>
               {step.label}
             </li>
@@ -141,7 +187,7 @@ export function GenerateOperation({ aiAvailable }: { aiAvailable: boolean }) {
         <div className={styles.actions}>
           {!failed && job.stage !== 'ready' && (
             <>
-              {job.provider !== 'disabled' && (
+              {job.provider !== 'disabled' && job.stage !== 'illustrating' && (
                 <button type="button" className="btn" onClick={useOffline} disabled={busy}>
                   Use the offline generator instead
                 </button>
@@ -198,14 +244,14 @@ export function GenerateOperation({ aiAvailable }: { aiAvailable: boolean }) {
           maxLength={40}
           pattern="[A-Za-z][A-Za-z '\-]*"
           title="Letters, spaces, apostrophes and hyphens"
-          placeholder="e.g. Grey Lantern"
+          placeholder="Leave empty for a fresh one"
           onChange={(e) => setChoices({ ...choices, codename: e.target.value })}
         />
       </label>
       <p className={styles.provider}>
         {aiAvailable
-          ? 'Lantern drafts the operation with Google Gemini (about 15 seconds). If anything fails, the offline generator steps in.'
-          : 'AI drafting is not configured on this server, so the offline generator prepares the operation.'}
+          ? 'Lantern drafts the operation and sketches its dossier with Google Gemini (about 25 seconds). Anything left on Random is chosen fresh for every operation. If anything fails, the offline generator steps in.'
+          : 'AI drafting is not configured on this server, so the offline generator prepares the operation. Anything left on Random is chosen fresh for every operation.'}
       </p>
       <div className={styles.actions}>
         <button type="submit" className="btn btn--primary" disabled={busy} data-testid="generate">
@@ -216,6 +262,9 @@ export function GenerateOperation({ aiAvailable }: { aiAvailable: boolean }) {
             Use the offline generator
           </button>
         )}
+        <button type="button" className="btn btn--ghost" disabled={busy} onClick={() => setChoices(RANDOM)} data-testid="reset-random">
+          Set everything to Random
+        </button>
       </div>
       {error && (
         <p className="alert" role="alert">

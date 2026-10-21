@@ -19,7 +19,7 @@ export interface Briefing {
 export interface MissionEntry {
   key: string;
   title: string;
-  theme: 'coastal' | 'alpine' | 'rail' | 'training';
+  theme: 'coastal' | 'alpine' | 'rail' | 'forest' | 'farmland' | 'training';
   summary: string;
   /** Squad rules, known without building the level (must match the built mission). */
   squad: { required: SpecialistId[]; min: number; max: number };

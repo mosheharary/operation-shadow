@@ -53,8 +53,9 @@ The simulation is a fixed 20 Hz deterministic engine (`packages/engine`), so sav
 | 1 | Silent Tide | Varrow Harbour (coastal) | Night | The vertical slice: radio sabotage, optional codebook |
 | 2 | White Silence | Whitecrown Ridge (alpine) | Day, snow (footprints) | Gorge crossing, radar sabotage, optional charts |
 | 3 | Iron Junction | Corvan Junction (rail) | Dusk, fog | Ammunition train, timetable, a prisoner revealed mid-mission |
-| 4 | Frozen Ledger | Whitecrown Ridge | Night, fog, heavy garrison | Rescue with the medic required |
-| 5 | Last Light | Varrow Harbour | Dawn, fog, heavy | Two guns before the alarm reaches full alert (mission fails at 4) |
+
+Each starting mission has a hand-built map of its own. Generated operations are played on sites laid out from the job's
+seed (coast, mountains, railway, forest or farmland), so no two operations share a map (decision log D77–D78).
 
 Missions are data (`MissionSpec`) compiled onto templates, so the campaign, the tutorial and generated operations share
 one validated path: every mission must have a route to its objectives and back that no sentry can see.

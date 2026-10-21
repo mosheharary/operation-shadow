@@ -129,7 +129,14 @@ export function compileMission(spec: MissionSpec, template: TemplateDef): Compil
 }
 
 /** Compiles and runs the mission validator (reachability, stealth route, entity sanity). */
-const DECK_WEATHER: Record<TemplateDef['theme'], Weather[]> = { coastal: ['fog', 'rain', 'clear'], alpine: ['snow', 'fog', 'clear'], rail: ['rain', 'fog', 'clear'], training: [] };
+const DECK_WEATHER: Record<TemplateDef['theme'], Weather[]> = {
+  coastal: ['fog', 'rain', 'clear'],
+  alpine: ['snow', 'fog', 'clear'],
+  rail: ['rain', 'fog', 'clear'],
+  forest: ['fog', 'rain', 'clear'],
+  farmland: ['rain', 'fog', 'clear'],
+  training: [],
+};
 
 /** The template's dynamic-event deck: patrols from its reinforcement points, weather shifts, intel. */
 export function deckFor(template: TemplateDef): DirectorDeck {
@@ -167,7 +174,7 @@ export function fallbackSpec(template: TemplateDef, seed: number, id: string): M
       id: 'primary',
       kind: primaryKind,
       slot: primarySlot.id,
-      title: primaryKind === 'sabotage' ? `Disable the ${primarySlot.label}` : `Free the prisoner held at the ${primarySlot.label}`,
+      title: (primaryKind === 'sabotage' ? `Disable the ${primarySlot.label}` : `Free the prisoner held at the ${primarySlot.label}`).slice(0, 60),
       description:
         primaryKind === 'sabotage'
           ? `Sabotage the ${primarySlot.label} without raising the garrison.`
@@ -177,7 +184,7 @@ export function fallbackSpec(template: TemplateDef, seed: number, id: string): M
   ];
   if (items.length > 0 && rng.chance(0.75)) {
     const slot = pick(items);
-    objectives.push({ id: 'intel', kind: 'steal', slot: slot.id, title: `Recover papers from the ${slot.label}`, description: `Dominion orders are kept at the ${slot.label}.`, required: false });
+    objectives.push({ id: 'intel', kind: 'steal', slot: slot.id, title: `Recover papers from the ${slot.label}`.slice(0, 60), description: `Dominion orders are kept at the ${slot.label}.`, required: false });
   }
   if (primaryKind === 'sabotage' && prisoners.length > 0 && rng.chance(0.5)) {
     const slot = pick(prisoners);

@@ -21,12 +21,12 @@ Requirements: Docker Desktop (Compose v2+) and `make`. No Node.js, Neon account 
 ```bash
 git clone https://github.com/mosheharary/operation-shadow.git
 cd operation-shadow
-make up        # Postgres 18 + migrations + seed + dev server → http://localhost:3000
+make up        # Postgres 18 + migrations + seed + dev server → http://localhost:4000
 make e2e       # browser tests against the running stack
 make down      # stop (data is kept)
 ```
 
-Open <http://localhost:3000> and choose **Sign in as Test Operator A**. That dev-only login exists only in local and
+Open <http://localhost:4000> and choose **Sign in as Test Operator A**. That dev-only login exists only in local and
 test environments. Production uses Google sign-in.
 
 ## How to play

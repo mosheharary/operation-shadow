@@ -267,22 +267,6 @@
       "text": "Visitors. Look natural.",
       "hash": "a29fcf1aa3283bb5"
     },
-    "frozen-ledger-landing": {
-      "file": "frozen-ledger-landing.mp3",
-      "seconds": 6.41,
-      "voice": "Gacrux",
-      "speaker": "LANTERN",
-      "text": "Lantern to Shadow Section. The pilot is hurt and frightened. Get him out before dawn.",
-      "hash": "1b362d79c67793b4"
-    },
-    "frozen-ledger-pilot-free": {
-      "file": "frozen-ledger-pilot-free.mp3",
-      "seconds": 3.58,
-      "voice": "Gacrux",
-      "speaker": "LANTERN",
-      "text": "He is with you. Keep him close and keep moving.",
-      "hash": "6e6cdae9ada845a2"
-    },
     "guard-alarm-1-a": {
       "file": "guard-alarm-1-a.mp3",
       "seconds": 3.65,
@@ -698,30 +682,6 @@
       "speaker": "LANTERN",
       "text": "That train is going nowhere. Back to the woods.",
       "hash": "01375b6f15dba0d1"
-    },
-    "last-light-alarm": {
-      "file": "last-light-alarm.mp3",
-      "seconds": 5.11,
-      "voice": "Gacrux",
-      "speaker": "LANTERN",
-      "text": "They know you are there. If the sirens sound, the fleet turns back.",
-      "hash": "511223eef31ba1cf"
-    },
-    "last-light-first-gun": {
-      "file": "last-light-first-gun.mp3",
-      "seconds": 2.59,
-      "voice": "Gacrux",
-      "speaker": "LANTERN",
-      "text": "One gun down. One to go.",
-      "hash": "1d352abbd263ba0b"
-    },
-    "last-light-landing": {
-      "file": "last-light-landing.mp3",
-      "seconds": 7.39,
-      "voice": "Gacrux",
-      "speaker": "LANTERN",
-      "text": "Lantern to Shadow Section. The invasion fleet arrives at first light. Those guns must be silent by then.",
-      "hash": "c8caae9ebf5d1905"
     },
     "moth-ack-action-1": {
       "file": "moth-ack-action-1.mp3",

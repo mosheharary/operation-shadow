@@ -80,7 +80,7 @@ export interface GuardSlot {
 export interface TemplateDef {
   id: string;
   name: string;
-  theme: 'coastal' | 'alpine' | 'rail' | 'training';
+  theme: 'coastal' | 'alpine' | 'rail' | 'forest' | 'farmland' | 'training';
   version: string;
   /** Player-facing description of the terrain (for briefings and the generator prompt). */
   description: string;

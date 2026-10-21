@@ -28,7 +28,7 @@ FROM deps AS dev
 COPY infra/docker/dev-entrypoint.sh /usr/local/bin/dev-entrypoint
 RUN chmod +x /usr/local/bin/dev-entrypoint
 ENTRYPOINT ["dev-entrypoint"]
-EXPOSE 3000
+EXPOSE 4000
 CMD ["pnpm", "dev"]
 
 # Build-time media tooling (voice bank, textures, models): the dev image plus ffmpeg and unzip
@@ -40,14 +40,14 @@ RUN apt-get update \
 
 FROM deps AS build
 COPY . .
-ARG NEXT_PUBLIC_APP_URL=http://localhost:3000
+ARG NEXT_PUBLIC_APP_URL=http://localhost:4000
 ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
 RUN pnpm build
 
 FROM node:24-bookworm-slim AS runner
 ENV NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \
-    PORT=3000 \
+    PORT=4000 \
     HOSTNAME=0.0.0.0
 WORKDIR /app
 RUN groupadd --system app && useradd --system --gid app app
@@ -55,7 +55,7 @@ COPY --from=build --chown=app:app /app/apps/web/.next/standalone ./
 COPY --from=build --chown=app:app /app/apps/web/.next/static ./apps/web/.next/static
 COPY --from=build --chown=app:app /app/apps/web/public ./apps/web/public
 USER app
-EXPOSE 3000
+EXPOSE 4000
 HEALTHCHECK --interval=10s --timeout=3s --start-period=20s --retries=5 \
-  CMD node -e "fetch('http://127.0.0.1:'+(process.env.PORT||3000)+'/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+  CMD node -e "fetch('http://127.0.0.1:'+(process.env.PORT||4000)+'/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
 CMD ["node", "apps/web/server.js"]

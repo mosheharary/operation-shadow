@@ -112,7 +112,7 @@ stored; it is rebuilt deterministically from the template and seed, and `level_h
 | `id` | uuid | Primary key. The public mission key is `op-<id>` |
 | `owner_id` | text | FK → `user.id`, **ON DELETE CASCADE** |
 | `source` | text | `gemini`, `mock` or `fallback` |
-| `template_id` | text | `coastal-harbor`, `alpine-ridge` or `rail-junction` |
+| `template_id` | text | The operation's site, `site-<theatre>-<seed>` (rebuilt from the id) |
 | `spec_version` | integer | |
 | `generator_version` | text | |
 | `seed` | bigint | |

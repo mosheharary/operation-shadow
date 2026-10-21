@@ -1,11 +1,12 @@
 import { and, desc, eq, gte, inArray, isNull, lt, or, sql } from 'drizzle-orm';
 import type { Database } from '../client';
-import { aiUsage, generationJobs, missions } from '../schema/generation';
+import { aiUsage, generationJobs, missionImages, missions } from '../schema/generation';
+import { saveSlots } from '../schema/progress';
 
 export type JobRow = typeof generationJobs.$inferSelect;
 export type MissionRow = typeof missions.$inferSelect;
 
-export const ACTIVE_STAGES = ['queued', 'drafting', 'validating', 'building'] as const;
+export const ACTIVE_STAGES = ['queued', 'drafting', 'validating', 'building', 'illustrating'] as const;
 /** A job whose lease expired this many times is given up (plan §8.3: stale jobs expire). */
 export const MAX_JOB_ATTEMPTS = 3;
 
@@ -94,6 +95,7 @@ export async function completeGenerationJob(
   db: Database,
   job: Pick<JobRow, 'id' | 'ownerId'>,
   mission: Omit<typeof missions.$inferInsert, 'id' | 'ownerId' | 'createdAt'>,
+  image?: { contentType: string; data: Buffer } | null,
 ): Promise<MissionRow | null> {
   return db.transaction(async (tx) => {
     const locked = await tx
@@ -104,6 +106,7 @@ export async function completeGenerationJob(
       .limit(1);
     if (!locked[0] || !(ACTIVE_STAGES as readonly string[]).includes(locked[0].stage)) return null;
     const [row] = await tx.insert(missions).values({ ...mission, ownerId: job.ownerId }).returning();
+    if (image) await tx.insert(missionImages).values({ missionId: row!.id, ownerId: job.ownerId, ...image });
     await tx
       .update(generationJobs)
       .set({ stage: 'ready', missionId: row!.id, leaseUntil: null, error: null, updatedAt: sql`now()` })
@@ -174,9 +177,52 @@ export async function getOwnedMission(db: Database, ownerId: string, missionId: 
 
 export async function listOwnedMissions(db: Database, ownerId: string, limit = 12) {
   return db
-    .select({ id: missions.id, title: missions.title, source: missions.source, templateId: missions.templateId, createdAt: missions.createdAt })
+    .select({
+      id: missions.id,
+      title: missions.title,
+      source: missions.source,
+      templateId: missions.templateId,
+      createdAt: missions.createdAt,
+      hasImage: sql<boolean>`${missionImages.missionId} is not null`,
+    })
     .from(missions)
+    .leftJoin(missionImages, eq(missionImages.missionId, missions.id))
     .where(eq(missions.ownerId, ownerId))
     .orderBy(desc(missions.createdAt))
     .limit(limit);
+}
+
+/**
+ * Deletes a generated operation and the owner's saves of it (they could no longer be loaded).
+ * Its jobs keep their history with the mission link cleared; run records keep the mission key.
+ */
+export async function deleteOwnedMission(db: Database, ownerId: string, missionId: string): Promise<boolean> {
+  return db.transaction(async (tx) => {
+    const rows = await tx
+      .delete(missions)
+      .where(and(eq(missions.id, missionId), eq(missions.ownerId, ownerId)))
+      .returning({ id: missions.id });
+    if (rows.length === 0) return false;
+    await tx.delete(saveSlots).where(and(eq(saveSlots.ownerId, ownerId), eq(saveSlots.missionKey, `op-${missionId}`)));
+    return true;
+  });
+}
+
+/** The dossier sketch of one of the owner's operations, or null when it has none. */
+export async function getMissionImage(db: Database, ownerId: string, missionId: string): Promise<{ contentType: string; data: Buffer } | null> {
+  const rows = await db
+    .select({ contentType: missionImages.contentType, data: missionImages.data })
+    .from(missionImages)
+    .where(and(eq(missionImages.missionId, missionId), eq(missionImages.ownerId, ownerId)))
+    .limit(1);
+  return rows[0] ?? null;
+}
+
+export async function hasMissionImage(db: Database, ownerId: string, missionId: string): Promise<boolean> {
+  const rows = await db
+    .select({ id: missionImages.missionId })
+    .from(missionImages)
+    .where(and(eq(missionImages.missionId, missionId), eq(missionImages.ownerId, ownerId)))
+    .limit(1);
+  return rows.length > 0;
 }

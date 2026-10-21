@@ -15,7 +15,7 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { GUARD_BARKS, GUARD_VOICES, HQ_PROFILE, MISSIONS, SPECIALIST_PROFILES, SQUAD_BARKS } from '@operation-shadow/content';
-import { deckFor, deckMessage, GENERATOR_TEMPLATES, SPECIALISTS } from '@operation-shadow/engine';
+import { deckFor, deckMessage, SITE_BIOMES, SITE_SECTOR_NAMES, siteTemplate, SPECIALISTS } from '@operation-shadow/engine';
 
 const MODEL = 'gemini-3.8-flash-tts';
 const API = 'https://generativelanguage.googleapis.com/v1beta/interactions';
@@ -87,8 +87,10 @@ function collectJobs(): Job[] {
   }
   // Dynamic-event lines of generated operations (same key and text across templates are recorded once).
   const deckKeys = new Set<string>();
-  for (const template of GENERATOR_TEMPLATES) {
-    deckFor(template).cards.forEach((card) => {
+  // Sites differ per operation, so patrol lines are recorded for every sector name a site can have.
+  const patrols = SITE_SECTOR_NAMES.map((sector) => ({ kind: 'patrol' as const, sector, pos: { x: 0, z: 0 }, count: 2 }));
+  for (const cards of [patrols, ...SITE_BIOMES.map((biome) => deckFor(siteTemplate(biome, 1)).cards)]) {
+    cards.forEach((card) => {
       const { lineKey, text } = deckMessage(card);
       if (deckKeys.has(lineKey)) return;
       deckKeys.add(lineKey);

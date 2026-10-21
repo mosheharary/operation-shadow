@@ -9,7 +9,7 @@ Everything runs in Docker. The host needs only Docker Desktop (Compose v2+) and 
 | `db` | PostgreSQL 18.6. Volume `pgdata` is mounted at `/var/lib/postgresql`; the first initialization also creates `operation_shadow_test` | `127.0.0.1:54329` |
 | `migrate` | One-shot: applies SQL migrations (`packages/db/migrations`) | – |
 | `seed` | One-shot: creates or updates the dev test operators | – |
-| `app` | Next.js dev server with hot reload; source is bind-mounted | `127.0.0.1:3000` |
+| `app` | Next.js dev server with hot reload; source is bind-mounted | `127.0.0.1:4000` |
 | `app-prod` (profile `prod`) | Production-like standalone image | `127.0.0.1:3001` |
 | `tools` (profile `tools`) | One-off commands (`pnpm …`) | – |
 | `test` (profile `test`) | Unit and integration tests | – |
@@ -64,7 +64,7 @@ docker compose run --rm --no-deps tools pnpm <script>
   button for each.
 - **Google sign-in (optional).**
   1. Create an OAuth client in Google Cloud with the authorized redirect URI
-     `http://localhost:3000/api/auth/callback/google`.
+     `http://localhost:4000/api/auth/callback/google`.
   2. Put `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` in `.env`.
   3. Run `make up` again.
 
@@ -113,7 +113,7 @@ make reset         # DANGER: deletes the database and dependency volumes (asks y
 |---|---|
 | `/api/ready` returns 503 with `migrations: pending` | Run `make migrate` |
 | Dev sign-in says "failed" | Run `make seed`, which re-syncs the operator passwords |
-| Port 3000, 3001 or 54329 already in use | Stop the other process, or change the host port in `compose.yaml` |
+| Port 4000, 3001 or 54329 already in use | Stop the other process, or change the host port in `compose.yaml` |
 | Browser tests can't reach the app | Start the stack first (`make up`). The `e2e` service shares the `app` container's network |
 | Dependency errors after pulling changes | `docker compose run --rm tools true` re-syncs `node_modules`; `make rebuild` as a last resort |
 | Pages reload over and over in dev (the log shows `GET /sign-in` many times a second) | Turbopack's persistent dev cache was stale. It is now disabled in `next.config.ts`; if it ever recurs, `docker compose stop app`, delete `apps/web/.next/dev`, then `make up` |

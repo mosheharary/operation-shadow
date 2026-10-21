@@ -110,14 +110,14 @@ These run the real repositories and migrations against Postgres.
 
 - `testDir: tests/browser`; one worker, not fully parallel (tests share the seeded operators).
 - Timeouts: 90 s per test, 20 s per assertion. One retry when `CI` is set (Compose sets `CI=true`).
-- Base URL from `E2E_BASE_URL` (default `http://localhost:3000`).
+- Base URL from `E2E_BASE_URL` (default `http://localhost:4000`).
 - One project, Desktop Chrome at 1280×800, launched with `--use-angle=swiftshader --enable-unsafe-swiftshader
   --ignore-gpu-blocklist`.
 - Traces and screenshots are kept for failures; the HTML report goes to `playwright-report/`.
 
 The `e2e` and `e2e-prod` services use the official `mcr.microsoft.com/playwright:v1.64.0-noble` image. They share
 the network namespace of `app` or `app-prod` (`network_mode: service:…`), so the browser reaches the app at
-`http://localhost:3000` or `http://localhost:3001`. That is the origin the app is configured with, so Better Auth's
+`http://localhost:4000` or `http://localhost:3001`. That is the origin the app is configured with, so Better Auth's
 origin checks and the API's `Origin` check pass, and Chromium does not upgrade the requests to HTTPS. `e2e-prod` runs
 the same suite against the standalone production build with its strict CSP.
 

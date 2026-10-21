@@ -56,8 +56,6 @@ test.describe('Campaign', () => {
   for (const [mission, squad] of [
     ['white-silence', 'engineer,infiltrator,recon'],
     ['iron-junction', 'engineer,deception,medic'],
-    ['frozen-ledger', 'engineer,medic,recon,infiltrator'],
-    ['last-light', 'engineer,marine,infiltrator'],
   ] as const) {
     test(`${mission} loads and runs without errors`, async ({ page }) => {
       const errors: string[] = [];

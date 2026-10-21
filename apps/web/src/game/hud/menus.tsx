@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import { type BindingAction, type Bindings, DEFAULT_BINDINGS, findConflicts, getBindings, keyLabel, primaryKey } from '../input/bindings';
 import { useController } from '../runtime/game-context';
 import { closeMenu, openMenu } from '../runtime/menus';
-import { getActivePersistence, listSaves } from '../runtime/persistence';
+import { deleteSave, getActivePersistence, listSaves } from '../runtime/persistence';
 import { type GameSettings, PRESETS, useSettings } from '../runtime/settings';
 import { useGameUi } from '../runtime/store';
 import styles from './hud.module.css';
@@ -419,12 +419,13 @@ export function HelpOverlay() {
 const SLOT_LABEL: Record<SaveSlotId, string> = { quick: 'Quicksave', auto: 'Autosave', 'manual-1': 'Slot 1', 'manual-2': 'Slot 2', 'manual-3': 'Slot 3' };
 const clock = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 
-/** Save into the three manual slots; load any slot (quick, auto, manual). */
+/** Save into the three manual slots; load or delete any slot (quick, auto, manual). */
 export function SaveMenu() {
   const controller = useController();
   const first = useAutoFocus<HTMLButtonElement>();
   const [saves, setSaves] = useState<SaveSummary[] | null>(null);
   const [busy, setBusy] = useState(false);
+  const [confirming, setConfirming] = useState<SaveSlotId | null>(null);
   useEffect(() => {
     let live = true;
     void listSaves().then((list) => live && setSaves(list));
@@ -440,6 +441,14 @@ export function SaveMenu() {
     setBusy(false);
     if (ok && close) closeMenu(controller);
     else setSaves(await listSaves());
+  };
+  const remove = async (slot: SaveSlotId) => {
+    setConfirming(null);
+    await run(async () => {
+      const result = await deleteSave(slot);
+      useGameUi.getState().toast('error' in result ? `Delete failed: ${result.error}` : `${SLOT_LABEL[slot]} deleted`, 'error' in result ? 'danger' : 'info');
+      return !('error' in result);
+    }, false);
   };
   return (
     <div className={styles.modalBackdrop}>
@@ -466,15 +475,33 @@ export function SaveMenu() {
                     </span>
                   </div>
                   <div className={styles.saveActions}>
-                    {manual && persistence && (
-                      <button type="button" className={styles.button} disabled={busy} onClick={() => void run(() => persistence.save(slot), false)} data-tip="Save the mission here (replaces what is in this slot)">
-                        Save here
-                      </button>
-                    )}
-                    {save && persistence && (
-                      <button type="button" className={styles.button} disabled={busy} onClick={() => void run(() => persistence.load(slot), true)} data-tip="Load this save (the current progress is lost)">
-                        Load
-                      </button>
+                    {save && confirming === slot ? (
+                      <>
+                        <button type="button" className={styles.dangerButton} disabled={busy} onClick={() => void remove(slot)} data-testid={`delete-confirm-${slot}`} data-tip="Delete this save for good">
+                          Delete
+                        </button>
+                        <button type="button" className={styles.button} disabled={busy} onClick={() => setConfirming(null)} data-tip="Keep this save">
+                          Keep
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        {manual && persistence && (
+                          <button type="button" className={styles.button} disabled={busy} onClick={() => void run(() => persistence.save(slot), false)} data-tip="Save the mission here (replaces what is in this slot)">
+                            Save here
+                          </button>
+                        )}
+                        {save && persistence && (
+                          <button type="button" className={styles.button} disabled={busy} onClick={() => void run(() => persistence.load(slot), true)} data-tip="Load this save (the current progress is lost)">
+                            Load
+                          </button>
+                        )}
+                        {save && (
+                          <button type="button" className={styles.button} disabled={busy} onClick={() => setConfirming(slot)} data-testid={`delete-${slot}`} aria-label={`Delete ${SLOT_LABEL[slot]}`} data-tip="Delete this save (asks first)">
+                            ✕
+                          </button>
+                        )}
+                      </>
                     )}
                   </div>
                 </li>

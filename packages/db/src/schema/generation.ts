@@ -1,6 +1,8 @@
 import { sql } from 'drizzle-orm';
-import { bigint, doublePrecision, index, integer, jsonb, pgTable, text, timestamp, uniqueIndex, uuid } from 'drizzle-orm/pg-core';
+import { bigint, customType, doublePrecision, index, integer, jsonb, pgTable, text, timestamp, uniqueIndex, uuid } from 'drizzle-orm/pg-core';
 import { user } from './auth';
+
+const bytea = customType<{ data: Buffer; driverData: Buffer }>({ dataType: () => 'bytea' });
 
 /**
  * Generated operations. The spec and briefing are validated JSON (packages/schemas); the level itself
@@ -29,6 +31,19 @@ export const missions = pgTable(
   (t) => [index('missions_owner_created_idx').on(t.ownerId, t.createdAt)],
 );
 
+/** The dossier sketch drawn for a generated operation (WebP, about 100 KB). Deleted with it. */
+export const missionImages = pgTable('mission_images', {
+  missionId: uuid('mission_id')
+    .primaryKey()
+    .references(() => missions.id, { onDelete: 'cascade' }),
+  ownerId: text('owner_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  contentType: text('content_type').notNull(),
+  data: bytea('data').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
 /** Resumable, idempotent generation jobs (plan §8.3). Stages are claimed with a lease. */
 export const generationJobs = pgTable(
   'generation_jobs',
@@ -40,7 +55,7 @@ export const generationJobs = pgTable(
     idempotencyKey: text('idempotency_key').notNull(),
     request: jsonb('request').$type<Record<string, unknown>>().notNull(),
     seed: bigint('seed', { mode: 'number' }).notNull(),
-    /** queued | drafting | validating | building | ready | failed | cancelled */
+    /** queued | drafting | validating | building | illustrating | ready | failed | cancelled */
     stage: text('stage').notNull().default('queued'),
     provider: text('provider').notNull(),
     leaseUntil: timestamp('lease_until', { withTimezone: true }),

@@ -1,7 +1,8 @@
 import {
   fallbackSpec,
-  GENERATOR_TEMPLATES,
   getTemplate,
+  SITE_BIOMES,
+  siteTemplate,
   impliedRoles,
   MISSION_SPEC_VERSION,
   OBJECTIVE_SLOT_TAG,
@@ -13,39 +14,96 @@ import {
   type TemplateDef,
   type Weather,
 } from '@operation-shadow/engine';
-import { type GeneratedBriefing, type GenerationRequest, type MissionPlan, TIME_OF_DAY_HOURS } from '@operation-shadow/schemas';
+import {
+  type GeneratedBriefing,
+  type GenerationRequest,
+  type MissionPlan,
+  OBJECTIVE_KIND_IDS,
+  STORY_ANGLE_IDS,
+  STORY_ANGLES,
+  THEATRE_IDS,
+  TIME_OF_DAY_HOURS,
+  TIME_OF_DAY_IDS,
+  WEATHER_IDS,
+} from '@operation-shadow/schemas';
 import { textProblem } from './safety';
 
-const THEME_OF: Record<string, TemplateDef['theme']> = Object.fromEntries(GENERATOR_TEMPLATES.map((t) => [t.id, t.theme]));
 
-/** Templates the request allows. */
-export function allowedTemplates(request: GenerationRequest): TemplateDef[] {
-  return GENERATOR_TEMPLATES.filter((t) => request.theatre === 'any' || t.theme === request.theatre);
+/**
+ * Replaces every "Random" (`any`) choice with a concrete value drawn from the job's seed, so each
+ * job asks for something different while a retried job asks for the same thing.
+ */
+export function resolveRequest(request: GenerationRequest, seed: number): GenerationRequest {
+  const rng = Rng.fromSeed(seed ^ 0x7a2d);
+  const theatre = request.theatre !== 'any' ? request.theatre : request.weather === 'snow' ? 'alpine' : rng.pick(THEATRE_IDS);
+  return {
+    ...request,
+    theatre,
+    timeOfDay: request.timeOfDay !== 'any' ? request.timeOfDay : rng.pick(TIME_OF_DAY_IDS),
+    weather: request.weather !== 'any' ? request.weather : rng.pick(WEATHER_IDS.filter((w) => w !== 'snow' || theatre === 'alpine')),
+    focus: request.focus !== 'any' ? request.focus : rng.pick(OBJECTIVE_KIND_IDS),
+    density: request.density !== 'any' ? request.density : rng.pick(['light', 'standard', 'standard', 'heavy'] as const),
+    alarm: request.alarm !== 'any' ? request.alarm : rng.pick(['strict', 'lenient', 'lenient'] as const),
+    objectives: request.objectives !== 'any' ? request.objectives : rng.pick(['1', '2', '2', '3'] as const),
+    angle: request.angle !== 'any' ? request.angle : rng.pick(STORY_ANGLE_IDS),
+  };
+}
+
+const CODENAME_FIRST = ['Amber', 'Ashen', 'Black', 'Blind', 'Cold', 'Copper', 'Crooked', 'Dark', 'Distant', 'Drowned', 'Falling', 'Glass', 'Gilded', 'Hidden', 'Hollow', 'Hushed', 'Iron', 'Ivory', 'Last', 'Lone', 'Midnight', 'Northern', 'Pale', 'Quiet', 'Red', 'Rusted', 'Salt', 'Scarlet', 'Silent', 'Silver', 'Sleeping', 'Slate', 'Stone', 'Sunken', 'Tin', 'Velvet', 'Weary', 'White', 'Winter', 'Wolf'];
+const CODENAME_SECOND = ['Anchor', 'Bell', 'Bramble', 'Candle', 'Compass', 'Crow', 'Cutlass', 'Dagger', 'Ember', 'Falcon', 'Ferry', 'Fox', 'Gate', 'Harbour', 'Hare', 'Heron', 'Key', 'Kestrel', 'Lantern', 'Ledger', 'Lighthouse', 'Lock', 'Magpie', 'Meridian', 'Mill', 'Mirror', 'Moth', 'Needle', 'Orchard', 'Raven', 'Ridge', 'Shepherd', 'Signal', 'Sparrow', 'Spire', 'Thistle', 'Tide', 'Viper', 'Wake', 'Willow'];
+const OFFICER_RANKS = ['Colonel', 'Major', 'Captain', 'Commandant', 'Inspector'];
+const OFFICER_NAMES = ['Valdrek', 'Orsini-Kell', 'Brandvold', 'Kessar', 'Morrow-Vane', 'Strell', 'Haldane', 'Vosk', 'Teague', 'Ardell', 'Krell', 'Moravec', 'Dunmere', 'Sallow', 'Corvic'];
+
+/** Random ingredients for the prompt (codename ideas, an enemy officer), different for each seed. */
+export function inspirationFor(seed: number): { words: string[]; officer: string } {
+  const rng = Rng.fromSeed(seed ^ 0x1d3a);
+  const words = new Set<string>();
+  while (words.size < 4) words.add(rng.chance(0.5) ? rng.pick(CODENAME_FIRST) : rng.pick(CODENAME_SECOND));
+  return { words: [...words], officer: `${rng.pick(OFFICER_RANKS)} ${rng.pick(OFFICER_NAMES)}` };
+}
+
+const randomCodename = (rng: Rng) => `${rng.pick(CODENAME_FIRST)} ${rng.pick(CODENAME_SECOND)}`;
+
+/**
+ * The site this job plays on: a whole map laid out from the job's seed in the requested theatre
+ * (a random one, mountains for snow, when the theatre is Random), so no two operations share a map.
+ */
+export function allowedTemplates(request: GenerationRequest, seed: number): TemplateDef[] {
+  const biome = request.theatre !== 'any' ? request.theatre : request.weather === 'snow' ? 'alpine' : Rng.fromSeed(seed ^ 0x5173).pick(SITE_BIOMES);
+  return [siteTemplate(biome, seed)];
 }
 
 /**
  * The prompt. Only enumerated catalog data and the player's enumerated choices go in; the optional
  * codename is already restricted to letters, spaces, apostrophes and hyphens by the request schema.
  */
-export function buildPrompt(request: GenerationRequest): string {
-  const templates = allowedTemplates(request)
+export function buildPrompt(request: GenerationRequest, seed = 0): string {
+  const templates = allowedTemplates(request, seed)
     .map((t) => {
       const slots = t.slots.map((s) => `    - slot "${s.id}" (${kindForTag(s.tag)}): ${s.label}`).join('\n');
       return `- templateId "${t.id}" — ${t.name}: ${t.description}\n  Objective slots:\n${slots}`;
     })
     .join('\n');
+  const { words, officer } = inspirationFor(seed);
   const choices = [
     request.timeOfDay !== 'any' ? `timeOfDay must be "${request.timeOfDay}".` : 'Choose any timeOfDay.',
-    request.weather !== 'any' ? `weather must be "${request.weather}".` : 'Choose any weather (snow only on the alpine template).',
+    request.weather !== 'any' ? `weather must be "${request.weather}".` : 'Choose any weather (snow only on an alpine site).',
     request.focus !== 'any' ? `At least one required objective must be of kind "${request.focus}".` : 'Choose the objective kinds freely.',
-    request.codename ? `Use the codename "Operation ${request.codename}".` : 'Invent a two-word codename such as "Grey Lantern".',
+    request.density !== 'any' ? `density must be "${request.density}".` : 'Choose any density.',
+    request.alarm !== 'any' ? `failOnFullAlarm must be ${request.alarm === 'strict'}.` : 'Choose failOnFullAlarm freely.',
+    request.objectives !== 'any' ? `Give exactly ${request.objectives} objective${request.objectives === '1' ? '' : 's'}.` : 'Give 1 to 3 objectives.',
+    request.angle !== 'any' ? `Story angle: ${STORY_ANGLES[request.angle]}` : 'Choose any story angle.',
+    request.codename
+      ? `Use the codename "Operation ${request.codename}".`
+      : `Invent an original two-word codename. For inspiration (use one, combine, or ignore): ${words.join(', ')}. Avoid stock names such as "Grey Lantern".`,
+    `The Dominion officer in charge here is ${officer}; mention the officer in the premise or intel if it suits the story.`,
   ].join('\n');
   return `You design one mission for "Operation Shadow", a top-down tactical stealth game in a fictional 1940s-style war.
 Shadow Section, a six-specialist Coalition commando squad directed by their handler "Lantern", operates behind the lines of the Dominion, a fictional occupying power.
 Specialists: infiltrator (MOTH: silent takedowns, climbing), recon (OWL: binoculars, darts), engineer (BADGER: lock-picking, wire cutters, sabotage, explosives), deception (FOX: disguises), medic (HERON: revives, sedatives), marine (OTTER: swimming, diving).
 Never mention real countries, armies, political movements, historical people or symbols. No gore. Plain text only: no markup, links or emoji.
 
-Pick exactly one template:
+The operation takes place on this site (use its templateId):
 ${templates}
 
 Objective kinds: "sabotage" uses an objective-target slot, "steal" an item slot, "rescue" a prisoner slot. Use each slot at most once.
@@ -53,6 +111,8 @@ Give 1 to 3 objectives; at least one must be required. An optional objective may
 density is how many guards are posted: light, standard or heavy. failOnFullAlarm true means the mission fails if the garrison reaches full alarm.
 hqMessages are short radio lines from Lantern at a given second of the mission (0 to 3 of them).
 recommended lists 1 to 4 specialist ids that suit the mission. The debrief lines congratulate or console the squad without inventing statistics.
+sceneDescription describes, in one or two sentences, the reconnaissance sketch pinned to the dossier: the most telling corner of the map for this mission, with its light and weather. No people, no lettering.
+Make the story specific to this operation: give places, cargo, prisoners and documents concrete invented details.
 
 Player choices:
 ${choices}
@@ -65,17 +125,19 @@ function kindForTag(tag: string): string {
 }
 
 /** Everything wrong with a schema-valid plan for this request (empty when it can be used). */
-export function planIssues(plan: MissionPlan, request: GenerationRequest): string[] {
+export function planIssues(plan: MissionPlan, request: GenerationRequest, seed: number): string[] {
   const issues: string[] = [];
   const template = getTemplate(plan.templateId);
-  if (!template || !allowedTemplates(request).some((t) => t.id === plan.templateId)) {
-    issues.push(`templateId must be one of: ${allowedTemplates(request).map((t) => t.id).join(', ')}`);
-  }
+  const allowed = allowedTemplates(request, seed);
+  if (!template || !allowed.some((t) => t.id === plan.templateId)) issues.push(`templateId must be ${allowed.map((t) => `"${t.id}"`).join(' or ')}`);
   if (request.timeOfDay !== 'any' && plan.timeOfDay !== request.timeOfDay) issues.push(`timeOfDay must be ${request.timeOfDay}`);
   if (request.weather !== 'any' && plan.weather !== request.weather) issues.push(`weather must be ${request.weather}`);
-  if (plan.weather === 'snow' && THEME_OF[plan.templateId] !== 'alpine') issues.push('snow is only possible on the alpine template');
+  if (plan.weather === 'snow' && template?.theme !== 'alpine') issues.push('snow is only possible on an alpine site');
   if (!plan.objectives.some((o) => o.required)) issues.push('at least one objective must be required');
   if (request.focus !== 'any' && !plan.objectives.some((o) => o.required && o.kind === request.focus)) issues.push(`a required objective must be of kind ${request.focus}`);
+  if (request.density !== 'any' && plan.density !== request.density) issues.push(`density must be ${request.density}`);
+  if (request.alarm !== 'any' && plan.failOnFullAlarm !== (request.alarm === 'strict')) issues.push(`failOnFullAlarm must be ${request.alarm === 'strict'}`);
+  if (request.objectives !== 'any' && plan.objectives.length !== Number(request.objectives)) issues.push(`give exactly ${request.objectives} objectives`);
   const used = new Set<string>();
   plan.objectives.forEach((o, i) => {
     const slot = template?.slots.find((s) => s.id === o.slot);
@@ -104,6 +166,7 @@ function planTexts(plan: MissionPlan): [string, string][] {
     ...plan.hqMessages.map((m, i): [string, string] => [`hqMessages[${i}].text`, m.text]),
     ['debrief.success', plan.debrief.success],
     ['debrief.failure', plan.debrief.failure],
+    ['sceneDescription', plan.sceneDescription],
   ];
 }
 
@@ -179,14 +242,24 @@ export function planToMission(plan: MissionPlan, key: string, seed: number): Bui
       extraction: 'The pick-up point marked in green on your map.',
       recommended: [...new Set<SpecialistId>([...required, ...plan.recommended])].slice(0, 4),
       debrief: plan.debrief,
+      sceneDescription: plan.sceneDescription,
     },
   };
 }
 
+const TIME_WORD: Record<number, string> = { 6: 'first light', 13: 'midday', 19: 'dusk', 23: 'night' };
+const timeWord = (hour: number) => TIME_WORD[hour] ?? (hour >= 20 || hour < 5 ? 'night' : 'daylight');
+const VERB = { sabotage: 'Disable the', steal: 'Recover the papers from the', rescue: 'Free the prisoner at the' } as const;
+const DESCRIPTION = {
+  sabotage: (label: string) => `Put the ${label} out of action without raising the garrison.`,
+  steal: (label: string) => `Dominion papers are kept at the ${label}. Bring them out.`,
+  rescue: (label: string) => `A Coalition agent is held at the ${label}. Bring them to the extraction point.`,
+} as const;
+
 /** The offline generator: a valid mission from the same request without any model. */
 export function fallbackMission(request: GenerationRequest, key: string, seed: number): BuiltMission {
   const rng = Rng.fromSeed(seed ^ 0xfa11);
-  const options = allowedTemplates(request);
+  const options = allowedTemplates(request, seed);
   const template = options[rng.int(0, options.length)]!;
   const base = fallbackSpec(template, seed, key);
   const weather: Weather = request.weather === 'any' ? base.env.weather : request.weather === 'snow' && template.theme !== 'alpine' ? 'fog' : request.weather;
@@ -196,17 +269,47 @@ export function fallbackMission(request: GenerationRequest, key: string, seed: n
   if (request.focus !== 'any' && objectives[0]!.kind !== request.focus) {
     const slot = template.slots.find((s) => s.tag === OBJECTIVE_SLOT_TAG[request.focus as keyof typeof OBJECTIVE_SLOT_TAG]);
     if (slot) {
-      const verb = { sabotage: 'Disable the', steal: 'Recover the papers from the', rescue: 'Free the prisoner at the' }[request.focus];
       objectives = [
-        { id: 'primary', kind: request.focus, slot: slot.id, title: `${verb} ${slot.label}`.slice(0, 60), description: `Lantern needs this done before dawn. Keep the garrison quiet.`, required: true },
+        { id: 'primary', kind: request.focus, slot: slot.id, title: `${VERB[request.focus]} ${slot.label}`.slice(0, 60), description: `Lantern needs this done before dawn. Keep the garrison quiet.`, required: true },
         ...objectives.slice(1).filter((o) => o.slot !== slot.id),
       ];
     }
   }
-  const title = request.codename ?? base.title;
+  // Honour the number of objectives: drop optional ones, or add optional ones on unused slots.
+  if (request.objectives !== 'any') {
+    const want = Number(request.objectives);
+    objectives = objectives.slice(0, want);
+    const free = rng.shuffle(template.slots.filter((s) => !objectives.some((o) => o.slot === s.id)));
+    for (const slot of free) {
+      if (objectives.length >= want) break;
+      const kind = OBJECTIVE_KIND_IDS.find((k) => OBJECTIVE_SLOT_TAG[k] === slot.tag);
+      if (!kind) continue;
+      objectives.push({ id: `extra-${objectives.length}`, kind, slot: slot.id, title: `${VERB[kind]} ${slot.label}`.slice(0, 60), description: DESCRIPTION[kind](slot.label).slice(0, 200), required: false });
+    }
+  }
+  const title = request.codename ?? randomCodename(rng);
   const required = impliedRoles(objectives);
-  const spec: MissionSpec = { ...base, title, env: { timeOfDay, weather }, objectives, squad: { required, min: Math.max(2, required.length), max: 4 }, dynamicEvents: true };
-  spec.events = spec.events.filter((e) => e.trigger.type !== 'objective' || objectives.some((o) => e.trigger.type === 'objective' && o.id === e.trigger.objectiveId));
+  const spec: MissionSpec = {
+    ...base,
+    title,
+    env: { timeOfDay, weather },
+    density: request.density === 'any' ? base.density : request.density,
+    failAtAlarm: request.alarm === 'any' ? base.failAtAlarm : request.alarm === 'strict' ? 4 : null,
+    objectives,
+    squad: { required, min: Math.max(2, required.length), max: 4 },
+    dynamicEvents: true,
+  };
+  spec.events = spec.events
+    .filter((e) => e.trigger.type !== 'objective' || objectives.some((o) => e.trigger.type === 'objective' && o.id === e.trigger.objectiveId))
+    // The landing line names the primary objective, which the choices above may have changed.
+    .map((e) =>
+      e.id === 'landing' && e.action.type === 'message'
+        ? { ...e, action: { ...e.action, text: `Lantern to Shadow Section. You are on the ground. ${objectives[0]!.title}, then get out unseen.`.slice(0, 240) } }
+        : e,
+    );
+  const { officer } = inspirationFor(seed);
+  const angle = request.angle === 'any' ? null : STORY_ANGLES[request.angle];
+  const primary = objectives.find((o) => o.required) ?? objectives[0]!;
   return {
     spec,
     briefing: {
@@ -214,13 +317,17 @@ export function fallbackMission(request: GenerationRequest, key: string, seed: n
       location: template.name,
       time: hourLabel(timeOfDay),
       weather: WEATHER_LABEL[weather],
-      premise: [`Lantern has a job for Shadow Section at ${template.name}. ${template.description}`],
+      premise: [
+        `${angle ? `${angle} ` : ''}Lantern has a job for Shadow Section at ${template.name}. ${template.description}`.slice(0, 400),
+        `The garrison answers to ${officer}.`,
+      ],
       intel: objectives.filter((o) => o.revealAtSeconds === undefined).map((o) => `${o.required ? 'Objective' : 'Optional'}: ${o.title}. ${o.description}`),
       warnings: warningsFor(spec),
       insertion: 'Marked in green on your map.',
       extraction: 'The pick-up point marked in green on your map.',
       recommended: [...new Set<SpecialistId>([...required, 'infiltrator', 'recon'])].slice(0, 4),
       debrief: { success: 'Clean work. Lantern logs another operation for Shadow Section.', failure: 'The operation is lost. Regroup and try again.' },
+      sceneDescription: `${template.name} at ${timeWord(timeOfDay)} in ${WEATHER_LABEL[weather].toLowerCase()} weather, seen from the hills, with the ${primary.title.replace(/^\S+\s+(the\s+)?/i, '').toLowerCase()} at its heart.`.slice(0, 400),
     },
   };
 }
@@ -235,13 +342,14 @@ export function examplePlan(request: GenerationRequest, seed = 1): MissionPlan {
     templateId: template.id as MissionPlan['templateId'],
     timeOfDay,
     weather: built.spec.env.weather,
-    density: 'standard',
+    density: request.density === 'any' ? 'standard' : request.density,
     premise: ['A Dominion garrison guards something Lantern wants gone. Shadow Section goes in tonight, quietly.'],
     intel: ['Patrols change every few minutes. Watch the sentries before you move.'],
     objectives: built.spec.objectives.map((o) => ({ kind: o.kind, slot: o.slot, title: o.title, description: o.description, required: o.required, revealAtSeconds: o.revealAtSeconds ?? null })),
     hqMessages: [{ atSeconds: 5, text: 'Lantern to Shadow Section. You are on the ground. Good hunting.' }],
-    failOnFullAlarm: false,
+    failOnFullAlarm: request.alarm === 'strict',
     recommended: ['infiltrator', 'engineer'],
     debrief: { success: 'Lantern is pleased. The garrison never knew you were there.', failure: 'The garrison was ready for you. We will try again.' },
+    sceneDescription: `${template.name} under a low sky, sketched from a ridge above the perimeter fence.`,
   };
 }

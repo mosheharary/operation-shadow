@@ -1,5 +1,19 @@
 import { randomInt } from 'node:crypto';
-import { disabledProvider, examplePlan, geminiProvider, generateMission, type MissionPlanProvider, mockProvider, type ProviderId } from '@operation-shadow/ai';
+import {
+  type BuiltMission,
+  disabledProvider,
+  dossierImagePrompt,
+  estimateCostUsd,
+  examplePlan,
+  geminiImageProvider,
+  geminiProvider,
+  generateMission,
+  type MissionPlanProvider,
+  mockProvider,
+  type ProviderId,
+  resolveRequest,
+  type UsageRecord,
+} from '@operation-shadow/ai';
 import {
   aiSpendSince,
   claimGenerationJob,
@@ -7,12 +21,14 @@ import {
   failGenerationJob,
   getGenerationJob,
   getOwnedMission,
+  hasMissionImage,
   type JobRow,
   type MissionRow,
   recordAiUsage,
   setGenerationJobStage,
 } from '@operation-shadow/db';
-import { type GeneratedMission, generatedMissionSchema, type GenerationJob, generationRequestSchema, type JobStage } from '@operation-shadow/schemas';
+import sharp from 'sharp';
+import { type GeneratedMission, generatedMissionSchema, type GenerationJob, type GenerationRequest, generationRequestSchema, type JobStage } from '@operation-shadow/schemas';
 import { getDb } from './db';
 import { getServerEnv } from './env';
 
@@ -24,6 +40,7 @@ const STAGE_MESSAGE: Record<JobStage, string> = {
   drafting: 'Lantern is drafting the operation',
   validating: 'Checking the plan against field intelligence',
   building: 'Surveying the ground and testing a silent route',
+  illustrating: 'Sketching the reconnaissance dossier',
   ready: 'Operation ready',
   failed: 'The operation could not be prepared',
   cancelled: 'Cancelled',
@@ -37,14 +54,44 @@ export function configuredProvider(): ProviderId {
   return env.GOOGLE_API_KEY ? 'gemini' : 'disabled';
 }
 
-function providerFor(id: ProviderId): MissionPlanProvider {
+function providerFor(id: ProviderId, request: GenerationRequest, seed: number): MissionPlanProvider {
   const env = getServerEnv();
   if (id === 'gemini' && env.GOOGLE_API_KEY) return geminiProvider({ apiKey: env.GOOGLE_API_KEY, model: env.GEMINI_TEXT_MODEL });
   if (id === 'mock') {
     const scenario = env.AI_MOCK_SCENARIO ?? 'valid';
-    return mockProvider(scenario, () => examplePlan(generationRequestSchema.parse({}), 1));
+    return mockProvider(scenario, () => examplePlan(request, seed));
   }
   return disabledProvider;
+}
+
+/** Sketch size stored and served (16:9, like the campaign dossier art). */
+const SKETCH = { width: 1024, height: 576 };
+
+/**
+ * Draws the operation's dossier sketch with Gemini and shrinks it to WebP. Only for AI-drafted jobs
+ * (the offline generator never calls a model); any failure leaves the theatre's stock sketch.
+ */
+async function drawDossier(mission: BuiltMission, signal: AbortSignal): Promise<{ image: { contentType: string; data: Buffer } | null; usage: UsageRecord | null }> {
+  const env = getServerEnv();
+  if (!env.GOOGLE_API_KEY || env.GEMINI_IMAGE_MODEL === 'none') return { image: null, usage: null };
+  const provider = geminiImageProvider({ apiKey: env.GOOGLE_API_KEY, model: env.GEMINI_IMAGE_MODEL });
+  try {
+    const call = await provider.draw(dossierImagePrompt(mission), signal);
+    const data = await sharp(call.data).resize(SKETCH.width, SKETCH.height, { fit: 'cover' }).webp({ quality: 80 }).toBuffer();
+    const usage: UsageRecord = {
+      provider: 'gemini',
+      model: call.model,
+      inputTokens: call.inputTokens,
+      outputTokens: call.outputTokens,
+      costUsd: estimateCostUsd(call.model, call.inputTokens, call.outputTokens),
+      latencyMs: call.latencyMs,
+      status: 'ok',
+    };
+    return { image: { contentType: 'image/webp', data }, usage };
+  } catch (err) {
+    console.error('[generation] dossier sketch failed', err instanceof Error ? err.message.slice(0, 120) : typeof err);
+    return { image: null, usage: { provider: 'gemini', model: provider.model, inputTokens: 0, outputTokens: 0, costUsd: 0, latencyMs: 0, status: 'error' } };
+  }
 }
 
 const monthStart = () => {
@@ -87,14 +134,15 @@ export async function advanceJob(ownerId: string, jobId: string): Promise<JobRow
   const { db } = getDb();
   const job = await claimGenerationJob(db, ownerId, jobId, LEASE_MS);
   if (!job) return getGenerationJob(db, ownerId, jobId);
-  const request = generationRequestSchema.parse(job.request);
+  // "Random" choices become concrete here, from the job's own random seed.
+  const request = resolveRequest(generationRequestSchema.parse(job.request), job.seed);
   const controller = new AbortController();
   try {
     const outcome = await generateMission({
       request,
       key: missionKey('00000000-0000-4000-8000-000000000000'),
       seed: job.seed,
-      provider: providerFor(job.provider as ProviderId),
+      provider: providerFor(job.provider as ProviderId, request, job.seed),
       signal: controller.signal,
       onStage: async (stage) => {
         // A cancelled job stops before the next model call.
@@ -106,6 +154,12 @@ export async function advanceJob(ownerId: string, jobId: string): Promise<JobRow
       outcome.usage.map((u) => ({ userId: ownerId, jobId: job.id, purpose: 'mission-plan', ...u })),
     );
     if (controller.signal.aborted) return getGenerationJob(db, ownerId, jobId);
+    let image: { contentType: string; data: Buffer } | null = null;
+    if (job.provider === 'gemini' && (await setGenerationJobStage(db, job.id, 'illustrating', LEASE_MS))) {
+      const drawn = await drawDossier(outcome, controller.signal);
+      if (drawn.usage) await recordAiUsage(db, [{ userId: ownerId, jobId: job.id, purpose: 'dossier-image', ...drawn.usage }]);
+      image = drawn.image;
+    }
     await completeGenerationJob(db, job, {
       source: outcome.source,
       templateId: outcome.spec.templateId,
@@ -118,7 +172,7 @@ export async function advanceJob(ownerId: string, jobId: string): Promise<JobRow
       briefing: outcome.briefing as unknown as Record<string, unknown>,
       levelHash: outcome.report.levelHash,
       report: outcome.report as unknown as Record<string, unknown>,
-    });
+    }, image);
   } catch (err) {
     console.error('[generation] job failed', err instanceof Error ? err.name : typeof err);
     await failGenerationJob(db, job.id, 'The operation could not be prepared. Please try again.');
@@ -132,6 +186,7 @@ export async function loadGeneratedMission(ownerId: string, key: string): Promis
   if (!match) return null;
   const row = await getOwnedMission(getDb().db, ownerId, match[1]!);
   if (!row) return null;
-  const parsed = generatedMissionSchema.safeParse({ key, source: row.source, spec: { ...row.spec, id: key }, briefing: row.briefing });
+  const dossierImage = (await hasMissionImage(getDb().db, ownerId, row.id)) ? `/api/v1/missions/${row.id}/image` : undefined;
+  const parsed = generatedMissionSchema.safeParse({ key, source: row.source, spec: { ...row.spec, id: key }, briefing: row.briefing, dossierImage });
   return parsed.success ? parsed.data : null;
 }

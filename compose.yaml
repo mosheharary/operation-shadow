@@ -7,8 +7,8 @@ x-node-env: &node-env
   DATABASE_URL_UNPOOLED: postgres://shadow:shadow@db:5432/operation_shadow
   TEST_DATABASE_URL: postgres://shadow:shadow@db:5432/operation_shadow_test
   BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-local-development-secret-not-for-production}
-  BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:3000}
-  NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
+  BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:4000}
+  NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:4000}
   ALLOW_DEV_LOGIN: "true"
   DEV_LOGIN_PASSWORD: ${DEV_LOGIN_PASSWORD:-shadow-section-dev-only}
   GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
@@ -73,12 +73,12 @@ services:
     <<: *tools
     command: ["pnpm", "dev"]
     ports:
-      - "127.0.0.1:3000:3000"
+      - "127.0.0.1:4000:4000"
     depends_on:
       seed:
         condition: service_completed_successfully
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:3000/api/health > /dev/null"]
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:4000/api/health > /dev/null"]
       interval: 5s
       timeout: 5s
       start_period: 60s
@@ -133,11 +133,11 @@ services:
     image: mcr.microsoft.com/playwright:v1.64.0-noble
     working_dir: /app
     ipc: host
-    # Share the app container's network so the browser uses http://localhost:3000 — the same origin
+    # Share the app container's network so the browser uses http://localhost:4000 — the same origin
     # the app is configured with (auth origin checks), and exempt from Chromium's HTTPS upgrades.
     network_mode: service:app
     environment:
-      E2E_BASE_URL: http://localhost:3000
+      E2E_BASE_URL: http://localhost:4000
       CI: "true"
     volumes:
       - .:/app

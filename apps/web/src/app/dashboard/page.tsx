@@ -6,6 +6,7 @@ import { saveSummarySchema } from '@operation-shadow/schemas';
 import { getDb } from '@/server/db';
 import { activeCampaign, readProgress } from '@/server/progress';
 import { requireSession } from '@/server/session';
+import { DeleteButton } from './delete-button';
 import { SignOutButton } from './sign-out-button';
 
 // Session-dependent: always rendered per request.
@@ -20,8 +21,8 @@ const statusClass = (value: string) =>
 const ROADMAP = [
   { label: 'Foundation: accounts, database, 3D pipeline', state: 'ok' },
   { label: 'Vertical slice: playable mission "Silent Tide"', state: 'ok' },
-  { label: 'Campaign of six missions with a guided tutorial', state: 'ok' },
-  { label: 'Generated operations (Gemini, with offline fallback)', state: 'ok' },
+  { label: 'Four starting missions with a guided tutorial', state: 'ok' },
+  { label: 'Generated operations on maps laid out for each one (Gemini, with offline fallback)', state: 'ok' },
   { label: 'Campaign progress, saved games, synced settings', state: 'ok' },
   { label: 'Planning mode, settings and accessibility, security hardening', state: 'ok' },
 ] as const;
@@ -72,14 +73,17 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                   Continue
                 </h2>
                 {saves.slice(0, 3).map((save) => (
-                  <Link key={save.slot} className="menu__item" href={`/play/${save.missionKey}?save=${save.slot}`} data-testid={`continue-${save.slot}`}>
-                    <span className="menu__title">
-                      {save.missionTitle} · {SLOT_NAME[save.slot]}
-                    </span>
-                    <span className="menu__desc">
-                      {Math.floor(save.seconds / 60)} min in · {save.objectivesDone}/{save.objectivesTotal} objectives · saved {save.updatedAt.slice(0, 16).replace('T', ' ')} UTC
-                    </span>
-                  </Link>
+                  <div key={save.slot} className="menu__row">
+                    <Link className="menu__item" href={`/play/${save.missionKey}?save=${save.slot}`} data-testid={`continue-${save.slot}`}>
+                      <span className="menu__title">
+                        {save.missionTitle} · {SLOT_NAME[save.slot]}
+                      </span>
+                      <span className="menu__desc">
+                        {Math.floor(save.seconds / 60)} min in · {save.objectivesDone}/{save.objectivesTotal} objectives · saved {save.updatedAt.slice(0, 16).replace('T', ' ')} UTC
+                      </span>
+                    </Link>
+                    <DeleteButton url={`/api/v1/saves/${save.slot}`} label={`${save.missionTitle} · ${SLOT_NAME[save.slot]}`} testId={`delete-save-${save.slot}`} />
+                  </div>
                 ))}
               </section>
             )}
@@ -112,12 +116,19 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
               <span className="menu__desc">Lantern drafts a fresh mission on any map, checked to be winnable without being seen.</span>
             </Link>
             {generated.map((m) => (
-              <Link key={m.id} className="menu__item" href={`/missions/op-${m.id}`} data-testid="generated-mission">
-                <span className="menu__title">Operation: {m.title}</span>
-                <span className="menu__desc">
-                  Generated {m.createdAt.toISOString().slice(0, 10)} · {m.source === 'fallback' ? 'offline generator' : 'drafted by Lantern (AI)'}
-                </span>
-              </Link>
+              <div key={m.id} className="menu__row">
+                <Link className={`menu__item${m.hasImage ? ' menu__item--sketch' : ''}`} href={`/missions/op-${m.id}`} data-testid="generated-mission">
+                  {m.hasImage && (
+                    // eslint-disable-next-line @next/next/no-img-element -- private per-user image served by the API
+                    <img className="menu__sketch" src={`/api/v1/missions/${m.id}/image`} alt="" width={128} height={72} loading="lazy" />
+                  )}
+                  <span className="menu__title">Operation: {m.title}</span>
+                  <span className="menu__desc">
+                    Generated {m.createdAt.toISOString().slice(0, 10)} · {m.source === 'fallback' ? 'offline generator' : 'drafted by Lantern (AI)'}
+                  </span>
+                </Link>
+                <DeleteButton url={`/api/v1/missions/${m.id}`} label={`Operation: ${m.title}`} testId={`delete-operation-${m.id}`} />
+              </div>
             ))}
             <Link className="menu__item" href="/test-range">
               <span className="menu__title">Test range</span>

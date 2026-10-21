@@ -757,6 +757,21 @@
   background: var(--brass-strong);
 }
 
+.dangerButton {
+  padding: 0.55rem 1rem;
+  border: 1px solid var(--rust);
+  border-radius: var(--radius);
+  background: rgba(207, 106, 79, 0.28);
+  color: #ffd2c4;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.dangerButton:hover {
+  background: rgba(207, 106, 79, 0.45);
+}
+
 .settings {
   display: grid;
   gap: 0.5rem;

@@ -19,13 +19,19 @@ export interface GeneratedMissionData {
     extraction: string;
     recommended: SpecialistId[];
     debrief: { success: string; failure: string };
+    sceneDescription?: string;
   };
+  /** The operation's own dossier sketch, if one was drawn. */
+  dossierImage?: string;
 }
 
+// Stock sketches for operations drawn without AI (each AI-drafted operation gets its own).
 const DOSSIER: Record<string, string> = {
-  coastal: '/media/briefing/last-light.jpg',
+  coastal: '/media/briefing/silent-tide.jpg',
   alpine: '/media/briefing/white-silence.jpg',
   rail: '/media/briefing/iron-junction.jpg',
+  forest: '/media/briefing/frozen-ledger.jpg',
+  farmland: '/media/briefing/boot-camp.jpg',
   training: '/media/briefing/boot-camp.jpg',
 };
 
@@ -33,12 +39,12 @@ const DOSSIER: Record<string, string> = {
 export function generatedMissionEntry(data: GeneratedMissionData): MissionEntry | null {
   const template = getTemplate(data.spec.templateId);
   if (!template) return null;
-  const { debrief, ...briefing } = data.briefing;
+  const { debrief, sceneDescription: _scene, ...briefing } = data.briefing;
   const origin = data.source === 'fallback' ? 'Prepared by the offline generator.' : 'Drafted by Lantern (AI-generated).';
   return {
     ...specMission(template, { ...data.spec, id: data.key }, {
       summary: `${briefing.premise[0] ?? template.description} ${origin}`,
-      briefing: { ...briefing, dossierImage: DOSSIER[template.theme] ?? DOSSIER.coastal! },
+      briefing: { ...briefing, dossierImage: data.dossierImage ?? DOSSIER[template.theme] ?? DOSSIER.coastal! },
       debrief,
     }),
     generated: data.source,

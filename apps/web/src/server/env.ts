@@ -29,6 +29,8 @@ const serverEnvSchema = z.object({
     .transform((v) => (v ? v : undefined))
     .pipe(z.enum(['valid', 'malformed', 'repairable', 'invalid', 'error', 'unsafe']).optional()),
   GEMINI_TEXT_MODEL: z.string().regex(/^[a-z0-9.-]+$/).default('gemini-3.8-flash'),
+  /** Draws each generated operation's dossier sketch; `none` turns the sketches off. */
+  GEMINI_IMAGE_MODEL: z.string().regex(/^[a-z0-9.-]+$/).default('gemini-3.1-flash-image'),
   AI_MONTHLY_BUDGET_USD: z.coerce.number().min(0).default(5),
   AI_DAILY_JOBS_PER_USER: z.coerce.number().int().min(0).default(20),
 });

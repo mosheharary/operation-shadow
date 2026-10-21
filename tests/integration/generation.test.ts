@@ -7,12 +7,16 @@ import {
   completeGenerationJob,
   createDbHandle,
   createGenerationJob,
+  deleteOwnedMission,
   getGenerationJob,
+  getMissionImage,
   getOwnedMission,
+  listSaveSlots,
   listOwnedMissions,
   recordAiUsage,
   schema,
   setGenerationJobStage,
+  writeSave,
   type DbHandle,
 } from '@operation-shadow/db';
 import { runMigrations } from '@operation-shadow/db/migrate';
@@ -108,6 +112,47 @@ describe('generation jobs', () => {
     expect(await getOwnedMission(handle.db, bob, stored[0]!.id)).toBeNull();
     expect((await listOwnedMissions(handle.db, alice)).map((m) => m.id)).toContain(stored[0]!.id);
     expect(await listOwnedMissions(handle.db, bob)).toEqual([]);
+  });
+
+  it('are deleted only by their owner, with the owner\'s saves of them; the job keeps its history', async () => {
+    const { job } = await createGenerationJob(handle.db, alice, { idempotencyKey: 'key-delete', request: {}, seed: 1, provider: 'disabled' });
+    await claimGenerationJob(handle.db, alice, job.id, 60_000);
+    const mission = (await completeGenerationJob(handle.db, job, await MISSION()))!;
+    const saveOf = (slot: string, missionKey: string) => ({
+      slot,
+      missionKey,
+      summary: {},
+      schemaVersion: 1,
+      payload: Buffer.from('x'),
+      checksum: 'sum',
+      sizeBytes: 1,
+    });
+    await writeSave(handle.db, alice, saveOf('manual-1', `op-${mission.id}`));
+    await writeSave(handle.db, alice, saveOf('manual-2', 'boot-camp'));
+
+    expect(await deleteOwnedMission(handle.db, bob, mission.id)).toBe(false);
+    expect(await getOwnedMission(handle.db, alice, mission.id)).not.toBeNull();
+    expect(await deleteOwnedMission(handle.db, alice, mission.id)).toBe(true);
+    expect(await getOwnedMission(handle.db, alice, mission.id)).toBeNull();
+    expect(await deleteOwnedMission(handle.db, alice, mission.id)).toBe(false);
+    expect((await listSaveSlots(handle.db, alice)).map((s) => s.slot)).toEqual(['manual-2']);
+    const kept = await getGenerationJob(handle.db, alice, job.id);
+    expect(kept?.stage).toBe('ready');
+    expect(kept?.missionId).toBeNull();
+  });
+
+  it('store a dossier sketch with the mission, readable only by its owner and deleted with it', async () => {
+    const { job } = await createGenerationJob(handle.db, alice, { idempotencyKey: 'key-image', request: {}, seed: 1, provider: 'gemini' });
+    await claimGenerationJob(handle.db, alice, job.id, 60_000);
+    expect(await setGenerationJobStage(handle.db, job.id, 'illustrating', 60_000)).toBe(true);
+    const image = { contentType: 'image/webp', data: Buffer.from('webp-bytes') };
+    const mission = (await completeGenerationJob(handle.db, job, await MISSION(), image))!;
+    expect((await getMissionImage(handle.db, alice, mission.id))?.data.equals(image.data)).toBe(true);
+    expect(await getMissionImage(handle.db, bob, mission.id)).toBeNull();
+    expect((await listOwnedMissions(handle.db, alice)).find((m) => m.id === mission.id)?.hasImage).toBe(true);
+    expect(await deleteOwnedMission(handle.db, alice, mission.id)).toBe(true);
+    const { rows } = await handle.pool.query('select count(*)::int as n from mission_images where mission_id = $1', [mission.id]);
+    expect(rows[0].n).toBe(0);
   });
 
   it('cancelled jobs do not store a mission', async () => {

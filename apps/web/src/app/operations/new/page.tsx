@@ -21,8 +21,8 @@ export default async function NewOperationPage() {
           <p className="eyebrow">Shadow Section · Generated operation</p>
           <h1 className="title">Request an operation</h1>
           <p className="lede">
-            Tell Lantern what kind of job you want. Every operation is checked before you see it: objectives must exist on the map,
-            and there must be a route to finish it without being seen.
+            Tell Lantern what kind of job you want. Every operation gets a map of its own, laid out fresh, and is checked before you
+            see it: objectives must exist on the map, and there must be a route to finish it without being seen.
           </p>
         </header>
         <GenerateOperation aiAvailable={provider !== 'disabled'} />
