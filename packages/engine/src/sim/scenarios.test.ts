@@ -257,11 +257,19 @@ describe('abilities and rules', () => {
     expect(marine.inventory['pistol-round']).toBe(4); // a shared round type is split
     expect(moth.inventory['pistol-round']).toBe(4);
 
-    // Owl cannot fire the harpoon, so the marine keeps the bolts; with no pistol rounds either, nothing to give.
+    // OTTER tops up OWL's suppressed rifle from his spare rounds; he keeps the bolts she cannot fire.
+    expect(marine.inventory['rifle-round']).toBe(2);
+    owl.inventory['rifle-round'] = 0;
     marine.inventory['pistol-round'] = 0;
+    expect(world.enqueue({ type: 'ability', unitId: 'op:marine', abilityId: 'resupply', target: { kind: 'entity', id: 'op:recon' } }).ok).toBe(true);
+    expect(runUntil(world, (w) => (w.operative('op:recon')!.inventory['rifle-round'] ?? 0) > 0, 8)).toBe(true);
+    expect(owl.inventory['rifle-round']).toBe(2);
+    expect(marine.inventory['rifle-round']).toBe(0);
+    expect(marine.inventory['harpoon-bolt']).toBe(3);
+
+    // Nothing left that she can fire: refused.
     const refused = world.enqueue({ type: 'ability', unitId: 'op:marine', abilityId: 'resupply', target: { kind: 'entity', id: 'op:recon' } });
     expect(refused).toMatchObject({ ok: false });
-    expect(owl.inventory['harpoon-bolt'] ?? 0).toBe(0);
   });
 
   it('a knife order can run to the target, creeping the last metres', () => {

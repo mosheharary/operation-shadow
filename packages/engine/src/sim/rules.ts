@@ -13,6 +13,9 @@ export interface SpecialistRules {
 
 const COMMON: AbilityId[] = ['door', 'carry', 'drop', 'hide-body', 'pick-up', 'throw-stone', 'pistol', 'first-aid', 'resupply', 'free'];
 const COMMON_KIT: Partial<Record<ItemId, number>> = { stone: 3, 'pistol-round': 8, dressing: 1 };
+/** Spare rounds carried for teammates' weapons (handed over with Resupply). */
+const SPARE_RIFLE: Partial<Record<ItemId, number>> = { 'rifle-round': 2 };
+const SPARE_BOLTS: Partial<Record<ItemId, number>> = { 'harpoon-bolt': 2 };
 
 export const SPECIALIST_RULES: Record<SpecialistId, SpecialistRules> = {
   infiltrator: {
@@ -20,42 +23,42 @@ export const SPECIALIST_RULES: Record<SpecialistId, SpecialistRules> = {
     nav: { swim: false, climb: true },
     strong: true,
     abilities: [...COMMON, 'takedown', 'knife', 'restrain', 'place-device', 'trigger-device'],
-    inventory: { ...COMMON_KIT, rope: 6, 'noise-device': 1 },
+    inventory: { ...COMMON_KIT, ...SPARE_RIFLE, ...SPARE_BOLTS, rope: 6, 'noise-device': 1 },
   },
   recon: {
     maxHealth: 80,
     nav: { swim: false, climb: false },
     strong: false,
     abilities: [...COMMON, 'binoculars', 'rifle', 'dart'],
-    inventory: { ...COMMON_KIT, 'rifle-round': 4, dart: 3 },
+    inventory: { ...COMMON_KIT, ...SPARE_BOLTS, 'rifle-round': 4, dart: 3 },
   },
   engineer: {
     maxHealth: 110,
     nav: { swim: false, climb: false },
     strong: true,
     abilities: [...COMMON, 'lockpick', 'cut-fence', 'sabotage', 'place-charge', 'restrain'],
-    inventory: { ...COMMON_KIT, 'wire-cutters': 1, lockpick: 1, charge: 2, rope: 2 },
+    inventory: { ...COMMON_KIT, ...SPARE_RIFLE, ...SPARE_BOLTS, 'wire-cutters': 1, lockpick: 1, charge: 2, rope: 2 },
   },
   deception: {
     maxHealth: 90,
     nav: { swim: false, climb: false },
     strong: false,
     abilities: [...COMMON, 'disguise', 'take-uniform', 'converse', 'sedative'],
-    inventory: { ...COMMON_KIT, sedative: 3 },
+    inventory: { ...COMMON_KIT, ...SPARE_RIFLE, ...SPARE_BOLTS, sedative: 3 },
   },
   medic: {
     maxHealth: 90,
     nav: { swim: false, climb: false },
     strong: true,
     abilities: [...COMMON, 'revive', 'chloroform', 'smoke'],
-    inventory: { ...COMMON_KIT, medkit: 3, chloroform: 3, smoke: 2 },
+    inventory: { ...COMMON_KIT, ...SPARE_RIFLE, ...SPARE_BOLTS, medkit: 3, chloroform: 3, smoke: 2 },
   },
   marine: {
     maxHealth: 100,
     nav: { swim: true, climb: false },
     strong: true,
     abilities: [...COMMON, 'knife', 'harpoon', 'dive', 'restrain'],
-    inventory: { ...COMMON_KIT, 'harpoon-bolt': 4, rope: 2 },
+    inventory: { ...COMMON_KIT, ...SPARE_RIFLE, 'harpoon-bolt': 4, rope: 2 },
   },
   // Carries no weapon at all: no pistol, blade or takedown. Lives on his cover until the alarm.
   spy: {

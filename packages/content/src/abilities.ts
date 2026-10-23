@@ -36,7 +36,7 @@ export const ABILITY_INFO: Record<AbilityId, AbilityInfo> = {
   sedative: { name: 'Sedative', description: 'Knock out a soldier up close. Works face to face on a relaxed soldier while disguised.' },
   revive: { name: 'Revive', description: 'Bring a downed squad member back with a medkit.' },
   'first-aid': { name: 'First aid', description: 'Slowly patch up a downed squad member with a field dressing.' },
-  resupply: { name: 'Resupply', description: 'Hand a squad member pistol rounds, rifle rounds or harpoon bolts they can use.' },
+  resupply: { name: 'Resupply', description: 'Hand a squad member pistol rounds, rifle rounds or harpoon bolts they can fire. Everyone armed carries 2 spare rifle rounds and 2 harpoon bolts for the team.' },
   chloroform: { name: 'Chloroform', description: 'Knock out a soldier from behind. Slower but quieter than a blow.' },
   smoke: { name: 'Smoke canister', description: 'A cloud that blocks sight for 20 seconds.' },
   pistol: { name: 'Pistol', description: 'A loud sidearm. Every soldier nearby will hear it.', lethal: true, loud: true },
