@@ -39,10 +39,10 @@ lists the required specialists; pick your squad and a difficulty, then deploy. T
 | Input | Action |
 |---|---|
 | Left-click / Shift-click / drag | Select one / add to selection / box-select squad members (or press 1–6) |
-| Right-click | Move, or the action shown under the cursor (open a door, knock out a sentry from behind, tie up, carry…) |
+| Right-click | Move, or the action shown under the cursor (open a door, knock out a sentry from behind, tie up, carry, resupply a teammate who is out of ammunition…) |
 | Double right-click / Shift + right-click | Run / queue the order |
 | Z · C · X | Stand · crouch · prone |
-| R G V B Y H N J U K | The selected specialist's ability slots (shown on the bar); left-click a target, right-click or Esc cancels |
+| R G V B Y H N J U K | The selected specialist's ability slots (shown on the bar); left-click a target (double-click to run there, e.g. a knife rush), right-click or Esc cancels |
 | Space | Tactical pause (orders still work) |
 | L · Enter | Planning: wait for the signal · give the signal (everyone waiting moves at once) |
 | F5 · F9 | Quicksave · quickload (the mission menu has manual slots; Field HQ has Continue) |

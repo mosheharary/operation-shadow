@@ -7,7 +7,7 @@ export * from './level/types';
 export * from './nav/pathfinder';
 export * from './sight/los';
 export * from './sound/propagation';
-export { ABILITIES, guardFaces, validateAbility, readyToExecute, type AbilityDef } from './sim/abilities';
+export { ABILITIES, guardFaces, resupplyLoad, validateAbility, readyToExecute, type AbilityDef } from './sim/abilities';
 export { ALARM_LABELS } from './sim/alarm';
 export { deckMessage } from './sim/director';
 export * from './sim/commands';

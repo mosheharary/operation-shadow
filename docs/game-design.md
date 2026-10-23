@@ -28,8 +28,9 @@ Non-lethal play is always viable and rewarded; killing is never required and nev
 | HERON | Field Medic | Revive the downed, chloroform, smoke |
 | OTTER | Marine | Swim and dive, harpoon, knife, tie up |
 
-Everyone can stand, crouch or go prone, carry bodies, hide them in containers, throw stones, use first aid and fire a
-pistol. Each specialist has a role-specific navigation profile (for example, only OTTER swims).
+Everyone can stand, crouch or go prone, carry bodies, hide them in containers, throw stones, use first aid, fire a
+pistol and resupply a teammate with ammunition they can fire (pistol rounds, rifle rounds, harpoon bolts: all of a type
+the giver cannot fire, half of a shared one). Each specialist has a role-specific navigation profile (for example, only OTTER swims).
 
 ## Stealth model (engine)
 

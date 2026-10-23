@@ -11,7 +11,7 @@ export interface SpecialistRules {
   inventory: Partial<Record<ItemId, number>>;
 }
 
-const COMMON: AbilityId[] = ['door', 'carry', 'drop', 'hide-body', 'pick-up', 'throw-stone', 'pistol', 'first-aid', 'free'];
+const COMMON: AbilityId[] = ['door', 'carry', 'drop', 'hide-body', 'pick-up', 'throw-stone', 'pistol', 'first-aid', 'resupply', 'free'];
 const COMMON_KIT: Partial<Record<ItemId, number>> = { stone: 3, 'pistol-round': 8, dressing: 1 };
 
 export const SPECIALIST_RULES: Record<SpecialistId, SpecialistRules> = {

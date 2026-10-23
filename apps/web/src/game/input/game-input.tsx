@@ -43,6 +43,8 @@ export function GameInput({ controller }: { controller: GameController }) {
   const press = useRef<Press | null>(null);
   const lastRight = useRef({ t: 0, x: 0, y: 0 });
   const lastLeft = useRef({ t: 0, id: '' });
+  /** The last walk-up ability order from the targeting cursor: clicking it again quickly upgrades it to a run. */
+  const lastAbilityOrder = useRef<{ t: number; x: number; y: number; command: Extract<Command, { type: 'ability' }> } | null>(null);
   const lastSelectKey = useRef({ t: 0, index: -1 });
   const hintAt = useRef({ t: 0, key: '' });
   const cursor = useRef('default');
@@ -106,6 +108,15 @@ export function GameInput({ controller }: { controller: GameController }) {
       if (e.button === 0 && e.altKey) return;
       if (e.button === 0) {
         const state = ui();
+        const last = lastAbilityOrder.current;
+        lastAbilityOrder.current = null;
+        if (last && running() && performance.now() - last.t < DOUBLE_CLICK_MS && Math.hypot(e.clientX - last.x, e.clientY - last.y) < 12) {
+          // Double-click on a target: run there instead (a knife rush, a sprint to a downed ally).
+          const command = { ...last.command, gait: 'run' as const };
+          const pos = world().resolveTargetPos(command.target);
+          issue(command, pos ? { pos, kind: 'run' } : undefined);
+          return;
+        }
         if (state.targeting && running()) {
           const lead = activeSelected()[0];
           const { entity, ground } = pickAt(e.clientX, e.clientY);
@@ -119,7 +130,10 @@ export function GameInput({ controller }: { controller: GameController }) {
             return;
           }
           const pos = world().resolveTargetPos(command.target) ?? ground;
-          if (issue(command, pos ? { pos, kind: 'action' } : undefined)) state.setTargeting(null);
+          if (issue(command, pos ? { pos, kind: 'action' } : undefined)) {
+            state.setTargeting(null);
+            if (ABILITIES[command.abilityId].approach && !command.queue) lastAbilityOrder.current = { t: performance.now(), x: e.clientX, y: e.clientY, command };
+          }
           return;
         }
         press.current = { x: e.clientX, y: e.clientY, shift: e.shiftKey, dragging: false };

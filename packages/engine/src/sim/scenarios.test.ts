@@ -240,6 +240,43 @@ describe('abilities and rules', () => {
     expect(runUntil(world, (w) => w.operative('op:infiltrator')!.status === 'active', 40)).toBe(true);
   });
 
+  it('a squad member resupplies another with ammunition they can fire', () => {
+    const lvl = level();
+    const world = makeWorld(lvl, makeMission(lvl), ['marine', 'infiltrator', 'recon']);
+    const marine = placeOperative(world, 'marine', vec(10, 10));
+    const moth = placeOperative(world, 'infiltrator', vec(14, 10));
+    const owl = placeOperative(world, 'recon', vec(10, 14));
+    marine.inventory['harpoon-bolt'] = 0;
+    marine.inventory['pistol-round'] = 0;
+    moth.inventory['harpoon-bolt'] = 3; // picked up in the field: Moth has no harpoon, so hands over all of them
+
+    expect(world.enqueue({ type: 'ability', unitId: 'op:infiltrator', abilityId: 'resupply', target: { kind: 'entity', id: 'op:marine' } }).ok).toBe(true);
+    expect(runUntil(world, (w) => (w.operative('op:marine')!.inventory['harpoon-bolt'] ?? 0) > 0, 8)).toBe(true);
+    expect(marine.inventory['harpoon-bolt']).toBe(3);
+    expect(moth.inventory['harpoon-bolt']).toBe(0);
+    expect(marine.inventory['pistol-round']).toBe(4); // a shared round type is split
+    expect(moth.inventory['pistol-round']).toBe(4);
+
+    // Owl cannot fire the harpoon, so the marine keeps the bolts; with no pistol rounds either, nothing to give.
+    marine.inventory['pistol-round'] = 0;
+    const refused = world.enqueue({ type: 'ability', unitId: 'op:marine', abilityId: 'resupply', target: { kind: 'entity', id: 'op:recon' } });
+    expect(refused).toMatchObject({ ok: false });
+    expect(owl.inventory['harpoon-bolt'] ?? 0).toBe(0);
+  });
+
+  it('a knife order can run to the target, creeping the last metres', () => {
+    const lvl = level();
+    const world = makeWorld(lvl, makeMission(lvl, { guards: [guard('g:1', vec(30, 20), EAST, { temperament: 'passive' })] }), ['infiltrator']);
+    const op = placeOperative(world, 'infiltrator', vec(10, 20), 'crouch');
+    world.enqueue({ type: 'ability', unitId: 'op:infiltrator', abilityId: 'knife', target: { kind: 'entity', id: 'g:1' }, gait: 'run' });
+    runFor(world, 2);
+    expect(op.action).toMatchObject({ kind: 'approach', gait: 'run' });
+    expect(op.pos.x).toBeGreaterThan(13.5); // crouched run (2.2 m/s), twice the crouched walk
+    expect(runUntil(world, (w) => w.guard('g:1')!.status === 'dead', 15)).toBe(true);
+    expect(op.stance).toBe('crouch');
+    expect(world.state.alarm.level).toBe(0);
+  });
+
   it('a downed operative bleeds out unless revived by the medic', () => {
     const lvl = level();
     const world = makeWorld(lvl, makeMission(lvl), ['infiltrator', 'medic']);

@@ -360,6 +360,7 @@ const HELP_GROUPS: { title: string; rows: [BindingAction[] | string, string][] }
     title: 'Tactics',
     rows: [
       [['slot-1', 'slot-2', 'slot-3', 'slot-4'], 'Ability slots (see the bar)'],
+      ['Double-click a target', 'Run there (e.g. knife, first aid, resupply)'],
       ['Esc / right-click', 'Cancel targeting'],
       ['Click a soldier', 'Pin his view cone'],
       ['Hold Alt', 'Show every view cone'],

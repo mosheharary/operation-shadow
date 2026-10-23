@@ -6,7 +6,9 @@ import {
   type Command,
   type CommandResult,
   type Gait,
+  type ItemId,
   type Operative,
+  resupplyLoad,
   SPECIALIST_RULES,
   type Vec2,
   type World,
@@ -79,6 +81,9 @@ function candidates(world: World, op: Operative, target: NonNullable<PointerTarg
     if (!ally || ally.id === op.id) return [];
     if (ally.status === 'downed') return ['revive', 'first-aid'];
     if (ally.status === 'captured') return ['free'];
+    // Like first aid for the wounded: an ally out of a round the unit can spare gets resupplied.
+    // Otherwise a right-click walks over (the bar's Resupply hands ammunition over at any time).
+    if (ally.status === 'active' && (Object.keys(resupplyLoad(op, ally)) as ItemId[]).some((item) => (ally.inventory[item] ?? 0) === 0)) return ['resupply'];
     return [];
   }
   const obj = world.object(target.id);
@@ -204,7 +209,7 @@ export function resolveAbilityOrder(
 
 /** Ability bar contents for a specialist: role skills first, then shared tools. Carry and drop share a slot. */
 export function abilityBar(op: Operative): AbilityId[] {
-  const shared: AbilityId[] = ['throw-stone', 'pistol', 'first-aid'];
+  const shared: AbilityId[] = ['throw-stone', 'pistol', 'first-aid', 'resupply'];
   const contextOnly = new Set<AbilityId>(['door', 'carry', 'drop', 'hide-body', 'pick-up', 'free', ...shared]);
   const role = SPECIALIST_RULES[op.role].abilities.filter((a) => !contextOnly.has(a));
   const carrySlot: AbilityId = op.carrying ? 'drop' : 'carry';

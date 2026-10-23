@@ -59,7 +59,7 @@ export function AbilityBar() {
           <>
             <span className={hint.ok ? styles.hintOk : styles.hintBad}>
               <Icon name={hint.ok ? 'check' : 'x'} size={13} />
-              {targeting ? `${hint.label}: ${hint.ok ? 'left-click to confirm' : hint.message}` : `Right-click: ${hint.label}`}
+              {targeting ? `${hint.label}: ${hint.ok ? (ABILITIES[targeting].approach ? 'left-click to confirm, double-click to run' : 'left-click to confirm') : hint.message}` : `Right-click: ${hint.label}`}
             </span>
             {!hint.ok && !targeting && hint.message && <span className={styles.hintReason}>{hint.message}</span>}
           </>

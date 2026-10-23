@@ -1,5 +1,6 @@
 import { distance, headingTo, moveToward, type Vec2 } from '../core/math';
 import { CellFlag, Surface } from '../level/types';
+import { ABILITIES } from './abilities';
 import { followPath } from './movement';
 import { completeChannel, interrupt, navProfileFor, tryBegin } from './orders';
 import { DIFFICULTY, operativeSpeed, SPECIALIST_RULES } from './rules';
@@ -22,6 +23,9 @@ const FOOTSTEP_WALK_DB: Record<number, number> = {
   [Surface.DeepWater]: 34,
   [Surface.Rock]: 46,
 };
+
+/** A run to a strike from behind drops to a crouched walk this close to the target, below most sentries' hearing. */
+const CREEP_DISTANCE = 6;
 
 const SURFACE_SPEED: Partial<Record<Surface, number>> = {
   [Surface.Sand]: 0.9,
@@ -125,6 +129,14 @@ function processAction(world: World, op: Operative): void {
     case 'approach': {
       if (tryBegin(world, op, action)) return;
       const s = world.state;
+      // A run to a strike from behind (knife, knockout) sprints the distance and creeps the last metres.
+      if (action.gait === 'run' && ABILITIES[action.abilityId].stance === 'crouch') {
+        const target = world.resolveTargetPos(action.target, op.pos);
+        if (target && distance(op.pos, target) < CREEP_DISTANCE) {
+          action.gait = 'walk';
+          op.stance = 'crouch';
+        }
+      }
       // Re-plan toward a moving target, but never in the middle of a climb or ladder.
       const midLink = action.linkProgress > 0;
       if (action.path.length === 0 || action.index >= action.path.length || (s.tick >= action.repathTick && !midLink)) {

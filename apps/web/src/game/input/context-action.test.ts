@@ -83,6 +83,16 @@ describe('resolveContextAction', () => {
     const action = resolveContextAction(world, ['op:medic'], { kind: 'operative', id: 'op:recon' }, null);
     expect(action.kind === 'ability' && action.command.abilityId).toBe('revive');
   });
+
+  it('resupplies an ally who is out of ammunition, otherwise walks over', () => {
+    const world = setup(['infiltrator', 'marine']);
+    const marine = world.operative('op:marine')!;
+    const walk = resolveContextAction(world, ['op:infiltrator'], { kind: 'operative', id: 'op:marine' }, vec(5, 5));
+    expect(walk.kind).toBe('move');
+    marine.inventory['pistol-round'] = 0;
+    const action = resolveContextAction(world, ['op:infiltrator'], { kind: 'operative', id: 'op:marine' }, vec(5, 5));
+    expect(action.kind === 'ability' && action.command.abilityId).toBe('resupply');
+  });
 });
 
 describe('resolveAbilityOrder', () => {

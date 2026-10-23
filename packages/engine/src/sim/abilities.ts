@@ -99,6 +99,33 @@ function alertShotTarget(world: World, op: Operative, guard: Guard): void {
   if (guard.status === 'active') world.alertGuardTo(guard, op.id, op.pos);
 }
 
+/** Ammunition and the ability that fires it. Resupply only hands over what the receiver can shoot. */
+const AMMO: [ItemId, AbilityId][] = [
+  ['pistol-round', 'pistol'],
+  ['rifle-round', 'rifle'],
+  ['harpoon-bolt', 'harpoon'],
+];
+
+/**
+ * What `giver` would hand `receiver`: every round of a type the giver cannot fire, half (rounded up)
+ * of one it shares.
+ */
+export function resupplyLoad(giver: Operative, receiver: Operative): Partial<Record<ItemId, number>> {
+  const load: Partial<Record<ItemId, number>> = {};
+  for (const [item, weapon] of AMMO) {
+    const have = giver.inventory[item] ?? 0;
+    if (have <= 0 || !SPECIALIST_RULES[receiver.role].abilities.includes(weapon)) continue;
+    load[item] = SPECIALIST_RULES[giver.role].abilities.includes(weapon) ? Math.ceil(have / 2) : have;
+  }
+  return load;
+}
+
+const AMMO_NAMES: Partial<Record<ItemId, [string, string]>> = {
+  'pistol-round': ['pistol round', 'pistol rounds'],
+  'rifle-round': ['rifle round', 'rifle rounds'],
+  'harpoon-bolt': ['harpoon bolt', 'harpoon bolts'],
+};
+
 export const ABILITIES: Record<AbilityId, AbilityDef> = {
   takedown: {
     id: 'takedown',
@@ -579,6 +606,30 @@ export const ABILITIES: Record<AbilityId, AbilityDef> = {
     item: 'dressing',
     check: (_w, _op, t) => (t.kind === 'ally' && t.op.status === 'downed' ? OK : reject('invalid-target', 'Choose a downed squad member')),
     apply: (w, _op, t) => t.kind === 'ally' && w.reviveOperative(t.op, 30),
+  },
+  resupply: {
+    id: 'resupply',
+    target: 'ally',
+    range: MELEE_RANGE,
+    approach: true,
+    los: false,
+    duration: 2,
+    cooldown: 0,
+    check: (_w, op, t) => {
+      if (t.kind !== 'ally' || t.op.status !== 'active') return reject('invalid-target', 'Choose a squad member on their feet');
+      return Object.keys(resupplyLoad(op, t.op)).length > 0 ? OK : reject('condition', 'Nothing to hand over that they can fire');
+    },
+    apply: (w, op, t) => {
+      if (t.kind !== 'ally' || t.op.status !== 'active') return;
+      const handed: string[] = [];
+      for (const [item, count] of Object.entries(resupplyLoad(op, t.op)) as [ItemId, number][]) {
+        op.inventory[item] = (op.inventory[item] ?? 0) - count;
+        t.op.inventory[item] = (t.op.inventory[item] ?? 0) + count;
+        const [one, many] = AMMO_NAMES[item] ?? [item, item];
+        handed.push(`${count} ${count === 1 ? one : many}`);
+      }
+      if (handed.length > 0) w.log('success', `Resupplied ${t.op.role}: ${handed.join(', ')}`);
+    },
   },
   smoke: {
     id: 'smoke',
