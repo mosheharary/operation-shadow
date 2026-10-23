@@ -57,7 +57,18 @@ export const SPECIALIST_RULES: Record<SpecialistId, SpecialistRules> = {
     abilities: [...COMMON, 'knife', 'harpoon', 'dive', 'restrain'],
     inventory: { ...COMMON_KIT, 'harpoon-bolt': 4, rope: 2 },
   },
+  // Carries no weapon at all: no pistol, blade or takedown. Lives on his cover until the alarm.
+  spy: {
+    maxHealth: 80,
+    nav: { swim: false, climb: false },
+    strong: false,
+    abilities: [...COMMON.filter((a) => a !== 'pistol'), 'chat'],
+    inventory: { stone: 3, dressing: 1 },
+  },
 };
+
+/** Alarm level from which the spy's cover is blown for the rest of the mission (sector alert). */
+export const SPY_COVER_ALARM = 3;
 
 export const GUARD_NAV: NavProfile = { swim: false, climb: false };
 

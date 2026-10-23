@@ -32,6 +32,7 @@ export const ABILITY_INFO: Record<AbilityId, AbilityInfo> = {
   disguise: { name: 'Put on uniform', description: 'Change into a captured officer uniform, out of sight.' },
   'take-uniform': { name: 'Take uniform', description: 'Take the uniform of an unconscious or dead officer.' },
   converse: { name: 'Distract', description: 'While disguised, hold a soldier in conversation. He watches only you.' },
+  chat: { name: 'Chat', description: 'Strike up a conversation. For 10 seconds the soldier stops looking around and watches only the spy.' },
   sedative: { name: 'Sedative', description: 'Knock out a soldier up close. Works face to face on a relaxed soldier while disguised.' },
   revive: { name: 'Revive', description: 'Bring a downed squad member back with a medkit.' },
   'first-aid': { name: 'First aid', description: 'Slowly patch up a downed squad member with a field dressing.' },

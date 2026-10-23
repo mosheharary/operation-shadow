@@ -1,6 +1,6 @@
 import { distance, type Vec2 } from '../core/math';
 import { sendToBarracks } from './guards';
-import { WEATHER_NOISE_FLOOR } from './rules';
+import { SPY_COVER_ALARM, WEATHER_NOISE_FLOOR } from './rules';
 import { type AlarmLevel, type Guard, seconds } from './types';
 import type { World } from './world';
 
@@ -11,6 +11,17 @@ export const ALARM_LABELS: Record<AlarmLevel, string> = {
   3: 'Sector alert',
   4: 'Full alert',
 };
+
+/** Records a new alarm peak. The first sector alert blows the spy's cover for good. */
+function setPeak(world: World, level: AlarmLevel): void {
+  const a = world.state.alarm;
+  if (a.peak < SPY_COVER_ALARM && level >= SPY_COVER_ALARM) {
+    for (const op of world.state.operatives) {
+      if (op.role === 'spy' && op.status !== 'dead' && op.status !== 'extracted') world.log('danger', `${op.role}: cover blown. Every soldier now knows his face`);
+    }
+  }
+  a.peak = level;
+}
 
 /** How long active investigation lasts without new escalations before stepping down. */
 const DECAY = seconds(60);
@@ -32,7 +43,6 @@ export function raiseAlarm(world: World, level: AlarmLevel, reason: string, sect
     a.level = level;
     a.since = s.tick;
   }
-  if (level > a.peak) a.peak = level;
   if (level > s.stats.peakAlarm) s.stats.peakAlarm = level;
   if (level >= 3) {
     s.stats.alarmsRaised += 1;
@@ -40,6 +50,8 @@ export function raiseAlarm(world: World, level: AlarmLevel, reason: string, sect
   }
   world.emit({ type: 'alarm', level: a.level, previous, reason });
   world.log(level >= 3 ? 'danger' : 'warning', `${ALARM_LABELS[level]}: ${reason}`);
+  // After the alarm line, so the cover-blown note reads as its consequence.
+  if (level > a.peak) setPeak(world, level);
   if (level >= 3) dispatchReinforcements(world, sector, pos);
   if (level >= 4) {
     a.sirens = true;
@@ -122,7 +134,7 @@ export function updateAlarm(world: World): void {
     const previous = a.level;
     a.level = effective;
     a.since = s.tick;
-    if (effective > a.peak) a.peak = effective;
+    if (effective > a.peak) setPeak(world, effective);
     if (effective > s.stats.peakAlarm) s.stats.peakAlarm = effective;
     world.emit({ type: 'alarm', level: effective, previous, reason: effective > previous ? 'Guards are alert' : 'Guards are calming down' });
   }

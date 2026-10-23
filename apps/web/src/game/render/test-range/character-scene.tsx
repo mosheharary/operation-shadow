@@ -19,6 +19,7 @@ const LINEUP = [
   SQUAD_LOOKS.deception,
   SQUAD_LOOKS.medic,
   SQUAD_LOOKS.marine,
+  SQUAD_LOOKS.spy,
   guardLook({ id: 'g:sentry-1', rank: 'soldier', carriesLantern: false }),
   guardLook({ id: 'g:sentry-2', rank: 'soldier', carriesLantern: true }),
   guardLook({ id: 'g:nco', rank: 'nco', carriesLantern: false }),

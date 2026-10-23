@@ -90,6 +90,16 @@ export const CHARACTERS = {
     ttsStyle: 'relaxed, cocky and easy-going',
     look: 'wiry man in his twenties, dark rubberized diving suit with the hood rolled down, swim fins clipped to his belt, short harpoon gun, coiled line, packed inflatable dinghy',
   },
+  // Added after the original six; not part of SQUAD, so the six-person samples are unchanged.
+  MAGPIE: {
+    name: 'Anton Reisz',
+    role: 'Spy',
+    voice: 'Algieba',
+    persona:
+      'Travelling clock-mender and spy. Chatty, warm, disarming; talks to every sentry by name. Carries no weapon at all.',
+    ttsStyle: 'warm, chatty and easy-going, with a disarming charm',
+    look: 'friendly man in his forties, charcoal civilian overcoat over a waistcoat and knitted tie, bare-headed with neatly combed dark hair, small round spectacles and a trim moustache, a jeweller\'s loupe on a chain and a small leather satchel of clock-mending tools, no weapon',
+  },
   GUARD_A: {
     name: 'Iron Dominion sentry (veteran)',
     role: 'Enemy',
@@ -233,6 +243,7 @@ Add labelled close-up callouts of the iron-crown emblem, the rust-red collar tab
 The iron crown is the only emblem anywhere on the sheet.`,
   },
   ...SQUAD.map(portrait),
+  portrait('MAGPIE'),
   {
     id: 'briefing_map',
     group: 'Briefing',

@@ -100,7 +100,7 @@ export function buildPrompt(request: GenerationRequest, seed = 0): string {
   ].join('\n');
   return `You design one mission for "Operation Shadow", a top-down tactical stealth game in a fictional 1940s-style war.
 Shadow Section, a six-specialist Coalition commando squad directed by their handler "Lantern", operates behind the lines of the Dominion, a fictional occupying power.
-Specialists: infiltrator (MOTH: silent takedowns, climbing), recon (OWL: binoculars, darts), engineer (BADGER: lock-picking, wire cutters, sabotage, explosives), deception (FOX: disguises), medic (HERON: revives, sedatives), marine (OTTER: swimming, diving).
+Specialists: infiltrator (MOTH: silent takedowns, climbing), recon (OWL: binoculars, darts), engineer (BADGER: lock-picking, wire cutters, sabotage, explosives), deception (FOX: disguises), medic (HERON: revives, sedatives), marine (OTTER: swimming, diving), spy (MAGPIE: unarmed; walks openly until a sector alert and chats up sentries so they watch only him).
 Never mention real countries, armies, political movements, historical people or symbols. No gore. Plain text only: no markup, links or emoji.
 
 The operation takes place on this site (use its templateId):

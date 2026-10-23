@@ -1,7 +1,7 @@
 {
   "version": 1,
   "model": "gemini-3.8-flash-tts",
-  "generatedAt": "2026-10-15T19:51:50.859Z",
+  "generatedAt": "2026-10-23T10:00:27.694Z",
   "lines": {
     "badger-ack-action-1": {
       "file": "badger-ack-action-1.mp3",
@@ -107,45 +107,117 @@
       "text": "The garrison changes shifts on the hour. Fresh sentries look around more.",
       "hash": "1ff86b88b42ad87c"
     },
-    "deck-patrol-battery": {
-      "file": "deck-patrol-battery.mp3",
+    "deck-patrol-barracks": {
+      "file": "deck-patrol-barracks.mp3",
       "seconds": 4.01,
       "voice": "Gacrux",
       "speaker": "LANTERN",
-      "text": "A Dominion patrol is sweeping the battery. Keep clear of it.",
-      "hash": "3f8a0fab9093a85d"
+      "text": "A Dominion patrol is sweeping the barracks. Keep clear of it.",
+      "hash": "eaf29dcbae7f2213"
     },
-    "deck-patrol-hamlet": {
-      "file": "deck-patrol-hamlet.mp3",
-      "seconds": 3.79,
+    "deck-patrol-engine-shed": {
+      "file": "deck-patrol-engine-shed.mp3",
+      "seconds": 4.32,
       "voice": "Gacrux",
       "speaker": "LANTERN",
-      "text": "A Dominion patrol is sweeping the hamlet. Keep clear of it.",
-      "hash": "68787cc200a7f64c"
+      "text": "A Dominion patrol is sweeping the engine shed. Keep clear of it.",
+      "hash": "d6e0ce92135d1620"
     },
-    "deck-patrol-station": {
-      "file": "deck-patrol-station.mp3",
-      "seconds": 4.27,
+    "deck-patrol-farmstead": {
+      "file": "deck-patrol-farmstead.mp3",
+      "seconds": 4.13,
       "voice": "Gacrux",
       "speaker": "LANTERN",
-      "text": "A Dominion patrol is sweeping the station. Keep clear of it.",
-      "hash": "76f76969703376fd"
+      "text": "A Dominion patrol is sweeping the farmstead. Keep clear of it.",
+      "hash": "e057aa1d6562b8eb"
     },
-    "deck-patrol-village": {
-      "file": "deck-patrol-village.mp3",
-      "seconds": 3.79,
+    "deck-patrol-fields": {
+      "file": "deck-patrol-fields.mp3",
+      "seconds": 3.96,
       "voice": "Gacrux",
       "speaker": "LANTERN",
-      "text": "A Dominion patrol is sweeping the village. Keep clear of it.",
-      "hash": "3e2ee7b2c686dab5"
+      "text": "A Dominion patrol is sweeping the fields. Keep clear of it.",
+      "hash": "efd462dda3842a37"
     },
-    "deck-patrol-yard": {
-      "file": "deck-patrol-yard.mp3",
-      "seconds": 3.84,
+    "deck-patrol-gun-battery": {
+      "file": "deck-patrol-gun-battery.mp3",
+      "seconds": 3.91,
       "voice": "Gacrux",
       "speaker": "LANTERN",
-      "text": "A Dominion patrol is sweeping the yard. Keep clear of it.",
-      "hash": "0293773b797713ed"
+      "text": "A Dominion patrol is sweeping the gun battery. Keep clear of it.",
+      "hash": "35a8679e8f57d8d9"
+    },
+    "deck-patrol-headquarters": {
+      "file": "deck-patrol-headquarters.mp3",
+      "seconds": 4.44,
+      "voice": "Gacrux",
+      "speaker": "LANTERN",
+      "text": "A Dominion patrol is sweeping the headquarters. Keep clear of it.",
+      "hash": "5c9afaffd76a51d8"
+    },
+    "deck-patrol-motor-pool": {
+      "file": "deck-patrol-motor-pool.mp3",
+      "seconds": 4.01,
+      "voice": "Gacrux",
+      "speaker": "LANTERN",
+      "text": "A Dominion patrol is sweeping the motor pool. Keep clear of it.",
+      "hash": "83afc7a6b14e8fd8"
+    },
+    "deck-patrol-outskirts": {
+      "file": "deck-patrol-outskirts.mp3",
+      "seconds": 4.2,
+      "voice": "Gacrux",
+      "speaker": "LANTERN",
+      "text": "A Dominion patrol is sweeping the outskirts. Keep clear of it.",
+      "hash": "7ed3c29fef5e084f"
+    },
+    "deck-patrol-prison-camp": {
+      "file": "deck-patrol-prison-camp.mp3",
+      "seconds": 4.37,
+      "voice": "Gacrux",
+      "speaker": "LANTERN",
+      "text": "A Dominion patrol is sweeping the prison camp. Keep clear of it.",
+      "hash": "93029887bb9c5b5c"
+    },
+    "deck-patrol-radio-station": {
+      "file": "deck-patrol-radio-station.mp3",
+      "seconds": 4.8,
+      "voice": "Gacrux",
+      "speaker": "LANTERN",
+      "text": "A Dominion patrol is sweeping the radio station. Keep clear of it.",
+      "hash": "9354798bbdf21a9f"
+    },
+    "deck-patrol-road": {
+      "file": "deck-patrol-road.mp3",
+      "seconds": 4.01,
+      "voice": "Gacrux",
+      "speaker": "LANTERN",
+      "text": "A Dominion patrol is sweeping the road. Keep clear of it.",
+      "hash": "15ae8871656f5520"
+    },
+    "deck-patrol-sawmill": {
+      "file": "deck-patrol-sawmill.mp3",
+      "seconds": 3.98,
+      "voice": "Gacrux",
+      "speaker": "LANTERN",
+      "text": "A Dominion patrol is sweeping the sawmill. Keep clear of it.",
+      "hash": "16b0e278ab5093be"
+    },
+    "deck-patrol-supply-depot": {
+      "file": "deck-patrol-supply-depot.mp3",
+      "seconds": 4.42,
+      "voice": "Gacrux",
+      "speaker": "LANTERN",
+      "text": "A Dominion patrol is sweeping the supply depot. Keep clear of it.",
+      "hash": "b6bf563667968997"
+    },
+    "deck-patrol-woods": {
+      "file": "deck-patrol-woods.mp3",
+      "seconds": 3.91,
+      "voice": "Gacrux",
+      "speaker": "LANTERN",
+      "text": "A Dominion patrol is sweeping the woods. Keep clear of it.",
+      "hash": "c804a14dc24cb014"
     },
     "deck-weather-clear": {
       "file": "deck-weather-clear.mp3",
@@ -682,6 +754,94 @@
       "speaker": "LANTERN",
       "text": "That train is going nowhere. Back to the woods.",
       "hash": "01375b6f15dba0d1"
+    },
+    "magpie-ack-action-1": {
+      "file": "magpie-ack-action-1.mp3",
+      "seconds": 1.15,
+      "voice": "Algieba",
+      "speaker": "MAGPIE",
+      "text": "Leave the talking to me.",
+      "hash": "afd01cdf0dec1853"
+    },
+    "magpie-ack-action-2": {
+      "file": "magpie-ack-action-2.mp3",
+      "seconds": 1.1,
+      "voice": "Algieba",
+      "speaker": "MAGPIE",
+      "text": "Let me have a word.",
+      "hash": "ca4093268da55f49"
+    },
+    "magpie-ack-action-3": {
+      "file": "magpie-ack-action-3.mp3",
+      "seconds": 1.85,
+      "voice": "Algieba",
+      "speaker": "MAGPIE",
+      "text": "Watch him forget his job.",
+      "hash": "d80c829b2b08ff7d"
+    },
+    "magpie-ack-move-1": {
+      "file": "magpie-ack-move-1.mp3",
+      "seconds": 2.3,
+      "voice": "Algieba",
+      "speaker": "MAGPIE",
+      "text": "Just a man out for a stroll.",
+      "hash": "e90ac0894b8a25e4"
+    },
+    "magpie-ack-move-2": {
+      "file": "magpie-ack-move-2.mp3",
+      "seconds": 0.94,
+      "voice": "Algieba",
+      "speaker": "MAGPIE",
+      "text": "Strolling.",
+      "hash": "a3943c16b46b781c"
+    },
+    "magpie-ack-move-3": {
+      "file": "magpie-ack-move-3.mp3",
+      "seconds": 2.52,
+      "voice": "Algieba",
+      "speaker": "MAGPIE",
+      "text": "Nobody here but the clock-mender.",
+      "hash": "17869c7a20d38bcf"
+    },
+    "magpie-downed-1": {
+      "file": "magpie-downed-1.mp3",
+      "seconds": 3.91,
+      "voice": "Algieba",
+      "speaker": "MAGPIE",
+      "text": "Well. That was not in the brochure.",
+      "hash": "5be7943f6f95117b"
+    },
+    "magpie-success-1": {
+      "file": "magpie-success-1.mp3",
+      "seconds": 1.82,
+      "voice": "Algieba",
+      "speaker": "MAGPIE",
+      "text": "He never even looked up.",
+      "hash": "de1856f4ce42a85b"
+    },
+    "magpie-success-2": {
+      "file": "magpie-success-2.mp3",
+      "seconds": 2.93,
+      "voice": "Algieba",
+      "speaker": "MAGPIE",
+      "text": "Nice fellow. Terrible sentry.",
+      "hash": "17ce4bb4414606ef"
+    },
+    "magpie-warn-1": {
+      "file": "magpie-warn-1.mp3",
+      "seconds": 2.35,
+      "voice": "Algieba",
+      "speaker": "MAGPIE",
+      "text": "Company coming. Smile, everyone.",
+      "hash": "1711d4da51083e63"
+    },
+    "magpie-warn-2": {
+      "file": "magpie-warn-2.mp3",
+      "seconds": 1.68,
+      "voice": "Algieba",
+      "speaker": "MAGPIE",
+      "text": "Patrol on the way. Look busy.",
+      "hash": "e9f24842a4cc9cab"
     },
     "moth-ack-action-1": {
       "file": "moth-ack-action-1.mp3",

@@ -33,7 +33,8 @@ export function createOperative(role: SpecialistId, spawn: { pos: { x: number; z
     role,
     pos: { ...spawn.pos },
     facing: spawn.facing,
-    stance: 'crouch',
+    // The spy's cover needs him upright; everyone else lands crouched.
+    stance: role === 'spy' ? 'stand' : 'crouch',
     gait: 'walk',
     health: rules.maxHealth,
     maxHealth: rules.maxHealth,

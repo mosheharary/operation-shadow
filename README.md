@@ -1,6 +1,6 @@
 # Operation Shadow
 
-A browser-based 3D real-time tactical stealth game: command a six-person special-operations squad behind enemy lines
+A browser-based 3D real-time tactical stealth game: command a seven-person special-operations squad behind enemy lines
 in a fictional 1940s-inspired world. It is an original spiritual successor inspired by the gameplay principles of
 classic squad-stealth games.
 

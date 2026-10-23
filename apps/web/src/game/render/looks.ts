@@ -104,6 +104,23 @@ export const SQUAD_LOOKS: Record<SpecialistId, FigureLook> = {
     weapon: 'harpoon',
     height: 1.01,
   },
+  // MAGPIE: a local clock-mender in a charcoal overcoat, bare-headed with glasses and a moustache. Unarmed.
+  spy: {
+    outfit: 'trench-coat',
+    coat: '#3d3a3e',
+    trousers: '#2f2c2b',
+    skin: '#cfa384',
+    hair: '#3b2c22',
+    hairStyle: 'short',
+    headgear: 'bare',
+    headgearColor: '#3d3a3e',
+    boots: 'ankle',
+    bootColor: '#2a211b',
+    gear: ['glasses', 'mustache', 'satchel'],
+    weapon: 'none',
+    build: 0.95,
+    height: 1.0,
+  },
 };
 
 /** FOX in a stolen Iron Dominion officer's coat and kepi. */

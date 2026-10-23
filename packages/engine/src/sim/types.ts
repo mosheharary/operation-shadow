@@ -6,8 +6,8 @@ export const TICK_RATE = 20;
 export const DT = 1 / TICK_RATE;
 export const seconds = (s: number): number => Math.round(s * TICK_RATE);
 
-export type SpecialistId = 'infiltrator' | 'recon' | 'engineer' | 'deception' | 'medic' | 'marine';
-export const SPECIALISTS: readonly SpecialistId[] = ['infiltrator', 'recon', 'engineer', 'deception', 'medic', 'marine'];
+export type SpecialistId = 'infiltrator' | 'recon' | 'engineer' | 'deception' | 'medic' | 'marine' | 'spy';
+export const SPECIALISTS: readonly SpecialistId[] = ['infiltrator', 'recon', 'engineer', 'deception', 'medic', 'marine', 'spy'];
 
 export type Stance = 'stand' | 'crouch' | 'prone';
 export type Gait = 'walk' | 'run';
@@ -56,6 +56,7 @@ export type AbilityId =
   | 'disguise'
   | 'take-uniform'
   | 'converse'
+  | 'chat'
   | 'sedative'
   | 'revive'
   | 'first-aid'

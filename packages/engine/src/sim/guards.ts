@@ -3,7 +3,7 @@ import { TARGET_HEIGHT } from '../sight/los';
 import { ABILITIES } from './abilities';
 import { followPath } from './movement';
 import { damageOperative } from './operatives';
-import { bestSuspicion, guardCanSee, THRESHOLD, visionParams } from './perception';
+import { bestSuspicion, guardCanSee, hasCover, THRESHOLD, visionParams } from './perception';
 import { DIFFICULTY, GUARD_NAV, GUARD_SPEED, NOISE_DB } from './rules';
 import type { BarkLine } from './events';
 import { DT, type Guard, type GuardStateName, type Operative, type Stimulus, seconds } from './types';
@@ -532,7 +532,7 @@ function updateRevive(world: World, g: Guard): void {
 function updateDistracted(world: World, g: Guard): void {
   const s = world.state;
   const op = g.distractedBy ? world.operative(g.distractedBy) : undefined;
-  if (!op || op.status !== 'active' || !op.disguised || distance(op.pos, g.pos) > 3 || s.tick >= g.distractedUntil) {
+  if (!op || op.status !== 'active' || !hasCover(world, op) || distance(op.pos, g.pos) > 3 || s.tick >= g.distractedUntil) {
     endDistraction(world, g.id);
     return;
   }
@@ -654,10 +654,10 @@ export function alertGuardTo(world: World, g: Guard, targetId: string, pos: Vec2
   goAlerted(world, g, targetId, pos, 'Under fire');
 }
 
-export function distractGuard(world: World, g: Guard, op: Operative): void {
+export function distractGuard(world: World, g: Guard, op: Operative, durationSeconds = 30): void {
   setGuardState(world, g, 'distracted');
   g.distractedBy = op.id;
-  g.distractedUntil = world.state.tick + seconds(30);
+  g.distractedUntil = world.state.tick + seconds(durationSeconds);
   g.path = null;
 }
 

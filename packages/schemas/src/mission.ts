@@ -5,7 +5,7 @@ import { z } from 'zod';
 
 /** Generated operations are played on a site laid out from the job's seed: `site-<theatre>-<seed>`. */
 export const SITE_TEMPLATE_ID = /^site-[a-z]+-\d{1,10}$/;
-export const SPECIALIST_IDS = ['infiltrator', 'recon', 'engineer', 'deception', 'medic', 'marine'] as const;
+export const SPECIALIST_IDS = ['infiltrator', 'recon', 'engineer', 'deception', 'medic', 'marine', 'spy'] as const;
 export const WEATHER_IDS = ['clear', 'rain', 'fog', 'snow'] as const;
 export const TIME_OF_DAY_IDS = ['dawn', 'day', 'dusk', 'night'] as const;
 export const DENSITY_IDS = ['light', 'standard', 'heavy'] as const;

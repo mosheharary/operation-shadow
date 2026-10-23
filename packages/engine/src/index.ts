@@ -14,7 +14,7 @@ export * from './sim/commands';
 export * from './sim/events';
 export * from './sim/mission';
 export { footstepDb } from './sim/operatives';
-export { lightAt, THRESHOLD, visibilityFactor, visionParams, type VisibilityInput } from './sim/perception';
+export { lightAt, spyCoverIntact, THRESHOLD, visibilityFactor, visionParams, type VisibilityInput } from './sim/perception';
 export * from './sim/rules';
 export { scoreMission, type Medal, type MissionScore } from './sim/scoring';
 export { createInitialState, SetupError, validateSquad, type WorldSetup } from './sim/setup';

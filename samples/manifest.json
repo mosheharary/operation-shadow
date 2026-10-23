@@ -1096,6 +1096,33 @@
       },
       "elapsedMs": 13730,
       "createdAt": "2026-10-15T11:40:45.149Z"
+    },
+    "portrait_magpie": {
+      "id": "portrait_magpie",
+      "type": "image",
+      "group": "Squad portraits",
+      "title": "MAGPIE — Anton Reisz, Spy",
+      "model": "gemini-nano-banana-2.1",
+      "prompt": "HUD character portrait for \"Operation Shadow\", an original 1940s-inspired stealth game.\nHead and shoulders, three-quarter view, painted in a 1940s gouache illustration style with subtle film grain,\nmuted palette, soft key light from the upper left, plain dark slate-blue background, consistent framing\nfor a matching set of six portraits. No text, no frame, no real-world insignia.\nSubject: friendly man in his forties, charcoal civilian overcoat over a waistcoat and knitted tie, bare-headed with neatly combed dark hair, small round spectacles and a trim moustache, a jeweller's loupe on a chain and a small leather satchel of clock-mending tools, no weapon. Personality to convey: Travelling clock-mender and spy. Chatty, warm, disarming; talks to every sentry by name.",
+      "settings": {
+        "aspect": "1:1",
+        "size": "1K"
+      },
+      "status": "ok",
+      "file": "images/portrait_magpie.jpg",
+      "bytes": 768999,
+      "mime": "image/jpeg",
+      "durationSec": null,
+      "usage": {
+        "total_tokens": 2442,
+        "total_input_tokens": 184,
+        "total_cached_tokens": 0,
+        "total_output_tokens": 1530,
+        "total_tool_use_tokens": 0,
+        "total_thought_tokens": 728
+      },
+      "elapsedMs": 12685,
+      "createdAt": "2026-10-23T10:00:42.383Z"
     }
   },
   "models": {
@@ -1105,5 +1132,5 @@
     "song": "lyria-3.5",
     "clip": "lyria-3-clip-preview"
   },
-  "updatedAt": "2026-10-15T11:43:15.818Z"
+  "updatedAt": "2026-10-23T10:00:42.384Z"
 }

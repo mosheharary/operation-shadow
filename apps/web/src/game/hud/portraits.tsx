@@ -1,7 +1,7 @@
 'use client';
 
 import { SPECIALIST_PROFILES } from '@operation-shadow/content';
-import { type Operative, TICK_RATE } from '@operation-shadow/engine';
+import { type Operative, spyCoverIntact, TICK_RATE, type World } from '@operation-shadow/engine';
 import { focusOn } from '../camera/camera-rig';
 import { primaryKey, SELECT_ACTIONS } from '../input/bindings';
 import { useHudTick } from '../runtime/game-context';
@@ -9,7 +9,8 @@ import { useGameUi } from '../runtime/store';
 import { Icon, type IconName } from './icons';
 import styles from './hud.module.css';
 
-function statusOf(op: Operative, tick: number): { icon: IconName; text: string; tone: 'ok' | 'warn' | 'danger' | 'muted' } | null {
+function statusOf(op: Operative, world: World): { icon: IconName; text: string; tone: 'ok' | 'warn' | 'danger' | 'muted' } | null {
+  const tick = world.state.tick;
   switch (op.status) {
     case 'downed':
       return { icon: 'cross', text: op.bleedOut > 0 ? `Downed ${Math.ceil(op.bleedOut / TICK_RATE)}s` : 'Downed', tone: 'danger' };
@@ -24,6 +25,7 @@ function statusOf(op: Operative, tick: number): { icon: IconName; text: string; 
   }
   if (op.noticedBy.length > 0) return { icon: 'eye', text: 'Being watched', tone: 'warn' };
   if (op.submerged) return { icon: 'wave', text: 'Submerged', tone: 'ok' };
+  if (op.role === 'spy') return spyCoverIntact(world, op) ? { icon: 'mask', text: 'Under cover', tone: 'ok' } : { icon: 'alert', text: 'Cover blown', tone: 'danger' };
   if (op.disguised) return { icon: 'mask', text: op.suspiciousUntil > tick ? 'Cover at risk' : 'Disguised', tone: op.suspiciousUntil > tick ? 'warn' : 'ok' };
   return null;
 }
@@ -38,7 +40,7 @@ export function PortraitBar() {
     <ol className={styles.portraits} aria-label="Squad">
       {state.operatives.map((op, index) => {
         const profile = SPECIALIST_PROFILES[op.role];
-        const status = statusOf(op, state.tick);
+        const status = statusOf(op, controller.world);
         const isSelected = selected.includes(op.id);
         const health = Math.max(0, op.health / op.maxHealth);
         const unavailable = op.status === 'dead' || op.status === 'extracted';

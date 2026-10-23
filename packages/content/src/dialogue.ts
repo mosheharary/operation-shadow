@@ -58,6 +58,13 @@ export const SQUAD_BARKS: Record<SpecialistId, Record<SquadBarkKey, DialogueLine
     success: lines('otter-success', ['Clipped his fins. Sentry is out cold.' /* approved */, 'Back in the water he goes. Figuratively.']),
     downed: lines('otter-downed', ['Taking on water here.']),
   },
+  spy: {
+    'ack-move': lines('magpie-ack-move', ['Just a man out for a stroll.', 'Strolling.', 'Nobody here but the clock-mender.']),
+    'ack-action': lines('magpie-ack-action', ['Leave the talking to me.', 'Let me have a word.', 'Watch him forget his job.']),
+    'warn-patrol': lines('magpie-warn', ['Company coming. Smile, everyone.', 'Patrol on the way. Look busy.']),
+    success: lines('magpie-success', ['He never even looked up.', 'Nice fellow. Terrible sentry.']),
+    downed: lines('magpie-downed', ['Well. That was not in the brochure.']),
+  },
 };
 
 export const GUARD_BARKS: Record<GuardBarkKey, DialogueLine[]> = {

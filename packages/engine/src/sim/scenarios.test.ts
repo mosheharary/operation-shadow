@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { vec, type Vec2 } from '../core/math';
+import { angleDelta, vec, type Vec2 } from '../core/math';
 import type { LevelBuilder } from '../level/builder';
 import { Surface } from '../level/types';
 import { buildTestLevel } from '../testing/test-level';
@@ -8,7 +8,7 @@ import type { GuardSpawn, ObjectSpawn, ObjectiveDef } from './mission';
 import { damageOperative } from './operatives';
 import { createInitialState, SetupError } from './setup';
 import { stateHash } from './snapshot';
-import type { SpecialistId, Stance } from './types';
+import { seconds, type SpecialistId, type Stance } from './types';
 import { World } from './world';
 
 const EAST = 0;
@@ -275,6 +275,70 @@ describe('abilities and rules', () => {
     expect(runUntil(world, (w) => w.guard('g:1')!.status === 'dead', 15)).toBe(true);
     expect(op.stance).toBe('crouch');
     expect(world.state.alarm.level).toBe(0);
+  });
+
+  it('the spy walks openly past a sentry until a sector alert blows his cover', () => {
+    const lvl = level();
+    const world = makeWorld(lvl, makeMission(lvl, { guards: [guard('g:1', vec(20, 20), WEST)] }), ['spy']);
+    placeOperative(world, 'spy', vec(12, 20), 'stand', EAST);
+    world.enqueue({ type: 'move', unitIds: ['op:spy'], target: vec(12, 24), gait: 'walk' });
+    runFor(world, 6);
+    expect(world.guard('g:1')!.state).toBe('post');
+    expect(world.state.alarm.level).toBe(0);
+
+    world.raiseAlarm(3, 'test', 'main', vec(30, 30));
+    expect(world.state.log.some((l) => l.text.includes('cover blown'))).toBe(true);
+    expect(runUntil(world, (w) => detected(w, 'g:1'), 6)).toBe(true);
+    expect(world.enqueue({ type: 'ability', unitId: 'op:spy', abilityId: 'chat', target: { kind: 'entity', id: 'g:1' } })).toMatchObject({ ok: false });
+  });
+
+  it('sentries ignore the spy\'s tracks while his cover holds', () => {
+    const lvl = level((b) => b.paintSurface(vec(0, 15), vec(40, 30), Surface.Sand));
+    const world = makeWorld(lvl, makeMission(lvl, { guards: [guard('g:1', vec(20, 20), WEST)] }), ['spy']);
+    const spy = world.operative('op:spy')!;
+    expect(spy.stance).toBe('stand');
+    placeOperative(world, 'spy', vec(30, 24), 'stand', WEST);
+    world.enqueue({ type: 'move', unitIds: ['op:spy'], target: vec(14, 24), gait: 'walk' });
+    runFor(world, 14);
+    expect(world.state.footprints.length).toBeGreaterThan(0);
+    expect(world.guard('g:1')!.state).toBe('post');
+  });
+
+  it('the spy carries no weapon', () => {
+    const lvl = level();
+    const world = makeWorld(lvl, makeMission(lvl, { guards: [guard('g:1', vec(20, 20), WEST)] }), ['spy']);
+    placeOperative(world, 'spy', vec(12, 20));
+    for (const abilityId of ['pistol', 'knife', 'takedown'] as const) {
+      expect(world.enqueue({ type: 'ability', unitId: 'op:spy', abilityId, target: { kind: 'entity', id: 'g:1' } })).toMatchObject({ ok: false, reason: 'not-your-ability' });
+    }
+    expect(world.operative('op:spy')!.inventory['pistol-round'] ?? 0).toBe(0);
+  });
+
+  it('a chat holds a sentry\'s eyes on the spy for 10 seconds while a teammate slips past', () => {
+    const lvl = level();
+    const world = makeWorld(lvl, makeMission(lvl, { guards: [guard('g:1', vec(20, 20), WEST)] }), ['spy', 'infiltrator']);
+    placeOperative(world, 'spy', vec(20, 24), 'stand');
+    const moth = placeOperative(world, 'infiltrator', vec(12, 21), 'crouch');
+    moth.pos = vec(30, 30); // out of the way until the guard is busy
+    expect(world.enqueue({ type: 'ability', unitId: 'op:spy', abilityId: 'chat', target: { kind: 'entity', id: 'g:1' } }).ok).toBe(true);
+    const g = world.guard('g:1')!;
+    expect(runUntil(world, (w) => w.guard('g:1')!.state === 'distracted', 3)).toBe(true);
+    const chatStart = world.state.tick;
+    expect(g.distractedBy).toBe('op:spy');
+    runFor(world, 1);
+    expect(g.look).toBe(0);
+    expect(Math.abs(angleDelta(g.facing, Math.PI / 2))).toBeLessThan(0.2); // turned to face the spy (south)
+
+    // MOTH crosses the field the guard was watching, in plain view had he been looking.
+    moth.pos = vec(12, 18);
+    world.enqueue({ type: 'move', unitIds: ['op:infiltrator'], target: vec(12, 14), gait: 'walk' });
+    runFor(world, 4);
+    expect(g.state).toBe('distracted');
+    expect(world.state.alarm.level).toBe(0);
+
+    expect(runUntil(world, (w) => w.guard('g:1')!.state !== 'distracted', 6)).toBe(true);
+    expect((world.state.tick - chatStart) / seconds(1)).toBeGreaterThan(9.5);
+    expect((world.state.tick - chatStart) / seconds(1)).toBeLessThan(10.5);
   });
 
   it('a downed operative bleeds out unless revived by the medic', () => {

@@ -105,6 +105,20 @@ export const SPECIALIST_PROFILES: Record<SpecialistId, SpecialistProfile> = {
     strengths: ['Swims and dives through deep water (hidden underwater)', 'Silent harpoon', 'Boards piers from the water by ladder'],
     limits: ['Harpoon has short range and slow reload'],
   },
+  spy: {
+    id: 'spy',
+    callSign: 'MAGPIE',
+    name: 'Anton Reisz',
+    roleLabel: 'Spy',
+    summary: 'Cover, small talk and nerve. No weapons.',
+    bio: 'A travelling clock-mender who has fixed half the watches in the Northern Reach. Reisz talks to every sentry by name, and every sentry stops to listen.',
+    portrait: '/media/portraits/magpie.jpg',
+    voice: 'Algieba',
+    voiceStyle: 'warm, chatty and easy-going, with a disarming charm',
+    color: '#c9b46c',
+    strengths: ['Walks openly among the enemy until a sector alert', 'Chats up a sentry: he stops looking around and watches only MAGPIE for 10 seconds'],
+    limits: ['Carries no weapon at all', 'Cover is blown for good once the alarm reaches a sector alert', 'Crouching, running near soldiers or carrying a body gives him away'],
+  },
 };
 
 export const HQ_PROFILE = {

@@ -84,6 +84,13 @@ describe('resolveContextAction', () => {
     expect(action.kind === 'ability' && action.command.abilityId).toBe('revive');
   });
 
+  it('the spy chats up an active guard instead of attacking him', () => {
+    const world = setup(['spy'], { guards: [guardAt('g:1', 20, 20, EAST)] });
+    place(world, 'spy', 19, 20);
+    const action = resolveContextAction(world, ['op:spy'], { kind: 'guard', id: 'g:1' }, null);
+    expect(action.kind === 'ability' && action.command.abilityId).toBe('chat');
+  });
+
   it('resupplies an ally who is out of ammunition, otherwise walks over', () => {
     const world = setup(['infiltrator', 'marine']);
     const marine = world.operative('op:marine')!;

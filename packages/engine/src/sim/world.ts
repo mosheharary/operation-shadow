@@ -227,8 +227,8 @@ export class World {
     alertGuardTo(this, g, targetId, pos);
   }
 
-  distractGuard(g: Guard, op: Operative): void {
-    distractGuard(this, g, op);
+  distractGuard(g: Guard, op: Operative, durationSeconds?: number): void {
+    distractGuard(this, g, op, durationSeconds);
   }
 
   endDistraction(guardId: string): void {

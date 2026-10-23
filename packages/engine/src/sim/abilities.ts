@@ -2,6 +2,7 @@ import { angleDelta, distance, headingTo, type Vec2 } from '../core/math';
 import { CellFlag } from '../level/types';
 import { TARGET_HEIGHT, traceSight } from '../sight/los';
 import { OK, reject, type CommandResult } from './commands';
+import { spyCoverIntact } from './perception';
 import { DIFFICULTY, NOISE_DB, SPECIALIST_RULES } from './rules';
 import {
   type AbilityId,
@@ -53,6 +54,8 @@ export interface AbilityDef {
 }
 
 const MELEE_RANGE = 1.3;
+/** How long a chat with the spy holds a soldier's attention. */
+export const SPY_CHAT_SECONDS = 10;
 const FRONT_ARC = (70 * Math.PI) / 180;
 
 const isBody = (g: Guard) => g.status !== 'active' && g.carriedBy === null && g.hiddenIn === null;
@@ -580,6 +583,27 @@ export const ABILITIES: Record<AbilityId, AbilityDef> = {
     apply: (w, op, t) => {
       if (t.kind !== 'guard') return;
       w.distractGuard(t.guard, op);
+      op.action = { kind: 'converse', guardId: t.guard.id };
+    },
+  },
+  chat: {
+    id: 'chat',
+    target: 'guard',
+    range: 2,
+    approach: true,
+    los: false,
+    duration: 0,
+    cooldown: 0,
+    check: (w, op, t) => {
+      if (!spyCoverIntact(w, op)) return reject('condition', 'His cover is blown');
+      if (t.kind !== 'guard' || t.guard.status !== 'active') return reject('invalid-target', 'Choose an enemy soldier');
+      const busy = ['alerted', 'combat', 'challenge', 'investigate', 'search', 'escort'].includes(t.guard.state);
+      return busy ? reject('condition', 'He is too busy to chat') : OK;
+    },
+    // He stops scanning and watches only the spy for 10 seconds.
+    apply: (w, op, t) => {
+      if (t.kind !== 'guard') return;
+      w.distractGuard(t.guard, op, SPY_CHAT_SECONDS);
       op.action = { kind: 'converse', guardId: t.guard.id };
     },
   },

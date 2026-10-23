@@ -65,6 +65,9 @@ function candidates(world: World, op: Operative, target: NonNullable<PointerTarg
         case 'deception':
           if (op.disguised && g.distractedBy !== op.id) return ['converse', 'sedative'];
           return ['sedative'];
+        case 'spy':
+          // Nothing violent: talk to him (again, to keep him busy).
+          return ['chat'];
         default:
           return [];
       }
@@ -211,7 +214,9 @@ export function resolveAbilityOrder(
 export function abilityBar(op: Operative): AbilityId[] {
   const shared: AbilityId[] = ['throw-stone', 'pistol', 'first-aid', 'resupply'];
   const contextOnly = new Set<AbilityId>(['door', 'carry', 'drop', 'hide-body', 'pick-up', 'free', ...shared]);
-  const role = SPECIALIST_RULES[op.role].abilities.filter((a) => !contextOnly.has(a));
+  const known = SPECIALIST_RULES[op.role].abilities;
+  const role = known.filter((a) => !contextOnly.has(a));
   const carrySlot: AbilityId = op.carrying ? 'drop' : 'carry';
-  return [...role, ...shared, carrySlot].slice(0, 10);
+  // Shared tools a specialist lacks (the spy's pistol) are left off.
+  return [...role, ...shared.filter((a) => known.includes(a)), carrySlot].slice(0, 10);
 }

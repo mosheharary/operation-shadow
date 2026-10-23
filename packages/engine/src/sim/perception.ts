@@ -1,7 +1,7 @@
 import { angleDelta, clamp, distance, headingTo, type Vec2 } from '../core/math';
 import { TARGET_HEIGHT, traceSight } from '../sight/los';
 import { receivedLevel } from '../sound/propagation';
-import { DIFFICULTY } from './rules';
+import { DIFFICULTY, SPY_COVER_ALARM } from './rules';
 import { DT, type Guard, type NoiseKind, type Operative, type Stance, type Stimulus, type SuspicionEntry } from './types';
 import type { World } from './world';
 
@@ -123,7 +123,17 @@ function operativeHeight(op: Operative): number {
   return TARGET_HEIGHT[op.stance];
 }
 
-/** Whether a disguised operative is currently doing something that gives them away. */
+/** The spy passes as a harmless local until the first sector alert of the mission. */
+export function spyCoverIntact(world: World, op: Operative): boolean {
+  return op.role === 'spy' && world.state.alarm.peak < SPY_COVER_ALARM;
+}
+
+/** Walks among the enemy unchallenged: a disguise, or the spy's cover. */
+export function hasCover(world: World, op: Operative): boolean {
+  return op.disguised || spyCoverIntact(world, op);
+}
+
+/** Whether an operative under cover is currently doing something that gives them away. */
 export function actsSuspicious(world: World, op: Operative, observer: Guard, d: number): boolean {
   const s = world.state;
   if (op.carrying || s.tick < op.suspiciousUntil) return true;
@@ -207,8 +217,9 @@ function seeOperatives(world: World, g: Guard, params: VisionParams, elapsed: nu
       });
       if (op.carrying) factor *= 1.3;
       if (op.submerged) factor = see.distance <= params.near ? factor * 0.3 : 0;
-      if (op.disguised && op.status === 'active' && !actsSuspicious(world, op, g, see.distance)) {
-        factor = g.rank === 'officer' && see.distance <= 5 ? factor * 0.35 : 0;
+      if (op.status === 'active' && hasCover(world, op) && !actsSuspicious(world, op, g, see.distance)) {
+        // Officers see through a stolen uniform up close; the spy's cover holds for everyone.
+        factor = op.disguised && g.rank === 'officer' && see.distance <= 5 ? factor * 0.35 : 0;
       }
       return factor;
     });
@@ -237,6 +248,9 @@ function seeEvidence(world: World, g: Guard, params: VisionParams): void {
     const fp = s.footprints[i]!;
     if (s.tick - fp.tick > maxAge) break;
     if (distance(fp.pos, g.pos) > params.near + 3) continue;
+    // A local's tracks on the beach are nothing to look at while the spy's cover holds.
+    const owner = world.operative(fp.ownerId);
+    if (owner && spyCoverIntact(world, owner)) continue;
     checked += 1;
     if (guardCanSee(world, g, fp.pos, 0.05, params).visible) {
       pushStimulus(world, g, { kind: 'tracks', pos: { ...fp.pos }, tick: s.tick, salience: 35, sourceId: fp.ownerId });
@@ -260,6 +274,7 @@ function hear(world: World, g: Guard, noises: World['state']['noises']): void {
   for (const noise of noises) {
     if (noise.sourceId === g.id) continue;
     if (noise.sourceId?.startsWith('g:') && (noise.kind === 'footstep' || noise.kind === 'door')) continue;
+    if (noise.kind === 'footstep' && isStrollingSpy(world, noise.sourceId)) continue;
     const level = receivedLevel(world.sound, noise.pos, noise.db, g.pos);
     if (level < threshold) continue;
     const d = distance(noise.pos, g.pos);
@@ -267,6 +282,12 @@ function hear(world: World, g: Guard, noises: World['state']['noises']): void {
     const pos = { x: noise.pos.x + world.rng.range(-spread, spread), z: noise.pos.z + world.rng.range(-spread, spread) };
     pushStimulus(world, g, { kind: 'noise', pos, tick: s.tick, salience: NOISE_SALIENCE[noise.kind], sourceId: noise.sourceId, noise: noise.kind });
   }
+}
+
+/** A spy under cover walking upright sounds like any local on an errand. */
+function isStrollingSpy(world: World, sourceId: string | null | undefined): boolean {
+  const op = sourceId ? world.operative(sourceId) : undefined;
+  return Boolean(op && spyCoverIntact(world, op) && op.stance === 'stand' && op.lastGait === 'walk' && !op.carrying);
 }
 
 /** Runs vision and hearing for every guard whose (distance-scaled) perception tick is due. */
