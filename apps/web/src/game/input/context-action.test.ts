@@ -84,6 +84,20 @@ describe('resolveContextAction', () => {
     expect(action.kind === 'ability' && action.command.abilityId).toBe('revive');
   });
 
+  it('right-clicking OWL with an empty suppressed rifle resupplies it from a teammate\'s spare rounds', () => {
+    const world = setup(['marine', 'recon']);
+    const owl = world.operative('op:recon')!;
+    place(world, 'marine', 10, 10);
+    place(world, 'recon', 11, 10);
+    expect(resolveContextAction(world, ['op:marine'], { kind: 'operative', id: 'op:recon' }, vec(11, 10)).kind).toBe('move');
+    owl.inventory['rifle-round'] = 0;
+    const action = resolveContextAction(world, ['op:marine'], { kind: 'operative', id: 'op:recon' }, vec(11, 10));
+    expect(action.kind === 'ability' && action.command.abilityId).toBe('resupply');
+    if (action.kind === 'ability') expect(world.enqueue(action.command).ok).toBe(true);
+    for (let i = 0; i < 20 * 4; i++) world.step();
+    expect(owl.inventory['rifle-round']).toBe(2);
+  });
+
   it('the spy chats up an active guard instead of attacking him', () => {
     const world = setup(['spy'], { guards: [guardAt('g:1', 20, 20, EAST)] });
     place(world, 'spy', 19, 20);

@@ -6,6 +6,7 @@ import { buildTestLevel } from '../testing/test-level';
 import { makeMission, makeWorld, runFor, runUntil } from '../testing/scenario';
 import type { GuardSpawn, ObjectSpawn, ObjectiveDef } from './mission';
 import { damageOperative } from './operatives';
+import { standDownIn } from './alarm';
 import { createInitialState, SetupError } from './setup';
 import { stateHash } from './snapshot';
 import { seconds, type SpecialistId, type Stance } from './types';
@@ -439,13 +440,41 @@ describe('objectives, extraction and failure', () => {
     const events = runFor(world, 2);
     expect(events.some((e) => e.type === 'all-clear')).toBe(true);
     expect(world.state.alarm.sirens).toBe(false);
-    expect(world.state.alarm.persistent).toBeLessThan(3);
+    expect(world.state.alarm.persistent).toBe(0);
     expect(reinforcements(world).every((g) => g.state === 'return' || g.state === 'post')).toBe(true);
     expect(runUntil(world, (w) => reinforcements(w).length === 0, 30)).toBe(true);
 
     // The barracks turns out again for the next alarm.
     world.raiseAlarm(4, 'Test alarm', 'main', vec(108, 20));
     expect(reinforcements(world)).toHaveLength(2);
+  });
+
+  it('clears all the way back to Routine 30 s after nobody is found, calling off the search', () => {
+    const lvl = level(undefined, { width: 120, depth: 40 });
+    const world = makeWorld(lvl, makeMission(lvl, { guards: [guard('g:1', vec(20, 20), WEST)] }), ['infiltrator']);
+    placeOperative(world, 'infiltrator', vec(115, 38), 'prone'); // far out of sight
+    world.raiseAlarm(3, 'Test alarm', 'main', vec(20, 20));
+    world.alertGuardTo(world.guard('g:1')!, 'op:infiltrator', vec(30, 5)); // hunting the wrong place
+    runFor(world, 5);
+    expect(world.state.alarm.level).toBeGreaterThanOrEqual(3);
+    expect(standDownIn(world)).toBeGreaterThan(20);
+
+    runFor(world, 26.5);
+    expect(world.state.alarm.persistent).toBe(0);
+    expect(world.state.log.some((l) => l.text.startsWith('All clear'))).toBe(true);
+    expect(['return', 'post', 'patrol']).toContain(world.guard('g:1')!.state);
+    expect(runUntil(world, (w) => w.state.alarm.level === 0, 5)).toBe(true);
+    expect(standDownIn(world)).toBeNull();
+  });
+
+  it('an active investigation also clears after 30 s without a sighting', () => {
+    const lvl = level();
+    const world = makeWorld(lvl, makeMission(lvl), ['infiltrator']);
+    world.raiseAlarm(2, 'Test', 'main', vec(20, 20));
+    runFor(world, 29);
+    expect(world.state.alarm.persistent).toBe(2);
+    runFor(world, 2);
+    expect(world.state.alarm.level).toBe(0);
   });
 
   it('times the stand-down from the moment a later alert is raised, so it cannot clear and re-raise every tick', () => {

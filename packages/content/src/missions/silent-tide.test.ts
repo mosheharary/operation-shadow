@@ -27,6 +27,22 @@ describe('Silent Tide', () => {
     expect(report.stats.guards).toBe(23);
   });
 
+  it('a full alert where nobody is found clears to Routine 30 s later and stays clear', () => {
+    const world = World.create(level, mission, { seed: 42, squad: ['engineer', 'infiltrator', 'recon', 'marine'], difficulty: 'standard' });
+    for (const op of world.state.operatives) op.stance = 'prone';
+    for (let i = 0; i < 20 * 20; i++) world.step();
+    // The beach sentry is shot at from the landing point; the squad lies still in the dark.
+    world.alertGuardTo(world.guard('g:beach')!, 'op:recon', { ...world.operative('op:recon')!.pos });
+    for (let i = 0; i < 20 * 5; i++) world.step();
+    expect(world.state.alarm.level).toBe(4);
+    for (let i = 0; i < 20 * 30; i++) world.step();
+    expect(world.state.alarm.level).toBe(0);
+    expect(world.state.log.at(-1)?.text).toMatch(/^All clear/);
+    for (let i = 0; i < 20 * 40; i++) world.step();
+    expect(world.state.alarm.level).toBe(0);
+    expect(world.state.operatives.every((op) => op.status === 'active')).toBe(true);
+  });
+
   it('can be completed through every objective (guards removed to test the objective chain)', () => {
     const quiet: MissionRuntime = { ...mission, guards: [], reinforcementSpawns: [], director: mission.director };
     const world = World.create(level, quiet, { seed: 1, squad: ['engineer', 'infiltrator', 'recon', 'marine'], difficulty: 'standard' });

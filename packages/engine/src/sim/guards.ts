@@ -594,6 +594,15 @@ export function dispatchToSearch(world: World, g: Guard, center: Vec2): void {
   startSearch(world, g, center);
 }
 
+/** On the all-clear a guard still hunting for the squad gives up and goes back to his post or route. */
+export function callOffSearch(world: World, g: Guard): void {
+  if (!['search', 'investigate', 'alerted', 'observe', 'suspicious'].includes(g.state)) return;
+  g.focus = null;
+  g.suspicion = [];
+  g.path = null;
+  returnToRoutine(world, g);
+}
+
 /** Sends an alarm reinforcement back to its barracks once the alarm stands down. */
 export function sendToBarracks(world: World, g: Guard): void {
   if (!g.barracks) return;

@@ -45,6 +45,10 @@ bolts for OWL's suppressed rifle and OTTER's harpoon. Each specialist has a role
   alerted/combat, with challenges for disguised operatives, body discovery, wake-up after knockouts, and radio.
 - **Alarm ladder:** 0 Routine, 1 Local suspicion, 2 Active investigation, 3 Sector alert (reinforcements), 4 Full
   alert. Some missions fail at full alert, which the briefing always states.
+- **All clear:** a raised alarm (Active investigation, Sector or Full alert) clears to Routine 30 s after the last time a
+  guard saw or fought the squad. Searches are called off, guards return to their posts, sirens stop and reinforcements
+  march back to barracks. The alarm indicator counts down ("All clear in 12s", or "Contact" during a firefight). A body
+  found or a new sighting restarts the clock. Dead and missing soldiers stay missing, and MAGPIE's cover stays blown.
 
 The simulation is a fixed 20 Hz deterministic engine (`packages/engine`), so saves, replays and tests are exact.
 

@@ -269,6 +269,13 @@
   text-transform: uppercase;
 }
 
+.alarmCountdown {
+  font-size: 0.78rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
 .alarm_0 {
   color: #b8d2ad;
 }

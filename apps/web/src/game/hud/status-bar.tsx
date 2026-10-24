@@ -1,6 +1,6 @@
 'use client';
 
-import { ALARM_LABELS, type AlarmLevel, TICK_RATE } from '@operation-shadow/engine';
+import { ALARM_LABELS, type AlarmLevel, standDownIn, TICK_RATE } from '@operation-shadow/engine';
 import { useHudTick } from '../runtime/game-context';
 import { Icon, type IconName } from './icons';
 import styles from './hud.module.css';
@@ -21,6 +21,7 @@ export function StatusBar() {
   const level = state.alarm.level;
   const watched = state.operatives.some((op) => op.status === 'active' && op.noticedBy.length > 0);
   const limit = mission.failAtAlarm;
+  const standDown = standDownIn(controller.world);
 
   return (
     <div className={styles.status}>
@@ -35,6 +36,11 @@ export function StatusBar() {
           {ALARM_LABELS[level]}
           {state.alarm.sirens && ' · sirens'}
         </span>
+        {standDown !== null && (
+          <span className={styles.alarmCountdown} data-testid="alarm-countdown">
+            {standDown === 'contact' ? 'Contact' : `All clear in ${standDown}s`}
+          </span>
+        )}
       </div>
       {watched && (
         <span className={`${styles.chip} ${styles.chip_warn}`} data-testid="watched">
