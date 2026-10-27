@@ -3,13 +3,7 @@
 import { Environment } from '@react-three/drei';
 import { Suspense } from 'react';
 import { AssetBoundary } from '../assets/boundary';
-
-/** Which sky lights the scene at an hour of the day. */
-export function skyFor(hour: number): 'night' | 'dusk' | 'day' {
-  if (hour >= 20 || hour < 5) return 'night';
-  if (hour < 8 || hour >= 18) return 'dusk';
-  return 'day';
-}
+import { skyFor } from './sky';
 
 /**
  * The relative strength of each sky's light. The HDRIs are physically scaled (a night sky is

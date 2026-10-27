@@ -12,6 +12,7 @@ import type { CharacterKit } from './characters/library-loader';
 import type { FigureLook, FigurePose } from './figure';
 import { DISGUISED_LOOK, guardLook, PRISONER_LOOK, SQUAD_LOOKS } from './looks';
 import { type AnimationRate, proceduralRig, rigCounts, type UnitRig } from './rig';
+import { addXRay } from './xray';
 
 /** Characters animated every frame (the nearest on screen); the rest step at half rate. */
 const FULL_RATE = 24;
@@ -142,7 +143,8 @@ export function Units({ controller }: UnitsProps) {
 
   const ringGeometry = useMemo(() => new THREE.RingGeometry(0.5, 0.62, 32).rotateX(-Math.PI / 2), []);
   const hitGeometry = useMemo(() => new THREE.CylinderGeometry(0.55, 0.55, 1.9, 8).translate(0, 0.95, 0), []);
-  const hitMaterial = useMemo(() => new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, colorWrite: false }), []);
+  // Never drawn (raycasts ignore material.visible), which saves a draw call per unit.
+  const hitMaterial = useMemo(() => new THREE.MeshBasicMaterial({ visible: false }), []);
 
   const groundY = (pos: Vec2): number => {
     const { grid, level } = controller.world;
@@ -153,7 +155,7 @@ export function Units({ controller }: UnitsProps) {
   };
 
   /** The rig for a unit, rebuilt when its look changes or the authored library arrives. */
-  const ensureRig = (id: string, lookKey: string, look: () => FigureLook): RigEntry => {
+  const ensureRig = (id: string, lookKey: string, look: () => FigureLook, onCreate?: (rig: UnitRig) => void): RigEntry => {
     const key = `${lookKey}|${kit ? 'authored' : 'procedural'}`;
     const existing = rigs.current.get(id);
     if (existing && existing.key === key) return existing;
@@ -162,6 +164,7 @@ export function Units({ controller }: UnitsProps) {
       existing.rig.dispose();
     }
     const rig = kit ? kit.create(look()) : proceduralRig(look());
+    onCreate?.(rig);
     group.current?.add(rig.root);
     if (existing) rigCounts[existing.key.endsWith('|authored') ? 'authored' : 'procedural'] -= 1;
     rigCounts[kit ? 'authored' : 'procedural'] += 1;
@@ -196,7 +199,7 @@ export function Units({ controller }: UnitsProps) {
 
     for (const op of s.operatives) {
       const look = op.disguised ? DISGUISED_LOOK : SQUAD_LOOKS[op.role];
-      const entry = ensureRig(op.id, op.disguised ? 'disguised' : op.role, () => look);
+      const entry = ensureRig(op.id, op.disguised ? 'disguised' : op.role, () => look, (rig) => addXRay(rig.root, SPECIALIST_PROFILES[op.role].color));
       const rig = entry.rig;
       const pos = controller.interpolate(op.id, op.pos);
       const cell = world.grid.cellAt(op.pos);

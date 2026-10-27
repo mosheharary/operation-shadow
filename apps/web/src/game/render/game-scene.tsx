@@ -11,6 +11,7 @@ import type { GameController } from '../runtime/controller';
 import { useSettings } from '../runtime/settings';
 import { useGameUi } from '../runtime/store';
 import { Effects } from './effects';
+import { skyFor } from './sky';
 import { LampGlows } from './glows';
 import { setHighResTextures } from './materials/textures';
 import { Grass } from './grass';
@@ -117,7 +118,7 @@ export function GameScene({ controller, onSample = ignoreSample, testHooks = fal
       <Effects controller={controller} />
       <CameraRig controller={controller} edgeScroll={edgeScroll} reducedShake={reducedShake} />
       <GameInput controller={controller} />
-      {post && <PostEffects />}
+      {post && <PostEffects sky={skyFor(hour)} />}
       <PerfProbe onSample={onSample} />
       {testHooks && <TestHooks controller={controller} />}
       {audio && <AudioBridge audio={audio} />}

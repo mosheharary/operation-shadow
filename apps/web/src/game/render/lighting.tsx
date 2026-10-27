@@ -60,6 +60,7 @@ export function Lighting({ controller, shadows = true, cascaded = false }: { con
   const daylight = env.ambientLight;
   const sunColor = useMemo(() => new THREE.Color('#a4bbe0').lerp(new THREE.Color('#fff1d8'), Math.min(1, daylight * 1.4)), [daylight]);
 
+  const skyColor = useMemo(() => new THREE.Color('#5d76a6').lerp(new THREE.Color('#c4d4e6'), daylight), [daylight]);
   const fogColor = useMemo(() => new THREE.Color('#1b2632').lerp(new THREE.Color('#a9b6bf'), daylight), [daylight]);
   const background = useMemo(() => fogColor.clone().multiplyScalar(0.8), [fogColor]);
   // Light enough to read as sea mist from the tactical camera rather than as darkness.
@@ -113,8 +114,10 @@ export function Lighting({ controller, shadows = true, cascaded = false }: { con
       <fogExp2 attach="fog" args={[fogColor, fogDensity]} />
       <color attach="background" args={[background.r, background.g, background.b]} />
       {/* Moonlit night: a cool blue sky fill keeps the diorama readable, warm lamps do the rest. */}
-      <hemisphereLight args={['#7d93b8', '#2b2a24', 1.45 + daylight * 0.4]} />
-      <ambientLight color="#9fb2cc" intensity={0.32 + daylight * 0.2} />
+      {/* Night is moonlit, not lamp-black: a cool sky fill keeps shapes readable while the moon
+          (the directional light) gives them form and warm lamps carve out pools of light. */}
+      <hemisphereLight args={[skyColor, '#2b2a24', 0.75 + daylight * 0.95]} />
+      <ambientLight color="#9fb2cc" intensity={0.1 + daylight * 0.3} />
       {/* CSM's shader expects its cascade lights to be the only directional lights. */}
       {!csm && (
         <directionalLight
@@ -144,7 +147,7 @@ export function Lighting({ controller, shadows = true, cascaded = false }: { con
             lampRefs.current[i] = l;
           }}
           color="#ffc884"
-          intensity={14}
+          intensity={22}
           distance={13}
           decay={1.8}
         />

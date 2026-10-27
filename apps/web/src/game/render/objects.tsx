@@ -102,7 +102,7 @@ export function WorldObjects({ controller }: WorldObjectsProps) {
 
   const handlers = (id: string) => ({ userData: { id, kind: 'object' } });
   // Doors are picked through an invisible box over the leaf; the modelled leaf carries no userData.
-  const proxyMaterial = useMemo(() => new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, colorWrite: false }), []);
+  const proxyMaterial = useMemo(() => new THREE.MeshBasicMaterial({ visible: false }), []);
 
   const grid = controller.world.grid;
   const y = (o: WorldObject) => grid.heightAt(o.pos);
