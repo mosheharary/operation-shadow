@@ -16,7 +16,7 @@ import { updateObjectives } from './objectives';
 import { updateOperatives } from './operatives';
 import { applyCommand, navProfileFor, validateCommand } from './orders';
 import { isObservedBy, updatePerception, visionParams } from './perception';
-import { DIFFICULTY, type DifficultyRules, NOISE_DB } from './rules';
+import { DIFFICULTY, type DifficultyRules, NOISE_DB, SPECIALIST_RULES } from './rules';
 import { createGuard, createInitialState, type WorldSetup } from './setup';
 import { updateWorldTimers } from './timers';
 import type {
@@ -25,6 +25,7 @@ import type {
   DoorObject,
   FenceObject,
   Guard,
+  ItemId,
   LogEntry,
   NoiseKind,
   Operative,
@@ -85,6 +86,14 @@ export class World {
     if (state.levelId !== level.id || state.missionId !== mission.id) throw new Error('Saved state belongs to a different mission');
     const copy = structuredClone(state);
     copy.alarm.lastContactTick ??= copy.alarm.lastEscalationTick;
+    // Kit added to a specialist after the game was saved (e.g. the spare rifle rounds and harpoon
+    // bolts handed over with Resupply) is issued at its starting amount. Spent items are kept as
+    // 0, never removed, so a missing item is one the squad was never given.
+    for (const op of copy.operatives) {
+      for (const [item, count] of Object.entries(SPECIALIST_RULES[op.role].inventory) as [ItemId, number][]) {
+        op.inventory[item] ??= count;
+      }
+    }
     return new World(level, mission, copy);
   }
 

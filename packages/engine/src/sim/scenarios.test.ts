@@ -273,6 +273,37 @@ describe('abilities and rules', () => {
     expect(refused).toMatchObject({ ok: false });
   });
 
+  it('a game saved before the spare rounds existed gets them on load, and resupply hands them over', () => {
+    const lvl = level();
+    const mission = makeMission(lvl);
+    const world = makeWorld(lvl, mission, ['marine', 'recon']);
+    placeOperative(world, 'marine', vec(10, 10));
+    placeOperative(world, 'recon', vec(10, 12));
+    world.operative('op:marine')!.inventory['pistol-round'] = 0; // spent in the field: stays spent
+    const save = world.snapshot();
+    // What older saves held: no spare rifle rounds or harpoon bolts at all.
+    for (const op of save.operatives) {
+      if (op.role === 'marine') delete op.inventory['rifle-round'];
+      if (op.role === 'recon') delete op.inventory['harpoon-bolt'];
+    }
+
+    const restored = World.restore(lvl, mission, save);
+    const otter = restored.operative('op:marine')!;
+    const owl = restored.operative('op:recon')!;
+    expect(otter.inventory['rifle-round']).toBe(2);
+    expect(owl.inventory['harpoon-bolt']).toBe(2);
+    expect(otter.inventory['pistol-round']).toBe(0);
+
+    owl.inventory['rifle-round'] = 0;
+    expect(restored.enqueue({ type: 'ability', unitId: 'op:marine', abilityId: 'resupply', target: { kind: 'entity', id: 'op:recon' } }).ok).toBe(true);
+    expect(runUntil(restored, (w) => (w.operative('op:recon')!.inventory['rifle-round'] ?? 0) > 0, 8)).toBe(true);
+    expect(owl.inventory['rifle-round']).toBe(2);
+    otter.inventory['harpoon-bolt'] = 0;
+    expect(restored.enqueue({ type: 'ability', unitId: 'op:recon', abilityId: 'resupply', target: { kind: 'entity', id: 'op:marine' } }).ok).toBe(true);
+    expect(runUntil(restored, (w) => (w.operative('op:marine')!.inventory['harpoon-bolt'] ?? 0) > 0, 8)).toBe(true);
+    expect(otter.inventory['harpoon-bolt']).toBe(2);
+  });
+
   it('a knife order can run to the target, creeping the last metres', () => {
     const lvl = level();
     const world = makeWorld(lvl, makeMission(lvl, { guards: [guard('g:1', vec(30, 20), EAST, { temperament: 'passive' })] }), ['infiltrator']);
