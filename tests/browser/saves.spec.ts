@@ -115,6 +115,9 @@ test.describe('Saved games and progress', () => {
     expect((await json(page, 'POST', '/api/v1/campaigns', { difficulty: 'standard' })).status()).toBe(201);
     await page.goto('/dashboard');
     await expect(page.getByTestId('mission-boot-camp')).toContainText('Start here');
+    // The theatre map opens on the next target with its briefing one click away.
+    await expect(page.getByTestId('theatre-pin-boot-camp')).toHaveAttribute('data-state', 'next');
+    await expect(page.getByTestId('theatre-briefing')).toHaveAttribute('href', '/missions/boot-camp');
 
     const run = await json(page, 'POST', '/api/v1/mission-runs', { missionKey: 'boot-camp', squad: ['infiltrator', 'engineer'], difficulty: 'standard', seed: 7 });
     expect(run.status()).toBe(201);
@@ -126,6 +129,9 @@ test.describe('Saved games and progress', () => {
     await page.goto('/dashboard');
     await expect(page.getByTestId('done-boot-camp')).toContainText('Rank A');
     await expect(page.getByTestId('mission-boot-camp')).not.toContainText('Start here');
+    await expect(page.getByTestId('theatre-pin-boot-camp')).toHaveAttribute('data-state', 'done');
+    await expect(page.getByTestId('theatre-pin-silent-tide')).toHaveAttribute('data-state', 'next');
+    await expect(page.getByTestId('theatre-card')).toContainText('Operation Silent Tide');
   });
 
   test('settings sync to the account, and account deletion needs explicit confirmation', async ({ page }) => {

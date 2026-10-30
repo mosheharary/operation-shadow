@@ -201,14 +201,48 @@ a {
 
 .hq__grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
   gap: 1.5rem;
   margin-top: 1.5rem;
+}
+
+/* The theatre map stays in view while the mission list scrolls past it. */
+.hq__theatre {
+  align-self: start;
+  position: sticky;
+  top: 1rem;
+}
+
+.hq__systems {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+  margin: 0.9rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.hq__systems li {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.hq__systems .status-tag {
+  min-width: 0;
 }
 
 @media (max-width: 760px) {
   .hq__grid {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* On a phone the map leads, above the mission list. */
+  .hq__theatre {
+    position: static;
+    order: -1;
   }
 }
 

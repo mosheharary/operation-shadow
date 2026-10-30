@@ -1,0 +1,374 @@
+/* Field HQ theatre map: a plotting-table chart of the Northern Reach and the dossier card of the selected pin. */
+
+.theatre {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.chart {
+  display: block;
+  width: 100%;
+  height: auto;
+  /* On a short screen the chart crops top and bottom (every pin stays clear of the edges) so the card fits too. */
+  aspect-ratio: 4 / 3;
+  max-height: 46vh;
+  border-radius: var(--radius);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  font-family: var(--font-heading);
+  user-select: none;
+}
+
+.sea {
+  fill: #121c22;
+}
+
+.waves {
+  fill: none;
+  stroke: rgba(120, 150, 165, 0.09);
+  stroke-width: 0.8;
+}
+
+.land {
+  fill: #2a2f2a;
+  stroke: #8a8068;
+  stroke-width: 1.2;
+}
+
+.graticule line {
+  stroke: rgba(232, 226, 212, 0.06);
+  stroke-width: 0.6;
+}
+
+.hatch {
+  stroke: rgba(207, 106, 79, 0.16);
+  stroke-width: 1.4;
+}
+
+.enemy {
+  pointer-events: none;
+}
+
+.front {
+  fill: none;
+  stroke: var(--rust);
+  stroke-width: 1.6;
+  stroke-dasharray: 1 3.5;
+  stroke-linecap: round;
+  opacity: 0.85;
+}
+
+.relief {
+  fill: none;
+  stroke: rgba(232, 226, 212, 0.22);
+  stroke-width: 0.8;
+}
+
+.rail {
+  fill: none;
+  stroke: rgba(232, 226, 212, 0.4);
+  stroke-width: 1.2;
+}
+
+.railTicks {
+  fill: none;
+  stroke: rgba(232, 226, 212, 0.4);
+  stroke-width: 4;
+  stroke-dasharray: 0.8 6;
+}
+
+.seaLabel,
+.regionLabel {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+}
+
+.seaLabel {
+  fill: rgba(150, 180, 195, 0.45);
+}
+
+.regionLabel {
+  fill: rgba(232, 226, 212, 0.3);
+}
+
+.route {
+  fill: none;
+  stroke: rgba(201, 164, 92, 0.45);
+  stroke-width: 1.3;
+  stroke-dasharray: 4 4;
+}
+
+/* The travelled course inks itself in when the page opens. */
+.travelled {
+  fill: none;
+  stroke: var(--brass-strong);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  filter: drop-shadow(0 0 3px rgba(221, 184, 107, 0.55));
+  animation: theatre-ink 1.6s 0.2s cubic-bezier(0.45, 0, 0.2, 1) forwards;
+}
+
+@keyframes theatre-ink {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.pin {
+  cursor: pointer;
+  outline: none;
+  opacity: 0;
+  animation: theatre-pin-in 420ms var(--pin-delay, 0ms) ease-out forwards;
+}
+
+@keyframes theatre-pin-in {
+  to {
+    opacity: 1;
+  }
+}
+
+.hit {
+  fill: transparent;
+}
+
+.marker {
+  fill: var(--panel-strong);
+  stroke: var(--muted);
+  stroke-width: 1.5;
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 160ms ease, stroke 160ms ease;
+  animation: theatre-drop 420ms var(--pin-delay, 0ms) cubic-bezier(0.3, 1.6, 0.5, 1) backwards;
+}
+
+@keyframes theatre-drop {
+  from {
+    transform: scale(2.4);
+  }
+}
+
+.dot {
+  fill: var(--muted);
+}
+
+.tick {
+  fill: none;
+  stroke: var(--bg);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.pin[data-state='done'] .marker {
+  fill: var(--moss);
+  stroke: #c6d8bd;
+}
+
+.pin[data-state='next'] .marker {
+  fill: var(--brass);
+  stroke: #f3dca8;
+}
+
+.pin[data-state='next'] .dot {
+  fill: var(--bg);
+}
+
+.pulse {
+  fill: none;
+  stroke: var(--brass-strong);
+  stroke-width: 1.5;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: theatre-pulse 1.8s ease-out infinite;
+}
+
+@keyframes theatre-pulse {
+  from {
+    transform: scale(0.55);
+    opacity: 0.9;
+  }
+  to {
+    transform: scale(1.7);
+    opacity: 0;
+  }
+}
+
+.pin:hover .marker,
+.pin:focus-visible .marker,
+.pin[data-selected] .marker {
+  transform: scale(1.25);
+  stroke: var(--ink);
+}
+
+.pin:focus-visible .hit {
+  stroke: var(--brass-strong);
+  stroke-width: 1;
+  stroke-dasharray: 2 2;
+}
+
+.pinLabel {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  fill: var(--ink);
+  paint-order: stroke;
+  stroke: rgba(15, 20, 24, 0.85);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+
+.pinSub {
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  fill: var(--muted);
+  paint-order: stroke;
+  stroke: rgba(15, 20, 24, 0.85);
+  stroke-width: 3px;
+}
+
+.pin[data-state='next'] .pinSub {
+  fill: var(--brass-strong);
+}
+
+.pin[data-state='done'] .pinSub {
+  fill: var(--moss);
+}
+
+.compass {
+  fill: rgba(232, 226, 212, 0.35);
+  stroke: rgba(232, 226, 212, 0.35);
+  stroke-width: 0.8;
+}
+
+.compass circle {
+  fill: none;
+}
+
+.compass text {
+  stroke: none;
+  font-size: 8px;
+  font-weight: 700;
+  text-anchor: middle;
+}
+
+.frame {
+  fill: none;
+  stroke: var(--line);
+}
+
+/* Dossier card for the selected pin. */
+.card {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.4fr);
+  overflow: hidden;
+  background: rgba(27, 35, 41, 0.94);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--muted);
+  border-radius: var(--radius);
+}
+
+.card[data-state='next'] {
+  border-left-color: var(--brass);
+}
+
+.card[data-state='done'] {
+  border-left-color: var(--moss);
+}
+
+.cardImage {
+  width: 100%;
+  height: 100%;
+  min-height: 9rem;
+  object-fit: cover;
+  filter: sepia(0.25) contrast(1.05);
+  animation: theatre-card-in 260ms ease-out;
+}
+
+@keyframes theatre-card-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.cardBody {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.3rem;
+  padding: 0.9rem 1rem 1rem;
+}
+
+.cardEyebrow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  font: 600 0.72rem var(--font-body);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--brass);
+}
+
+.card[data-state='done'] .cardEyebrow {
+  color: var(--moss);
+}
+
+.cardRank {
+  padding: 0 0.35rem;
+  border: 1px solid currentColor;
+  border-radius: 3px;
+}
+
+.cardTitle {
+  margin: 0;
+  font: 700 1.3rem/1.15 var(--font-heading);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.cardMeta {
+  margin: 0;
+  font: 0.82rem var(--font-type);
+  color: var(--muted);
+}
+
+.cardSummary {
+  margin: 0.2rem 0 0.6rem;
+  font-size: 0.88rem;
+  color: var(--ink);
+}
+
+@media (max-width: 30rem) {
+  .card {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .cardImage {
+    max-height: 10rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .travelled,
+  .pin,
+  .marker,
+  .cardImage {
+    animation: none;
+    opacity: 1;
+    stroke-dashoffset: 0;
+  }
+
+  .pulse {
+    animation: none;
+    opacity: 0.6;
+  }
+}

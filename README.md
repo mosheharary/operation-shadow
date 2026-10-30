@@ -32,7 +32,9 @@ test environments. Production uses Google sign-in.
 ## How to play
 
 **New to the game? Start with *Boot Camp*** (marked "Start here" in Field HQ): a guided exercise that teaches every
-control one step at a time. Then play the campaign in order, or choose **Request a generated operation**. Each briefing
+control one step at a time. Then play the campaign in order, or choose **Request a generated operation**. Field HQ's
+theatre map charts the Northern Reach with every operation pinned where it happens, the course you have covered inked in
+and the next target pulsing; point at a pin (or a mission in the list) to see its dossier and open the briefing. Each briefing
 lists the required specialists; pick your squad and a difficulty, then deploy. The full design is in
 [`docs/game-design.md`](docs/game-design.md).
 

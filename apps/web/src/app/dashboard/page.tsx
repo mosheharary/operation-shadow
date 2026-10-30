@@ -8,6 +8,8 @@ import { activeCampaign, readProgress } from '@/server/progress';
 import { requireSession } from '@/server/session';
 import { DeleteButton } from './delete-button';
 import { SignOutButton } from './sign-out-button';
+import { theatreStops } from './theatre';
+import { TheatreMap } from './theatre-map';
 
 // Session-dependent: always rendered per request.
 export const dynamic = 'force-dynamic';
@@ -17,16 +19,6 @@ export const metadata: Metadata = { title: 'Field HQ' };
 const statusClass = (value: string) =>
   value === 'ok' ? 'status-tag status-tag--ok' : value === 'pending' ? 'status-tag status-tag--pending' : 'status-tag status-tag--error';
 
-// Milestones from docs/architecture/implementation-plan.md; only built features appear in the menu.
-const ROADMAP = [
-  { label: 'Foundation: accounts, database, 3D pipeline', state: 'ok' },
-  { label: 'Vertical slice: playable mission "Silent Tide"', state: 'ok' },
-  { label: 'Four starting missions with a guided tutorial', state: 'ok' },
-  { label: 'Generated operations on maps laid out for each one (Gemini, with offline fallback)', state: 'ok' },
-  { label: 'Campaign progress, saved games, synced settings', state: 'ok' },
-  { label: 'Planning mode, settings and accessibility, security hardening', state: 'ok' },
-] as const;
-
 const SLOT_NAME: Record<string, string> = { quick: 'Quicksave', auto: 'Autosave', 'manual-1': 'Slot 1', 'manual-2': 'Slot 2', 'manual-3': 'Slot 3' };
 
 export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
@@ -35,6 +27,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   const campaign = await activeCampaign(session.user.id).catch(() => null);
   const progress = readProgress(campaign?.progress);
   const firstTimer = Object.keys(progress.completed).length === 0;
+  const stops = theatreStops(CAMPAIGN, progress.completed);
   const saves = (await listSaveSlots(getDb().db, session.user.id).catch(() => []))
     .map((s) => saveSummarySchema.safeParse({ ...s.summary, slot: s.slot, updatedAt: s.updatedAt.toISOString() }))
     .flatMap((r) => (r.success ? [r.data] : []));
@@ -96,6 +89,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                   className={`menu__item${firstTimer && i === 0 ? ' menu__item--accent' : ''}`}
                   href={`/missions/${mission.key}`}
                   data-testid={`mission-${mission.key}`}
+                  data-theatre-key={mission.key}
                 >
                   <span className="menu__title">
                     {mission.tutorial ? 'Training' : `Operation ${i}`}: {mission.title}
@@ -136,18 +130,10 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
             </Link>
           </nav>
 
-          <aside className="panel" aria-labelledby="status-title">
-            <h2 id="status-title">Build status</h2>
-            <ul className="checklist">
-              {ROADMAP.map((item) => (
-                <li key={item.label}>
-                  <span className={statusClass(item.state)}>{item.state === 'ok' ? 'Done' : 'Next'}</span>
-                  <span>{item.label}</span>
-                </li>
-              ))}
-            </ul>
-            <h2>Systems</h2>
-            <ul className="checklist" aria-label="System status">
+          <aside className="panel hq__theatre" aria-labelledby="theatre-title">
+            <h2 id="theatre-title">Theatre of operations</h2>
+            <TheatreMap stops={stops} />
+            <ul className="hq__systems" aria-label="System status">
               <li>
                 <span className={statusClass(readiness.database)}>{readiness.database}</span>
                 <span>Database</span>
