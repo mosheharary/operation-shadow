@@ -60,7 +60,10 @@ test.describe('Silent Tide', () => {
     const reel = page.getByTestId('cinematic');
     await expect(reel).toBeVisible({ timeout: 60_000 });
     await expect(reel).toHaveAttribute('data-kind', 'intro');
-    await expect(reel).toContainText('Silent Tide');
+    // Software rendering is slow enough that the reel may already be past the codename shot.
+    await expect(reel).toContainText('Any key or click to skip');
+    // The reel overlay can mount a moment before the debug probe is published.
+    await expect.poll(() => page.evaluate(() => Boolean(window.__OS_GAME__))).toBe(true);
     expect((await probe(page)).tick).toBe(0);
     await page.keyboard.press('Space');
     await expect(reel).toBeHidden();
