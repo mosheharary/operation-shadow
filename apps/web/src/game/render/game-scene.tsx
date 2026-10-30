@@ -11,6 +11,7 @@ import type { GameController } from '../runtime/controller';
 import { useSettings } from '../runtime/settings';
 import { useGameUi } from '../runtime/store';
 import { Effects } from './effects';
+import { Foresight } from './foresight';
 import { skyFor } from './sky';
 import { LampGlows } from './glows';
 import { setHighResTextures } from './materials/textures';
@@ -115,6 +116,7 @@ export function GameScene({ controller, onSample = ignoreSample, testHooks = fal
       <Units controller={controller} />
       <Overlay controller={controller} />
       <Sightlines controller={controller} />
+      <Foresight controller={controller} />
       <TargetingPreview controller={controller} />
       {controller.entry.tutorial && <TutorialMarker controller={controller} />}
       <Effects controller={controller} />

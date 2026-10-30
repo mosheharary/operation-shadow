@@ -232,6 +232,10 @@ function SettingsFields() {
           <span>Show sightlines and danger pulse</span>
         </label>
         <label className={styles.check}>
+          <input type="checkbox" checked={settings.showForesight} onChange={(e) => settings.update({ showForesight: e.target.checked })} />
+          <span>Foresight in tactical pause</span>
+        </label>
+        <label className={styles.check}>
           <input type="checkbox" checked={settings.reducedShake} onChange={(e) => settings.update({ reducedShake: e.target.checked })} />
           <span>Reduce camera shake</span>
         </label>

@@ -7,6 +7,7 @@ import { DangerRim } from './danger-rim';
 import { Debrief } from './debrief';
 import { EnemyInfo } from './enemy-info';
 import { EventLog } from './event-log';
+import { ForesightPanel, ForesightTint } from './foresight-panel';
 import { MenuLayer, type MenuCallbacks } from './menus';
 import { DragBox, Subtitles, Toasts } from './messages';
 import { Minimap } from './minimap';
@@ -30,6 +31,8 @@ export function Hud(props: MenuCallbacks) {
   return (
     // While a cinematic or the field recorder plays the panels fade out and only its own layer remains.
     <div className={styles.hud} data-cinematic={cinematic?.kind ?? (recalling ? 'recall' : undefined)}>
+      {/* Under every panel: it tints the world, not the HUD. */}
+      <ForesightTint />
       {controller.entry.tutorial && <TutorialPanel />}
       <DragBox />
       <div className={styles.topLeft}>
@@ -39,6 +42,7 @@ export function Hud(props: MenuCallbacks) {
       <div className={styles.topCenter}>
         <StatusBar />
         <ControlBar />
+        <ForesightPanel />
         <PerfReadout />
         <Toasts />
       </div>

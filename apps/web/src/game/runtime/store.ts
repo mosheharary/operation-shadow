@@ -59,6 +59,16 @@ export interface RecallState {
   index: number;
 }
 
+/** What the paused game's foresight found (see foresight.ts), for the HUD; null while it is not shown. */
+export interface ForesightSummary {
+  tone: 'clear' | 'warning' | 'danger';
+  text: string;
+  /** How far ahead it looked, in seconds. */
+  seconds: number;
+  /** The trouble on the way, soonest first. */
+  incidents: { seconds: number; kind: string; text: string }[];
+}
+
 export interface GameUiState {
   selected: string[];
   hovered: HoverTarget;
@@ -80,6 +90,7 @@ export interface GameUiState {
   /** The mission's opening or closing reel; the HUD steps aside while one plays. */
   cinematic: CinematicState | null;
   recall: RecallState | null;
+  foresight: ForesightSummary | null;
   select: (ids: string[], additive?: boolean) => void;
   setHovered: (target: HoverTarget) => void;
   setGroundPoint: (point: Vec2 | null) => void;
@@ -99,6 +110,7 @@ export interface GameUiState {
   setTutorialMarker: (pos: Vec2 | null) => void;
   setCinematic: (cinematic: CinematicState | null) => void;
   setRecall: (recall: RecallState | null) => void;
+  setForesight: (foresight: ForesightSummary | null) => void;
   reset: () => void;
 }
 
@@ -123,6 +135,7 @@ const initial = {
   tutorialMarker: null as Vec2 | null,
   cinematic: null as CinematicState | null,
   recall: null as RecallState | null,
+  foresight: null as ForesightSummary | null,
 };
 
 /** UI-only state for one game session. Gameplay state lives in the engine, never here. */
@@ -177,5 +190,6 @@ export const useGameUi = create<GameUiState>((set) => ({
   setTutorialMarker: (tutorialMarker) => set({ tutorialMarker }),
   setCinematic: (cinematic) => set({ cinematic }),
   setRecall: (recall) => set({ recall }),
+  setForesight: (foresight) => set((s) => (s.foresight === foresight ? s : { foresight })),
   reset: () => set({ ...initial }),
 }));

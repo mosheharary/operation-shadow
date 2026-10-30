@@ -1950,3 +1950,148 @@
     animation: none;
   }
 }
+
+/* ── Foresight (tactical pause) ──────────────────────────────────────────── */
+/* The world cools and greys behind the HUD, like a plan laid out on a table, so the ghosts stand out. */
+.foresightTint {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  backdrop-filter: saturate(0.65) brightness(0.88) contrast(1.06);
+  background:
+    repeating-linear-gradient(0deg, rgba(160, 196, 255, 0.035) 0 1px, transparent 1px 48px),
+    repeating-linear-gradient(90deg, rgba(160, 196, 255, 0.035) 0 1px, transparent 1px 48px),
+    radial-gradient(ellipse at center, rgba(40, 70, 110, 0.08) 40%, rgba(12, 22, 38, 0.45) 100%);
+  animation: foresightIn 0.35s ease-out;
+}
+
+@keyframes foresightIn {
+  from {
+    opacity: 0;
+  }
+}
+
+.foresight {
+  --tone: 188, 214, 255;
+  width: min(24rem, 60vw);
+  padding: 0.45rem 0.7rem 0.55rem;
+  border: 1px solid rgba(var(--tone), 0.4);
+  border-left: 3px solid rgb(var(--tone));
+  border-radius: var(--radius);
+  background: rgba(12, 18, 26, 0.86);
+  animation: foresightIn 0.35s ease-out;
+}
+
+.foresight[data-tone='warning'] {
+  --tone: 240, 162, 58;
+}
+
+.foresight[data-tone='danger'] {
+  --tone: 255, 106, 76;
+}
+
+.foresight header {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: rgb(var(--tone));
+}
+
+.foresightTitle {
+  font-family: var(--font-heading);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.foresightClock {
+  margin-left: auto;
+  font-family: var(--font-type);
+  font-size: 0.72rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.foresightVerdict {
+  margin: 0.15rem 0 0.4rem;
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+}
+
+.foresight[data-tone='danger'] .foresightVerdict {
+  color: #ffd2c4;
+}
+
+/* Ten seconds as a strip: a tick per incident, a hatched end past a sighting, the ghosts' playhead. */
+.foresightStrip {
+  position: relative;
+  height: 0.5rem;
+  border-radius: 2px;
+  background: repeating-linear-gradient(90deg, rgba(188, 214, 255, 0.22) 0 1px, transparent 1px 10%), rgba(188, 214, 255, 0.08);
+}
+
+.foresightStrip i {
+  position: absolute;
+  top: -0.15rem;
+  bottom: -0.15rem;
+  width: 3px;
+  margin-left: -1px;
+  border-radius: 1px;
+  background: #f0a23a;
+}
+
+.foresightStrip i[data-kind='spotted'],
+.foresightStrip i[data-kind='casualty'],
+.foresightStrip i[data-kind='alarm'] {
+  background: #ff6a4c;
+}
+
+.foresightStrip i[data-kind='objective'] {
+  background: #e7c35a;
+}
+
+.foresightCut {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(135deg, rgba(255, 106, 76, 0.35) 0 3px, transparent 3px 7px);
+}
+
+.foresightHead {
+  position: absolute;
+  top: -0.25rem;
+  bottom: -0.25rem;
+  width: 2px;
+  margin-left: -1px;
+  background: #fff;
+  box-shadow: 0 0 6px rgba(var(--tone), 0.9);
+}
+
+.foresightList {
+  margin: 0.45rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.76rem;
+  color: var(--muted);
+}
+
+.foresightList time {
+  display: inline-block;
+  min-width: 2.8rem;
+  font-family: var(--font-type);
+  color: var(--ink);
+}
+
+.foresightList li[data-kind='spotted'] {
+  color: #f3a28c;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .foresightTint,
+  .foresight {
+    animation: none;
+  }
+}

@@ -31,6 +31,8 @@ export interface GameSettings {
   showNoise: boolean;
   /** Threads from each watching sentry to the operative he is sizing up, and the danger pulse at the screen edge. */
   showSightlines: boolean;
+  /** In tactical pause, ghosts play out the next ten seconds and warn of a sighting on the way. */
+  showForesight: boolean;
   showFps: boolean;
   masterVolume: number;
   musicVolume: number;
@@ -57,6 +59,7 @@ const DEFAULTS: GameSettings = {
   subtitles: true,
   showNoise: true,
   showSightlines: true,
+  showForesight: true,
   showFps: false,
   masterVolume: 0.8,
   musicVolume: 0.55,

@@ -45,7 +45,7 @@ lists the required specialists; pick your squad and a difficulty, then deploy. T
 | Double right-click / Shift + right-click | Run / queue the order |
 | Z · C · X | Stand · crouch · prone |
 | R G V B Y H N J U K | The selected specialist's ability slots (shown on the bar); left-click a target (double-click to run there, e.g. a knife rush), right-click or Esc cancels |
-| Space | Tactical pause (orders still work) |
+| Space | Tactical pause (orders still work; foresight plays out the next 10 s) |
 | L · Enter | Planning: wait for the signal · give the signal (everyone waiting moves at once) |
 | F5 · F9 | Quicksave · quickload (the mission menu has manual slots; Field HQ has Continue) |
 | Backspace | Field recorder: wind the last minute back (← → to scrub, Enter resumes from there in tactical pause, Esc returns to now) |
@@ -78,6 +78,12 @@ You can see a sentry make up his mind. When one notices a squad member, a sightl
 toward them as his suspicion builds, pale, then amber, then red; if it reaches them, they are spotted. The screen edge
 throbs with a quickening heartbeat, a watcher out of view gets an eye on the edge pointing at him, and the portrait
 says how far he has got. Get down or out of his line before the thread arrives.
+
+Tactical pause shows the future. While paused the world greys like a plan on a table and the next ten seconds play out
+as ghosts: every patrol and every squad member with an order walks a dotted track on a short loop, a sentry starting to
+size someone up is ringed amber, and a sighting is ringed red with a thread from the sentry, where the forecast stops.
+A panel under the control bar gives the verdict (e.g. "BADGER spotted in 7.0 s"). Give a different order and the
+ghosts replay the new plan at once.
 
 Stay out of the bright inner part of a view cone, keep to shadows and grass, hide bodies and tie up unconscious
 sentries: they wake up. Noise rings on the ground show how far a sound carries.

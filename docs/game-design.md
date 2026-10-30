@@ -93,6 +93,18 @@ Space pauses; orders still work while paused. Shift + right-click queues orders;
 gives the signal so specialists act together. Each specialist can abort the plan if spotted or when the alarm rises. A
 timeline shows each specialist's queue with rough durations; 0.5×, 1× and 2× speed let you wait out patrols.
 
+**Foresight.** While the game is paused the world greys and cools like a plan on a table, and the next ten seconds
+play out as ghosts. The simulation is deterministic, so the client runs it ahead on a copy of the world, with every
+order already given (including those given during the pause), and shows exactly what happens if play resumed now:
+each patrol and each squad member with an order leaves a dotted track (sentries pale blue, the squad in their own
+colours, a larger dot each second), and a ghost walks it on a three-times-speed loop. Trouble is ringed where it
+happens as the ghosts reach it: amber when a sentry starts sizing someone up, red with a thread from the sentry at the
+sighting. The forecast stops at the first sighting, because from then on it depends on what the player does. A panel
+under the control bar gives the verdict ("BADGER spotted in 7.0 s", or "Next 10 s: nobody sees the squad"), the
+trouble on the way and a ten-second strip with the ghosts' playhead. Every new order recomputes it; it can be switched
+off in the settings. The forecast is pure logic (`runtime/foresight.ts`, with unit tests that check it never touches
+the real world and lands where play then really goes).
+
 ## Scoring
 
 Success scores 1,000 plus: time against par (up to 400), stealth by peak alarm minus detections (up to 300), restraint

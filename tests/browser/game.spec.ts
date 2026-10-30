@@ -144,10 +144,14 @@ test.describe('Silent Tide', () => {
     await page.keyboard.press('Space');
     await expect(page.getByTestId('paused')).toBeVisible();
     const frozen = (await probe(page)).tick;
+    // Foresight: the paused world runs ahead on a copy and says what the next seconds hold.
+    await expect(page.getByTestId('foresight-verdict')).toHaveText(/^Next 10 s: nobody sees the squad$| in \d+\.\d s$/);
+    await expect(page.getByTestId('foresight-tint')).toBeVisible();
     await page.waitForTimeout(500);
     expect((await probe(page)).tick).toBe(frozen);
     await page.keyboard.press('Space');
     await expect.poll(async () => (await probe(page)).tick).toBeGreaterThan(frozen);
+    await expect(page.getByTestId('foresight')).toHaveCount(0);
 
     // Escape opens the pause menu (which pauses), F1 the controls.
     await page.keyboard.press('Escape');
