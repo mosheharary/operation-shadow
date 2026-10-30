@@ -22,6 +22,7 @@ export type SoundName =
   | 'stinger-spotted'
   | 'ui-click'
   | 'ui-deny'
+  | 'rewind'
   | 'success'
   | 'failure';
 
@@ -275,6 +276,15 @@ const SOUNDS: Record<SoundName, { seconds: number; peak: number; fill: Fill }> =
     fill: (o, r) => {
       addGlide(o, r, 330, 330, 1, 1, (t) => (t < 0.09 ? env(t, 0.004, 0.06) : 0));
       addGlide(o, r, 247, 247, 1, 1, (t) => (t < 0.12 ? env(t, 0.004, 0.08) : 0), 0.11);
+    },
+  },
+  /** Tape spooling backwards: falling chirps over a hiss. */
+  rewind: {
+    seconds: 0.5,
+    peak: 0.3,
+    fill: (o, r, rnd) => {
+      for (const start of [0, 0.11, 0.22]) addGlide(o, r, 2600, 700, 0.12, 1, (t) => (t < 0.12 ? env(t, 0.004, 0.05) : 0), start);
+      addNoise(o, r, rnd, 0.45, (t) => env(t, 0.01, 0.18), { hp: 2200 });
     },
   },
   success: {

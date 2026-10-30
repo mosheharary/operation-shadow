@@ -288,6 +288,11 @@ export class AudioEngine {
     this.play2D('ui-deny', { gain: 0.6 });
   }
 
+  /** The field recorder winding to another frame. */
+  rewind(): void {
+    this.play2D('rewind', { gain: 0.5 });
+  }
+
   // ── Voices ──────────────────────────────────────────────────────────────────────────────
 
   private loadVoice(key: string): Promise<AudioBuffer | null> {

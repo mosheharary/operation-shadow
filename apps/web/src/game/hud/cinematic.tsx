@@ -46,6 +46,8 @@ export function Cinematic() {
   const cinematic = useGameUi((s) => s.cinematic);
   const status = controller.world.state.status;
   const lastStatus = useRef(status);
+  // While the field recorder winds through the past, the status flickers; only its outcome counts.
+  const recalling = useGameUi((s) => s.recall !== null);
 
   // The insertion reel: only for a fresh start (not a continued save, nor the guided tutorial).
   useEffect(() => {
@@ -78,6 +80,7 @@ export function Cinematic() {
 
   // The closing beat when the mission ends; a restart or a load hands the camera straight back.
   useEffect(() => {
+    if (recalling) return;
     const was = lastStatus.current;
     lastStatus.current = status;
     if (was === status) return;
@@ -96,7 +99,7 @@ export function Cinematic() {
       // The verdict holds the screen during the glide; the debrief comes up once the orbit starts.
       onShot: (shot) => ui.setCinematic(shot === 0 ? { kind: 'outro', shot, seconds } : null),
     });
-  }, [controller, status]);
+  }, [controller, status, recalling]);
 
   // Skipping: any key or click. Captured on window so the game never sees that key.
   const active = cinematic !== null;

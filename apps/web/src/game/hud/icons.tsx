@@ -1,7 +1,7 @@
 import type { SVGProps } from 'react';
 
 /** Small line icons for HUD states. Every state also has a text label; icons never stand alone. */
-export type IconName = 'eye' | 'alert' | 'search' | 'cross' | 'lock' | 'exit' | 'mask' | 'wave' | 'pause' | 'clock' | 'check' | 'diamond' | 'x' | 'star' | 'body' | 'sound' | 'play' | 'rotate-left' | 'rotate-right' | 'target' | 'menu';
+export type IconName = 'eye' | 'alert' | 'search' | 'cross' | 'lock' | 'exit' | 'mask' | 'wave' | 'pause' | 'clock' | 'check' | 'diamond' | 'x' | 'star' | 'body' | 'sound' | 'play' | 'rotate-left' | 'rotate-right' | 'target' | 'menu' | 'rewind';
 
 const PATHS: Record<IconName, string> = {
   eye: 'M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6S2 12 2 12zm10 3a3 3 0 100-6 3 3 0 000 6z',
@@ -25,6 +25,7 @@ const PATHS: Record<IconName, string> = {
   'rotate-right': 'M20 4v6h-6M19.4 15a8 8 0 11-1.9-8.3L20 10',
   target: 'M12 3a9 9 0 110 18 9 9 0 010-18zm0 5a4 4 0 110 8 4 4 0 010-8zM12 1v4m0 14v4M1 12h4m14 0h4',
   menu: 'M4 6h16M4 12h16M4 18h16',
+  rewind: 'M11 6l-8 6 8 6V6zm10 0l-8 6 8 6V6z',
 };
 
 export function Icon({ name, size = 16, ...rest }: { name: IconName; size?: number } & SVGProps<SVGSVGElement>) {

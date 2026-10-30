@@ -101,6 +101,14 @@ The campaign records the best rank and medals per mission and each specialist's 
 and quickload (F9), autosaves (objective completed; every five minutes while calm), three manual slots, and Continue
 from Field HQ.
 
+The field recorder keeps the last minute of the current attempt in memory (a full simulation snapshot every two
+seconds of mission time; each frame notes the sightings, rising alarms, casualties and objectives that followed it).
+Opening it holds the clock and winds the world back to just before the latest run of trouble began; the player scrubs
+frame by frame and sees the real past state in the scene. Resuming erases the later frames and plays on in tactical
+pause; cancelling restores the present exactly. A failed mission can be wound back from its debrief: the failure stays
+on record and the rest of the attempt is reported as a new run. Not available in Boot Camp or after a success. The
+debrief shows how many times the tape was wound back.
+
 ## Controls (defaults, all remappable)
 
 | Action | Keys |
@@ -113,5 +121,5 @@ from Field HQ.
 | View cones | Hover or click a soldier; hold Alt for all |
 | Pause, speed | Space; [ and ] |
 | Planning | L wait for signal, Enter signal |
-| Saves | F5 quicksave, F9 quickload |
+| Saves, field recorder | F5 quicksave, F9 quickload; Backspace winds back |
 | Help, frame rate | F1, F3 |

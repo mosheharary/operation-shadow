@@ -40,6 +40,9 @@ export function PlaySession({ setup, title, fallback }: { setup: GameSetup; titl
         const controller = new GameController(setup);
         // Continuing a saved game: the engine checks the state before play resumes.
         if (setup.initialSave) controller.load(setup.initialSave.state as unknown as SimState);
+        // A fresh mission opens on the insertion reel (hud/cinematic.tsx), which releases the clock:
+        // holding it from the start keeps the first rendered frames from ticking before the reel mounts.
+        else if (!controller.entry.tutorial) controller.held = true;
         const dialogue = new DialogueDirector(() => controller.world);
         setSession({ controller, dialogue, audio: new AudioEngine(controller) });
       } catch (e) {

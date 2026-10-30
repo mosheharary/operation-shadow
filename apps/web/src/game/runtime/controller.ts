@@ -13,6 +13,7 @@ import {
   World,
 } from '@operation-shadow/engine';
 import type { SavePayload } from '@operation-shadow/schemas';
+import { RecallTape } from './recall';
 
 export interface GameSetup {
   missionKey: string;
@@ -46,6 +47,10 @@ export class GameController {
   held = false;
   /** Interpolation factor between the previous and current tick (0..1). */
   alpha = 1;
+  /** The last minute of play, for winding back a mistake (see recall.ts). */
+  readonly tape = new RecallTape();
+  /** Times this attempt was wound back (shown in the debrief). */
+  recalls = 0;
 
   private accumulator = 0;
   private readonly previous = new Map<string, { x: number; z: number; facing: number }>();
@@ -62,6 +67,7 @@ export class GameController {
     this.level = built.level;
     this.mission = built.mission;
     this.world = World.create(this.level, this.mission, { seed: setup.seed, squad: setup.squad, difficulty: setup.difficulty });
+    this.tape.record(this.world);
   }
 
   /** Advances the simulation by real elapsed time; call once per rendered frame. */
@@ -75,6 +81,8 @@ export class GameController {
         const events = this.world.step();
         this.accumulator -= DT;
         steps += 1;
+        this.tape.observe(events, this.world);
+        this.tape.record(this.world);
         if (events.length > 0) for (const listener of this.eventListeners) listener(events);
       }
       this.alpha = Math.min(1, this.accumulator / DT);
@@ -140,6 +148,14 @@ export class GameController {
 
   /** Continues from a saved simulation state (checked by the engine before play resumes). */
   load(state: SimState): void {
+    this.rewind(state);
+    this.tape.clear();
+    this.recalls = 0;
+    this.tape.record(this.world);
+  }
+
+  /** Puts the world back to an earlier state of this same attempt (the tape is kept). */
+  rewind(state: SimState): void {
     this.world = World.restore(this.level, this.mission, state);
     this.previous.clear();
     this.accumulator = 0;
@@ -154,6 +170,9 @@ export class GameController {
     this.paused = false;
     this.held = false;
     this.speed = 1;
+    this.tape.clear();
+    this.recalls = 0;
+    this.tape.record(this.world);
     this.notifyHud();
   }
 }

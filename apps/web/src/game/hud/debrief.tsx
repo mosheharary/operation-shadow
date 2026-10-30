@@ -3,6 +3,7 @@
 import { type Medal, scoreMission, TICK_RATE } from '@operation-shadow/engine';
 import { useEffect, useRef } from 'react';
 import { useHudTick } from '../runtime/game-context';
+import { canRecall, openRecall } from '../runtime/recall-session';
 import { useGameUi } from '../runtime/store';
 import type { MenuCallbacks } from './menus';
 import { presentText } from './present';
@@ -24,7 +25,8 @@ export function Debrief({ onRestart, onExit }: MenuCallbacks) {
   const first = useRef<HTMLButtonElement>(null);
   // The report waits for the closing shot's verdict (skippable) before it comes up.
   const closing = useGameUi((s) => s.cinematic?.kind === 'outro');
-  const over = state.status !== 'running' && !closing;
+  const recalling = useGameUi((s) => s.recall !== null);
+  const over = state.status !== 'running' && !closing && !recalling;
   useEffect(() => {
     if (over) first.current?.focus();
   }, [over]);
@@ -44,6 +46,8 @@ export function Debrief({ onRestart, onExit }: MenuCallbacks) {
     ['Shots fired', st.shotsFired],
     ['Squad injuries', st.injuries],
   ];
+  if (controller.recalls > 0) stats.push(['Wound back on the field recorder', controller.recalls]);
+  const rewindable = !success && canRecall(controller);
 
   return (
     <div className={styles.modalBackdrop}>
@@ -96,7 +100,12 @@ export function Debrief({ onRestart, onExit }: MenuCallbacks) {
           </section>
         </div>
         <div className={styles.menuButtons}>
-          <button ref={first} type="button" className={styles.primaryButton} onClick={onRestart} data-tip="Play this mission again from the start">
+          {rewindable && (
+            <button ref={first} type="button" className={styles.primaryButton} onClick={() => openRecall(controller)} data-testid="debrief-recall" data-tip="Wind the last minute back on the field recorder and play it differently">
+              Wind back
+            </button>
+          )}
+          <button ref={rewindable ? undefined : first} type="button" className={rewindable ? styles.button : styles.primaryButton} onClick={onRestart} data-tip="Play this mission again from the start">
             {success ? 'Play again' : 'Retry mission'}
           </button>
           <button type="button" className={styles.button} onClick={onExit} data-tip="Back to the mission briefing">

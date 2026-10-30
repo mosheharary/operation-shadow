@@ -23,6 +23,7 @@ export type BindingAction =
   | 'perf'
   | 'quicksave'
   | 'quickload'
+  | 'recall'
   | 'hold'
   | 'signal'
   | 'select-1'
@@ -68,6 +69,7 @@ export const DEFAULT_BINDINGS: Bindings = {
   perf: ['F3'],
   quicksave: ['F5'],
   quickload: ['F9'],
+  recall: ['Backspace'],
   hold: ['KeyL'],
   signal: ['Enter', 'NumpadEnter'],
   'select-1': ['Digit1'],

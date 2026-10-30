@@ -68,7 +68,7 @@ test.describe('Planning mode and settings', () => {
     await page.keyboard.press('KeyP');
     await expect(page.getByTestId('apply-bindings')).toBeEnabled();
     await page.getByTestId('apply-bindings').click();
-    await page.getByRole('button', { name: 'Back' }).click();
+    await page.getByRole('button', { name: 'Back', exact: true }).click();
     await page.getByRole('button', { name: 'Resume' }).click();
     await expect.poll(async () => (await probe(page)).paused).toBe(false);
 

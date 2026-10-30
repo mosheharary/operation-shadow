@@ -13,6 +13,7 @@ import { ObjectivesPanel } from './objectives';
 import { PerfReadout } from './perf-readout';
 import { PlanningPanel } from './planning';
 import { PortraitBar } from './portraits';
+import { RecallReel } from './recall-reel';
 import { StatusBar } from './status-bar';
 import { TooltipLayer } from './tooltip';
 import { TutorialPanel } from '../tutorial/tutorial-panel';
@@ -24,9 +25,10 @@ import styles from './hud.module.css';
 export function Hud(props: MenuCallbacks) {
   const controller = useController();
   const cinematic = useGameUi((s) => s.cinematic);
+  const recalling = useGameUi((s) => s.recall !== null);
   return (
-    // While a cinematic plays the panels fade out and only the letterbox and captions remain.
-    <div className={styles.hud} data-cinematic={cinematic?.kind}>
+    // While a cinematic or the field recorder plays the panels fade out and only its own layer remains.
+    <div className={styles.hud} data-cinematic={cinematic?.kind ?? (recalling ? 'recall' : undefined)}>
       {controller.entry.tutorial && <TutorialPanel />}
       <DragBox />
       <div className={styles.topLeft}>
@@ -55,6 +57,7 @@ export function Hud(props: MenuCallbacks) {
       <Debrief {...props} />
       <TooltipLayer />
       <Cinematic />
+      <RecallReel />
     </div>
   );
 }

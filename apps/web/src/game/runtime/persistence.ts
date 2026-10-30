@@ -128,14 +128,7 @@ export class SessionPersistence {
 
   start(): () => void {
     void flushPendingSaves();
-    const { setup } = this.controller;
-    post('/api/v1/mission-runs', { missionKey: setup.missionKey, squad: setup.squad, difficulty: setup.difficulty, seed: setup.seed })
-      .then(async (res) => (res.ok ? ((await res.json()) as { run: { id: string } }).run.id : null))
-      .then((id) => {
-        this.runId = id;
-        if (this.controller.world.state.status !== 'running') void this.report();
-      })
-      .catch(() => undefined);
+    this.openRun();
     this.lastAutosaveTick = this.controller.world.state.tick;
     const stop = this.controller.onEvents((events) => {
       const s = this.controller.world.state;
@@ -153,6 +146,29 @@ export class SessionPersistence {
       window.removeEventListener('pagehide', leave);
       void this.report('abandoned');
     };
+  }
+
+  /** Starts the run record for this attempt; its outcome is reported once the mission ends. */
+  private openRun(): void {
+    const { setup } = this.controller;
+    post('/api/v1/mission-runs', { missionKey: setup.missionKey, squad: setup.squad, difficulty: setup.difficulty, seed: setup.seed })
+      .then(async (res) => (res.ok ? ((await res.json()) as { run: { id: string } }).run.id : null))
+      .then((id) => {
+        this.runId = id;
+        if (this.controller.world.state.status !== 'running') void this.report();
+      })
+      .catch(() => undefined);
+  }
+
+  /**
+   * A failed mission wound back on the field recorder plays on: its failure stays on record, and
+   * what happens next is reported as a new run.
+   */
+  reopen(): void {
+    if (!this.reported) return;
+    this.reported = false;
+    this.runId = null;
+    this.openRun();
   }
 
   private payload(): SavePayload {

@@ -72,6 +72,50 @@ test.describe('Silent Tide', () => {
     expect((await probe(page)).paused).toBe(false);
   });
 
+  test('the field recorder winds the world back, returns to the present, and resumes in tactical pause', async ({ page }) => {
+    await startMission(page);
+    await page.keyboard.press('Digit2');
+    const start = (await probe(page)).operatives.find((o) => o.id === 'op:infiltrator')!;
+    const target = (await screenOf(page, start.x + 7, start.z + 4))!;
+    await page.mouse.click(target.x, target.y, { button: 'right' });
+    const moth = async () => (await probe(page)).operatives.find((o) => o.id === 'op:infiltrator')!;
+    await expect.poll(async () => Math.hypot((await moth()).x - start.x, (await moth()).z - start.z), { timeout: 30_000 }).toBeGreaterThan(2);
+    const now = (await probe(page)).tick;
+
+    // Backspace opens the recorder a few seconds back, with the clock held.
+    await page.keyboard.press('Backspace');
+    const recall = page.getByTestId('recall');
+    await expect(recall).toBeVisible();
+    await expect(recall).toContainText('Field recorder');
+    const held = (await probe(page)).tick;
+    expect(held).toBeLessThan(now);
+    await page.waitForTimeout(400);
+    expect((await probe(page)).tick).toBe(held);
+
+    // Home winds to the first frame: the mission's opening, with MOTH back on the beach.
+    await page.keyboard.press('Home');
+    await expect.poll(async () => (await probe(page)).tick).toBe(0);
+    expect(Math.hypot((await moth()).x - start.x, (await moth()).z - start.z)).toBeLessThan(0.5);
+
+    // Esc puts the present back exactly as it was (the Escape never opens the pause menu).
+    await page.keyboard.press('Escape');
+    await expect(recall).toBeHidden();
+    await expect(page.getByTestId('pause-menu')).toBeHidden();
+    expect((await probe(page)).tick).toBeGreaterThanOrEqual(now);
+
+    // Resuming from a frame plays on from there, in tactical pause so new orders come first.
+    await page.getByTestId('control-recall').click();
+    await expect(recall).toBeVisible();
+    await page.keyboard.press('Home');
+    await expect.poll(async () => (await probe(page)).tick).toBe(0);
+    await page.getByTestId('recall-resume').click();
+    await expect(recall).toBeHidden();
+    await expect(page.getByTestId('toasts')).toContainText('Wound back');
+    const resumed = await probe(page);
+    expect(resumed.paused).toBe(true);
+    expect(resumed.tick).toBe(0);
+  });
+
   test('an invalid squad in the URL returns to the briefing with the reason', async ({ page }) => {
     await page.goto('/play/silent-tide?squad=recon,marine,medic');
     await expect(page).toHaveURL(/\/missions\/silent-tide\?error=/);

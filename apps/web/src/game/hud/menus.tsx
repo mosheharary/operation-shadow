@@ -48,6 +48,7 @@ const ACTION_LABELS: Record<BindingAction, string> = {
   perf: 'Frame rate readout',
   quicksave: 'Quicksave',
   quickload: 'Quickload',
+  recall: 'Field recorder (wind back)',
   hold: 'Wait for signal',
   signal: 'Give the signal',
   'select-1': 'Select specialist 1',
@@ -368,6 +369,7 @@ const HELP_GROUPS: { title: string; rows: [BindingAction[] | string, string][] }
       [['speed-down', 'speed-up'], 'Game speed'],
       [['perf'], 'Frame rate readout'],
       [['quicksave', 'quickload'], 'Quicksave, quickload'],
+      [['recall'], 'Field recorder: wind back up to a minute'],
     ],
   },
 ];

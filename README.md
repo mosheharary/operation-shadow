@@ -48,6 +48,7 @@ lists the required specialists; pick your squad and a difficulty, then deploy. T
 | Space | Tactical pause (orders still work) |
 | L · Enter | Planning: wait for the signal · give the signal (everyone waiting moves at once) |
 | F5 · F9 | Quicksave · quickload (the mission menu has manual slots; Field HQ has Continue) |
+| Backspace | Field recorder: wind the last minute back (← → to scrub, Enter resumes from there in tactical pause, Esc returns to now) |
 | WASD / arrows · wheel or pinch | Pan · zoom (zoomed all the way out the whole map is in view) |
 | Q / E (tap: 45°, hold: spin) · sideways trackpad swipe · Option/Alt + drag · middle drag | Turn the camera all the way round; drag also tilts |
 | Click a soldier / hold Alt | Pin his view cone / show every view cone |
@@ -59,6 +60,13 @@ without saving** (it asks first). Every button in the HUD explains itself on hov
 A fresh mission opens on a short letterboxed insertion reel with the clock held: the whole map, the primary
 objective, then down to the squad on its landing point. The end of a mission gets a closing shot and a verdict before
 the debrief, which then plays over a slow orbit of the scene. Any key or click skips either.
+
+A mistake need not end the attempt. The **field recorder** keeps the last minute of play, a frame every two seconds:
+press Backspace (or the rewind button in the control bar, or **Wind back** on a failed mission's debrief) and the
+scene turns to old film and winds back to just before the latest trouble began, with the sightings, alarms and
+casualties that followed listed above a film strip of the frames. Scrub with ← →; the world itself shows each moment.
+Enter plays on from there in tactical pause (what came after is erased), Esc returns to the present untouched. The
+debrief counts how often the tape was wound back.
 
 Stay out of the bright inner part of a view cone, keep to shadows and grass, hide bodies and tie up unconscious
 sentries: they wake up. Noise rings on the ground show how far a sound carries.

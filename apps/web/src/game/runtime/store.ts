@@ -54,6 +54,11 @@ export interface CinematicState {
   seconds: number;
 }
 
+/** The field recorder is open on one of its frames (see recall.ts); the clock is held meanwhile. */
+export interface RecallState {
+  index: number;
+}
+
 export interface GameUiState {
   selected: string[];
   hovered: HoverTarget;
@@ -74,6 +79,7 @@ export interface GameUiState {
   tutorialMarker: Vec2 | null;
   /** The mission's opening or closing reel; the HUD steps aside while one plays. */
   cinematic: CinematicState | null;
+  recall: RecallState | null;
   select: (ids: string[], additive?: boolean) => void;
   setHovered: (target: HoverTarget) => void;
   setGroundPoint: (point: Vec2 | null) => void;
@@ -92,6 +98,7 @@ export interface GameUiState {
   setDragBox: (box: DragBox | null) => void;
   setTutorialMarker: (pos: Vec2 | null) => void;
   setCinematic: (cinematic: CinematicState | null) => void;
+  setRecall: (recall: RecallState | null) => void;
   reset: () => void;
 }
 
@@ -115,6 +122,7 @@ const initial = {
   dragBox: null as DragBox | null,
   tutorialMarker: null as Vec2 | null,
   cinematic: null as CinematicState | null,
+  recall: null as RecallState | null,
 };
 
 /** UI-only state for one game session. Gameplay state lives in the engine, never here. */
@@ -168,5 +176,6 @@ export const useGameUi = create<GameUiState>((set) => ({
   setDragBox: (dragBox) => set({ dragBox }),
   setTutorialMarker: (tutorialMarker) => set({ tutorialMarker }),
   setCinematic: (cinematic) => set({ cinematic }),
+  setRecall: (recall) => set({ recall }),
   reset: () => set({ ...initial }),
 }));

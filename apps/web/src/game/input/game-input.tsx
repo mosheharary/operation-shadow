@@ -10,6 +10,7 @@ import { focusOn } from '../camera/camera-rig';
 import type { GameController } from '../runtime/controller';
 import { closeMenu, openMenu } from '../runtime/menus';
 import { getActivePersistence } from '../runtime/persistence';
+import { openRecall } from '../runtime/recall-session';
 import { useSettings } from '../runtime/settings';
 import { useGameUi } from '../runtime/store';
 import { actionForCode, SELECT_ACTIONS, SLOT_ACTIONS } from './bindings';
@@ -341,6 +342,10 @@ export function GameInput({ controller }: { controller: GameController }) {
         case 'quickload':
           e.preventDefault();
           void getActivePersistence()?.load('quick');
+          break;
+        case 'recall':
+          e.preventDefault();
+          openRecall(controller);
           break;
         case 'perf': {
           e.preventDefault();

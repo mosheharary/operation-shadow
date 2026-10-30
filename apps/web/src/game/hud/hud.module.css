@@ -1149,7 +1149,7 @@
   transition: opacity 0.6s ease;
 }
 
-.hud[data-cinematic] > :not(.cinematic) {
+.hud[data-cinematic] > :not(.cinematic):not(.recall) {
   opacity: 0;
   visibility: hidden;
 }
@@ -1308,7 +1308,288 @@
   }
 }
 
+/* The field recorder (recall-reel.tsx): the scene behind turns to old film while it winds back. */
+.recall {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  pointer-events: auto;
+  overflow: hidden;
+  backdrop-filter: sepia(0.75) saturate(0.6) contrast(1.12) brightness(0.9);
+  background:
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.12) 0 1px, transparent 1px 3px),
+    radial-gradient(ellipse at center, transparent 45%, rgba(20, 12, 4, 0.7) 100%);
+  animation: recallIn 0.45s ease both, recallFlicker 0.18s steps(2) infinite;
+}
+
+/* A bright tape tear rolls down the picture each time the recorder winds to another frame. */
+.recallTear {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -12%;
+  height: 12%;
+  background: linear-gradient(180deg, transparent, rgba(255, 236, 200, 0.22) 45%, rgba(255, 255, 255, 0.35) 50%, transparent);
+  mix-blend-mode: screen;
+  animation: recallTear 0.42s ease-in both;
+  pointer-events: none;
+}
+
+.recallStamp {
+  position: absolute;
+  top: 1.25rem;
+  left: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font: 700 0.95rem var(--font-heading);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--brass-strong);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9);
+}
+
+.recallStamp::after {
+  content: '◀◀';
+  letter-spacing: -0.1em;
+  animation: recallBlink 1s steps(2) infinite;
+}
+
+.recallDot {
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
+  background: var(--rust);
+  box-shadow: 0 0 10px var(--rust);
+  animation: recallBlink 1s steps(2) infinite;
+}
+
+.recallReadout {
+  position: absolute;
+  top: 3.5rem;
+  left: 1.5rem;
+  max-width: min(36rem, 80vw);
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.9);
+}
+
+.recallReadout p {
+  margin: 0;
+}
+
+.recallBack {
+  font: 700 clamp(3rem, 8vw, 5.5rem) / 1 var(--font-heading);
+  letter-spacing: 0.02em;
+  color: var(--ink);
+  animation: recallJolt 0.3s ease-out both;
+}
+
+.recallBack small {
+  font-size: 0.4em;
+  color: var(--muted);
+}
+
+.recallClock {
+  margin-top: 0.2rem !important;
+  font: 0.95rem var(--font-type);
+  color: rgba(232, 226, 212, 0.86);
+}
+
+.recallUndo {
+  margin-top: 0.75rem !important;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  font: 600 0.8rem var(--font-body);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.recallUndo span {
+  padding: 0.15rem 0.5rem;
+  border: 1px solid currentColor;
+  border-radius: var(--radius);
+  background: rgba(10, 8, 6, 0.6);
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
+
+.recallMark_danger {
+  color: var(--rust);
+}
+
+.recallMark_warning {
+  color: var(--brass-strong);
+}
+
+.recallMark_success {
+  color: var(--moss);
+}
+
+.recallDeck {
+  position: absolute;
+  left: 50%;
+  bottom: 1.25rem;
+  transform: translateX(-50%);
+  width: min(64rem, calc(100vw - 2rem));
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* A strip of film: sprocket holes along both edges, one cell per frame. */
+.recallStrip {
+  display: flex;
+  gap: 2px;
+  padding: 0.75rem 0.5rem;
+  border-radius: 4px;
+  background:
+    repeating-linear-gradient(90deg, rgba(232, 226, 212, 0.55) 0 6px, transparent 6px 14px) top 0.2rem left 0 / 100% 0.3rem no-repeat,
+    repeating-linear-gradient(90deg, rgba(232, 226, 212, 0.55) 0 6px, transparent 6px 14px) bottom 0.2rem left 0 / 100% 0.3rem no-repeat,
+    #0b0906;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.6);
+}
+
+.recallFrame {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  height: 2.6rem;
+  padding: 0;
+  border: 1px solid rgba(201, 164, 92, 0.25);
+  border-radius: 2px;
+  background: linear-gradient(180deg, rgba(120, 96, 60, 0.35), rgba(60, 46, 28, 0.5));
+  color: var(--ink);
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.recallFrame span {
+  position: absolute;
+  left: 50%;
+  bottom: 0.15rem;
+  transform: translateX(-50%);
+  font: 0.62rem var(--font-type);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.recallFrame:hover {
+  background: rgba(201, 164, 92, 0.45);
+}
+
+/* The trouble that followed a frame: a notch on its right edge. */
+.recallFrame[data-mark]::after {
+  content: '';
+  position: absolute;
+  top: -0.45rem;
+  right: -3px;
+  width: 4px;
+  bottom: -0.45rem;
+  border-radius: 2px;
+  background: var(--moss);
+}
+
+.recallFrame[data-mark='warning']::after {
+  background: var(--brass-strong);
+}
+
+.recallFrame[data-mark='danger']::after {
+  background: var(--rust);
+  box-shadow: 0 0 8px var(--rust);
+}
+
+.recallFrame[data-state='on'] {
+  z-index: 1;
+  background: var(--brass);
+  border-color: var(--brass-strong);
+  color: #14100a;
+  transform: scaleY(1.18);
+}
+
+.recallFrame[data-state='erased'] {
+  opacity: 0.38;
+  background: repeating-linear-gradient(135deg, rgba(232, 226, 212, 0.12) 0 3px, transparent 3px 6px);
+}
+
+.recallNow {
+  flex: 0 0 3.2rem;
+  border-color: rgba(232, 226, 212, 0.5);
+  background: rgba(232, 226, 212, 0.12);
+}
+
+.recallActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.recallActions kbd {
+  margin-left: 0.4rem;
+  font-size: 0.7rem;
+  opacity: 0.75;
+}
+
+.recallHint {
+  margin-left: auto;
+  font-size: 0.78rem;
+  color: rgba(232, 226, 212, 0.8);
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.9);
+}
+
+@keyframes recallIn {
+  from {
+    opacity: 0;
+    backdrop-filter: none;
+  }
+}
+
+@keyframes recallFlicker {
+  50% {
+    background-position: 0 1px, 0 0;
+  }
+}
+
+@keyframes recallTear {
+  to {
+    top: 100%;
+  }
+}
+
+@keyframes recallBlink {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+@keyframes recallJolt {
+  from {
+    transform: translateX(-0.6rem);
+    opacity: 0.4;
+  }
+}
+
+@media (max-width: 640px) {
+  .recallHint {
+    display: none;
+  }
+
+  .recallFrame span {
+    display: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .recall,
+  .recallTear,
+  .recallBack,
+  .recallStamp::after,
+  .recallDot {
+    animation: none;
+  }
+
   .cinematic,
   .letterboxTop,
   .letterboxBottom,
