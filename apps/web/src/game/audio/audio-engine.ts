@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import type { GameController } from '../runtime/controller';
 import type { SpokenLine } from '../runtime/dialogue';
 import type { GameSettings } from '../runtime/settings';
+import { dangerLevel, heartbeatInterval, sightlines } from '../runtime/sightlines';
 import { type LoopName, SoundBank, type SoundName } from './synth';
 
 type Bus = 'music' | 'voice' | 'effects' | 'ambient' | 'ui';
@@ -64,6 +65,8 @@ export class AudioEngine {
   private voiceManifest: VoiceManifest | null = null;
   private readonly voiceCache = new Map<string, Promise<AudioBuffer | null>>();
   private active = 0;
+  /** Audio-clock time of the next heartbeat (0 = not beating). */
+  private nextBeat = 0;
   private listenerPos: Vec2 = { x: 0, z: 0 };
   private readonly forward = new THREE.Vector3();
   private settings: GameSettings | null = null;
@@ -455,6 +458,13 @@ export class AudioEngine {
     if (s.status !== 'running') {
       this.setMusic(s.status === 'success' ? 'theme' : 'none');
       return;
+    }
+    // The squad's pulse quickens as the closest sentry nears a call; it stops whenever the clock does.
+    const beat = this.controller.paused || this.controller.held ? null : heartbeatInterval(dangerLevel(sightlines(s)));
+    if (beat === null) this.nextBeat = 0;
+    else if (ctx.currentTime >= this.nextBeat) {
+      this.play2D('heartbeat', { gain: 0.55 });
+      this.nextBeat = ctx.currentTime + beat;
     }
     const watched = s.operatives.some((op) => op.noticedBy.length > 0);
     this.setMusic(s.alarm.level >= 3 ? 'alert' : 'stealth');

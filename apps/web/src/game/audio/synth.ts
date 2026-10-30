@@ -23,6 +23,7 @@ export type SoundName =
   | 'ui-click'
   | 'ui-deny'
   | 'rewind'
+  | 'heartbeat'
   | 'success'
   | 'failure';
 
@@ -285,6 +286,16 @@ const SOUNDS: Record<SoundName, { seconds: number; peak: number; fill: Fill }> =
     fill: (o, r, rnd) => {
       for (const start of [0, 0.11, 0.22]) addGlide(o, r, 2600, 700, 0.12, 1, (t) => (t < 0.12 ? env(t, 0.004, 0.05) : 0), start);
       addNoise(o, r, rnd, 0.45, (t) => env(t, 0.01, 0.18), { hp: 2200 });
+    },
+  },
+  /** Two low, muffled thumps: the squad's pulse while a sentry is sizing them up. */
+  heartbeat: {
+    seconds: 0.45,
+    peak: 0.55,
+    fill: (o, r, rnd) => {
+      addGlide(o, r, 62, 40, 0.12, 1, (t) => env(t, 0.006, 0.05));
+      addGlide(o, r, 55, 36, 0.12, 0.7, (t) => env(t, 0.006, 0.06), 0.2);
+      addNoise(o, r, rnd, 0.2, (t) => env(t, 0.003, 0.03), { lp: 180 });
     },
   },
   success: {

@@ -3,6 +3,7 @@
 import { AbilityBar } from './ability-bar';
 import { Cinematic } from './cinematic';
 import { ControlBar } from './controls';
+import { DangerRim } from './danger-rim';
 import { Debrief } from './debrief';
 import { EnemyInfo } from './enemy-info';
 import { EventLog } from './event-log';
@@ -53,6 +54,8 @@ export function Hud(props: MenuCallbacks) {
         <Subtitles />
         <AbilityBar />
       </div>
+      {/* Above the panels: a watcher's edge marker must never hide behind one. */}
+      <DangerRim />
       <MenuLayer {...props} />
       <Debrief {...props} />
       <TooltipLayer />

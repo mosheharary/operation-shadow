@@ -9,7 +9,7 @@ import { useSettings } from '../runtime/settings';
 import { useGameUi } from '../runtime/store';
 
 /** Cone colours; the colour-blind palette uses Okabe-Ito hues (alerted cones are striped in both). */
-const CONE_COLORS = {
+export const CONE_COLORS = {
   standard: { calm: '#5fd17a', wary: '#f0a23a', alert: '#ff5a3c' },
   colorblind: { calm: '#56b4e9', wary: '#e69f00', alert: '#d55e00' },
 } as const;

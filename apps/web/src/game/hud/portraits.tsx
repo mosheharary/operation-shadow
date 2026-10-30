@@ -5,11 +5,15 @@ import { type Operative, spyCoverIntact, TICK_RATE, type World } from '@operatio
 import { focusOn } from '../camera/camera-rig';
 import { primaryKey, SELECT_ACTIONS } from '../input/bindings';
 import { useHudTick } from '../runtime/game-context';
+import { type Sightline, sightlines, watchByOperative } from '../runtime/sightlines';
 import { useGameUi } from '../runtime/store';
 import { Icon, type IconName } from './icons';
 import styles from './hud.module.css';
 
-function statusOf(op: Operative, world: World): { icon: IconName; text: string; tone: 'ok' | 'warn' | 'danger' | 'muted' } | null {
+/** What the chip says while a sentry is sizing this operative up, by how far he has got. */
+const WATCH_TEXT = { watch: 'Being watched', suspect: 'Suspicious', close: 'About to be spotted', seen: 'Spotted' } as const;
+
+function statusOf(op: Operative, world: World, watch: Sightline | undefined): { icon: IconName; text: string; tone: 'ok' | 'warn' | 'danger' | 'muted' } | null {
   const tick = world.state.tick;
   switch (op.status) {
     case 'downed':
@@ -23,6 +27,8 @@ function statusOf(op: Operative, world: World): { icon: IconName; text: string; 
     default:
       break;
   }
+  if (watch && !watch.seeing) return { icon: 'eye', text: 'Out of sight', tone: 'warn' };
+  if (watch) return { icon: 'eye', text: WATCH_TEXT[watch.stage], tone: watch.stage === 'close' || watch.stage === 'seen' ? 'danger' : 'warn' };
   if (op.noticedBy.length > 0) return { icon: 'eye', text: 'Being watched', tone: 'warn' };
   if (op.submerged) return { icon: 'wave', text: 'Submerged', tone: 'ok' };
   if (op.role === 'spy') return spyCoverIntact(world, op) ? { icon: 'mask', text: 'Under cover', tone: 'ok' } : { icon: 'alert', text: 'Cover blown', tone: 'danger' };
@@ -35,12 +41,14 @@ export function PortraitBar() {
   const selected = useGameUi((s) => s.selected);
   const select = useGameUi((s) => s.select);
   const { state } = controller.world;
+  const watched = watchByOperative(sightlines(state));
 
   return (
     <ol className={styles.portraits} aria-label="Squad">
       {state.operatives.map((op, index) => {
         const profile = SPECIALIST_PROFILES[op.role];
-        const status = statusOf(op, controller.world);
+        const watch = watched.get(op.id);
+        const status = statusOf(op, controller.world, watch);
         const isSelected = selected.includes(op.id);
         const health = Math.max(0, op.health / op.maxHealth);
         const unavailable = op.status === 'dead' || op.status === 'extracted';
@@ -70,7 +78,11 @@ export function PortraitBar() {
                 <span className={styles.healthFill} style={{ width: `${health * 100}%`, background: health < 0.35 ? 'var(--rust)' : health < 0.7 ? 'var(--brass)' : 'var(--moss)' }} />
               </span>
               {status && (
-                <span className={`${styles.chip} ${styles[`chip_${status.tone}`]}`}>
+                <span
+                  className={`${styles.chip} ${styles[`chip_${status.tone}`]} ${watch ? styles.chipWatch : ''}`}
+                  style={watch ? { ['--watch' as string]: `${Math.round(watch.level * 100)}%` } : undefined}
+                  data-testid={watch ? `watch-${op.role}` : undefined}
+                >
                   <Icon name={status.icon} size={12} />
                   {status.text}
                 </span>

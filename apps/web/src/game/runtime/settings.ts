@@ -29,6 +29,8 @@ export interface GameSettings {
   reducedShake: boolean;
   subtitles: boolean;
   showNoise: boolean;
+  /** Threads from each watching sentry to the operative he is sizing up, and the danger pulse at the screen edge. */
+  showSightlines: boolean;
   showFps: boolean;
   masterVolume: number;
   musicVolume: number;
@@ -54,6 +56,7 @@ const DEFAULTS: GameSettings = {
   reducedShake: false,
   subtitles: true,
   showNoise: true,
+  showSightlines: true,
   showFps: false,
   masterVolume: 0.8,
   musicVolume: 0.55,

@@ -9,6 +9,9 @@ interface GameProbe {
   conesVisible: number;
   rigs: { authored: number; procedural: number };
   operatives: { id: string; role: string; x: number; z: number; status: string; stance: string; busy: boolean }[];
+  guards: { id: string; x: number; z: number; status: string; state: string }[];
+  sightlines: { guardId: string; targetId: string; level: number; stage: 'watch' | 'suspect' | 'close' | 'seen'; seeing: boolean }[];
+  sightlinesVisible: number;
 }
 
 declare global {

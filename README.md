@@ -68,6 +68,11 @@ casualties that followed listed above a film strip of the frames. Scrub with ←
 Enter plays on from there in tactical pause (what came after is erased), Esc returns to the present untouched. The
 debrief counts how often the tape was wound back.
 
+You can see a sentry make up his mind. When one notices a squad member, a sightline runs from his eyes and creeps
+toward them as his suspicion builds, pale, then amber, then red; if it reaches them, they are spotted. The screen edge
+throbs with a quickening heartbeat, a watcher out of view gets an eye on the edge pointing at him, and the portrait
+says how far he has got. Get down or out of his line before the thread arrives.
+
 Stay out of the bright inner part of a view cone, keep to shadows and grass, hide bodies and tie up unconscious
 sentries: they wake up. Noise rings on the ground show how far a sound carries.
 

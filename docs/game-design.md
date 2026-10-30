@@ -38,7 +38,12 @@ bolts for OWL's suppressed rifle and OTTER's harpoon. Each specialist has a role
 
 - **Sight:** each guard has a near cone (sees you even crouched) and a far cone (sees you standing or in light).
   Visibility depends on stance, movement, light (lamps, searchlights, time of day), weather and cover such as tall
-  grass. Suspicion builds over time instead of instant detection.
+  grass. Suspicion builds over time instead of instant detection, and you can watch it build: a sentry who has
+  noticed someone casts a sightline, a thread from his eyes that lights up and creeps toward the operative as his
+  suspicion grows (pale while he only looks, amber once suspicious, red when he is about to call it; touching the
+  operative means spotted) and breaks into a dim dotted line once he loses sight. The screen edge throbs with a
+  heartbeat that quickens with the closest call, a watcher out of view gets an eye on the screen edge pointing at
+  him, and the portrait chip names the stage and fills with the suspicion. Settings can switch the threads and rim off.
 - **Sound:** footsteps (by surface, stance and gait), tools, doors, shots and explosions propagate with distance and
   walls against a weather-dependent noise floor. Noise rings show how far a sound carries.
 - **Guards:** a deterministic state machine: post or patrol → observe → suspicious → investigate → search →

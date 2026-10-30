@@ -205,6 +205,37 @@ test.describe('Silent Tide', () => {
     await page.keyboard.up('Alt');
   });
 
+  test('a sentry sizing BADGER up shows a sightline, the danger rim and a filling chip', async ({ page }) => {
+    await startMission(page);
+    await page.keyboard.press('Digit1');
+    await page.keyboard.press('KeyZ');
+    const start = (await probe(page)).operatives.find((o) => o.id === 'op:engineer')!;
+    const sentry = (await probe(page)).guards.find((g) => g.id === 'g:beach')!;
+    // Walk upright up the open beach toward the beach patrol.
+    const target = (await screenOf(page, start.x + (sentry.x - start.x) * 0.7, start.z + (sentry.z - start.z) * 0.7))!;
+    await page.mouse.click(target.x, target.y, { button: 'right' });
+    // Pause the moment he starts watching, before he can make up his mind.
+    await expect
+      .poll(
+        async () => {
+          const p = await probe(page);
+          const live = p.sightlines.some((l) => l.targetId === 'op:engineer' && l.seeing);
+          if (live && !p.paused) await page.keyboard.press('Space');
+          return live;
+        },
+        { timeout: 60_000, intervals: [100] },
+      )
+      .toBe(true);
+    await expect.poll(async () => (await probe(page)).paused).toBe(true);
+    const watched = await probe(page);
+    const line = watched.sightlines.find((l) => l.targetId === 'op:engineer')!;
+    expect(line.level).toBeGreaterThan(0);
+    expect(line.level).toBeLessThanOrEqual(1);
+    await expect.poll(async () => (await probe(page)).sightlinesVisible).toBeGreaterThan(0);
+    await expect(page.getByTestId('danger-rim')).not.toHaveAttribute('data-level', 'calm');
+    await expect(page.getByTestId('watch-engineer')).toBeVisible();
+  });
+
   test('a squad that charges the garrison is lost and gets an honest debrief', async ({ page }) => {
     test.slow();
     await startMission(page);

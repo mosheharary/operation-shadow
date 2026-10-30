@@ -228,6 +228,10 @@ function SettingsFields() {
           <span>Show noise rings</span>
         </label>
         <label className={styles.check}>
+          <input type="checkbox" checked={settings.showSightlines} onChange={(e) => settings.update({ showSightlines: e.target.checked })} />
+          <span>Show sightlines and danger pulse</span>
+        </label>
+        <label className={styles.check}>
           <input type="checkbox" checked={settings.reducedShake} onChange={(e) => settings.update({ reducedShake: e.target.checked })} />
           <span>Reduce camera shake</span>
         </label>

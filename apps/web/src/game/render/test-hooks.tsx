@@ -1,10 +1,11 @@
 'use client';
 
-import type { AlarmLevel, OperativeStatus, Stance } from '@operation-shadow/engine';
+import type { AlarmLevel, GuardStateName, GuardStatus, OperativeStatus, Stance } from '@operation-shadow/engine';
 import { useThree } from '@react-three/fiber';
 import { useEffect } from 'react';
 import * as THREE from 'three';
 import type { GameController } from '../runtime/controller';
+import { type Sightline, sightlines } from '../runtime/sightlines';
 import { useGameUi } from '../runtime/store';
 import { rigCounts } from './rig';
 
@@ -19,6 +20,10 @@ export interface GameProbe {
   /** Characters drawn as authored (skinned glTF) and as procedural figures. */
   rigs: { authored: number; procedural: number };
   operatives: { id: string; role: string; x: number; z: number; status: OperativeStatus; stance: Stance; busy: boolean }[];
+  guards: { id: string; x: number; z: number; status: GuardStatus; state: GuardStateName }[];
+  /** Watch threads in the simulation, and how many the overlay is drawing. */
+  sightlines: Sightline[];
+  sightlinesVisible: number;
 }
 
 declare global {
@@ -35,10 +40,10 @@ declare global {
   }
 }
 
-function countCones(scene: THREE.Scene): number {
+function countVisible(scene: THREE.Scene, names: string[]): number {
   let n = 0;
   scene.traverseVisible((o) => {
-    if (o.name === 'cone-far' || o.name === 'cone-near') n += 1;
+    if (names.includes(o.name)) n += 1;
   });
   return n;
 }
@@ -64,7 +69,7 @@ export function TestHooks({ controller }: { controller: GameController }) {
           paused: controller.paused,
           alarm: s.alarm.level,
           selected: [...useGameUi.getState().selected],
-          conesVisible: countCones(scene),
+          conesVisible: countVisible(scene, ['cone-far', 'cone-near']),
           rigs: { ...rigCounts },
           operatives: s.operatives.map((op) => ({
             id: op.id,
@@ -75,6 +80,9 @@ export function TestHooks({ controller }: { controller: GameController }) {
             stance: op.stance,
             busy: op.action !== null,
           })),
+          guards: s.guards.map((g) => ({ id: g.id, x: g.pos.x, z: g.pos.z, status: g.status, state: g.state })),
+          sightlines: sightlines(s),
+          sightlinesVisible: countVisible(scene, ['sightline']),
         };
       },
       screenOf: (x, z) => project(x, controller.world.grid.heightAt({ x, z }), z),

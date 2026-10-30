@@ -22,6 +22,7 @@ import { Overlay } from './overlay';
 import { PostEffects } from './post';
 import { Props } from './props';
 import { Rocks } from './rocks';
+import { Sightlines } from './sightlines';
 import { Structures } from './structures';
 import { TargetingPreview, TutorialMarker } from './targeting';
 import { Terrain } from './terrain';
@@ -113,6 +114,7 @@ export function GameScene({ controller, onSample = ignoreSample, testHooks = fal
       <WorldObjects controller={controller} />
       <Units controller={controller} />
       <Overlay controller={controller} />
+      <Sightlines controller={controller} />
       <TargetingPreview controller={controller} />
       {controller.entry.tutorial && <TutorialMarker controller={controller} />}
       <Effects controller={controller} />

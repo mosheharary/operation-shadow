@@ -180,6 +180,14 @@
   color: #f3a28c;
 }
 
+/* While a sentry sizes the operative up, the chip fills as his suspicion does. */
+.chipWatch {
+  background-image: linear-gradient(90deg, currentColor 0 var(--watch), transparent var(--watch));
+  background-size: 100% 2px;
+  background-repeat: no-repeat;
+  background-position: bottom left;
+}
+
 .chip_muted {
   background: rgba(255, 255, 255, 0.08);
   color: var(--muted);
@@ -1596,5 +1604,139 @@
   .caption,
   .verdict {
     animation-duration: 0.01s;
+  }
+}
+
+/* Danger rim: the screen edge throbs while a sentry is sizing the squad up, and watchers out of view
+   get an eye on the edge pointing at them (see danger-rim.tsx; the threads are drawn in the world). */
+.dangerRim {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  --danger: 0;
+  --beat: 1.4s;
+  --rim: 239, 228, 194;
+}
+
+.dangerRim[data-level='suspect'] {
+  --rim: 240, 162, 58;
+}
+
+.dangerRim[data-level='close'] {
+  --rim: 255, 74, 48;
+}
+
+.dangerVignette,
+.dangerVignette::after {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 52%, rgba(var(--rim), 0.16) 80%, rgba(var(--rim), 0.42) 100%);
+}
+
+.dangerVignette {
+  opacity: calc(var(--danger) * 0.75);
+  transition: opacity 0.35s ease;
+}
+
+/* The pulse: a double thump, only once a sentry is suspicious. */
+.dangerVignette::after {
+  content: '';
+  opacity: 0;
+}
+
+.dangerRim[data-level='suspect'] .dangerVignette::after,
+.dangerRim[data-level='close'] .dangerVignette::after {
+  animation: heartbeat var(--beat) ease-out infinite;
+}
+
+@keyframes heartbeat {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  22% {
+    opacity: 0.2;
+  }
+  32% {
+    opacity: 0.7;
+  }
+  60% {
+    opacity: 0;
+  }
+}
+
+.watcherMark {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  transition: opacity 0.25s ease;
+  --angle: 0rad;
+  --fill: 0%;
+  --mark: 239, 228, 194;
+}
+
+.watcherMark[data-on='0'] {
+  opacity: 0;
+}
+
+.watcherMark[data-stage='suspect'] {
+  --mark: 240, 162, 58;
+}
+
+.watcherMark[data-stage='close'],
+.watcherMark[data-stage='seen'] {
+  --mark: 255, 74, 48;
+}
+
+.watcherRing {
+  position: absolute;
+  left: -18px;
+  top: -18px;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: rgb(var(--mark));
+  background:
+    radial-gradient(circle, var(--panel-bg) 60%, transparent 62%),
+    conic-gradient(rgb(var(--mark)) var(--fill), rgba(255, 255, 255, 0.14) 0);
+  box-shadow: 0 0 14px rgba(var(--mark), 0.45);
+}
+
+.watcherMark[data-stage='close'] .watcherRing {
+  animation: watcherThrob 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes watcherThrob {
+  to {
+    box-shadow: 0 0 24px rgba(var(--mark), 0.85);
+  }
+}
+
+/* The chevron sits outside the ring on the side the watcher is. */
+.watcherArrow {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  transform-origin: 0 0;
+  transform: rotate(var(--angle)) translate(21px, -6px);
+  border-left: 9px solid rgb(var(--mark));
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dangerRim .dangerVignette::after,
+  .watcherMark .watcherRing {
+    animation: none;
   }
 }
