@@ -105,6 +105,19 @@ trouble on the way and a ten-second strip with the ghosts' playhead. Every new o
 off in the settings. The forecast is pure logic (`runtime/foresight.ts`, with unit tests that check it never touches
 the real world and lands where play then really goes).
 
+**Turning points.** The few moments that decide a mission land with weight instead of passing as a toast: a sentry
+dropped or killed, a squad member spotted, the sector alarm, a man down, killed or captured, an objective done or
+lost, and the last required objective (which sends the squad home). The clock dips into slow motion for a breath and
+eases back (a takedown barely, a sighting or casualty for over a second), colour drains from the world, the world's
+sounds close up as if heard underwater, a shockwave runs across the ground from the spot, and an ink stamp slams down
+over it naming the moment ("Spotted / BADGER, seen by a sentry", "Objective complete / Topple the mast"). The last
+required objective stamps "Now extract" on the extraction point; a spot out of view keeps its stamp on the screen edge
+with a needle pointing the way. A weightier moment cuts across a lesser one on screen, a lesser one is dropped, and a
+sighting or alarm is not stamped again for a few seconds, so a firefight is one beat, not twenty. Only the clock's
+pace changes, never the simulation, so play stays deterministic. It can be switched off in the settings (the old
+toasts then return). The choice of moments, their pace curve and the ordering are pure logic (`runtime/beats.ts`, with
+unit tests).
+
 ## Scoring
 
 Success scores 1,000 plus: time against par (up to 400), stealth by peak alarm minus detections (up to 300), restraint

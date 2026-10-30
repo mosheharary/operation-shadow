@@ -24,6 +24,7 @@ export type SoundName =
   | 'ui-deny'
   | 'rewind'
   | 'heartbeat'
+  | 'stamp'
   | 'success'
   | 'failure';
 
@@ -296,6 +297,16 @@ const SOUNDS: Record<SoundName, { seconds: number; peak: number; fill: Fill }> =
       addGlide(o, r, 62, 40, 0.12, 1, (t) => env(t, 0.006, 0.05));
       addGlide(o, r, 55, 36, 0.12, 0.7, (t) => env(t, 0.006, 0.06), 0.2);
       addNoise(o, r, rnd, 0.2, (t) => env(t, 0.003, 0.03), { lp: 180 });
+    },
+  },
+  /** A rubber stamp brought down hard on a wooden table: a deep knock and the slap of paper. */
+  stamp: {
+    seconds: 0.7,
+    peak: 0.7,
+    fill: (o, r, rnd) => {
+      addGlide(o, r, 140, 48, 0.05, 1, (t) => env(t, 0.002, 0.11));
+      addNoise(o, r, rnd, 0.7, (t) => env(t, 0.001, 0.02), { lp: 2400, hp: 300 });
+      addGlide(o, r, 70, 38, 0.2, 0.45, (t) => env(t, 0.01, 0.25), 0.02);
     },
   },
   success: {

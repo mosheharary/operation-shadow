@@ -24,6 +24,8 @@ export interface GameProbe {
   /** Watch threads in the simulation, and how many the overlay is drawing. */
   sightlines: Sightline[];
   sightlinesVisible: number;
+  /** The turning point on screen (see beats.ts) and the clock's pace it sets, or null. */
+  beat: { kind: string; title: string; scale: number } | null;
 }
 
 declare global {
@@ -83,6 +85,11 @@ export function TestHooks({ controller }: { controller: GameController }) {
           guards: s.guards.map((g) => ({ id: g.id, x: g.pos.x, z: g.pos.z, status: g.status, state: g.state })),
           sightlines: sightlines(s),
           sightlinesVisible: countVisible(scene, ['sightline']),
+          beat: (() => {
+            const now = performance.now();
+            const beat = controller.beats.showing(now);
+            return beat ? { kind: beat.kind, title: beat.title, scale: controller.beats.scale(now) } : null;
+          })(),
         };
       },
       screenOf: (x, z) => project(x, controller.world.grid.heightAt({ x, z }), z),

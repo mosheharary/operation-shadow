@@ -13,6 +13,7 @@ import {
   World,
 } from '@operation-shadow/engine';
 import type { SavePayload } from '@operation-shadow/schemas';
+import { BeatDirector } from './beats';
 import { RecallTape } from './recall';
 import { MissionTrace } from './trace';
 
@@ -54,6 +55,8 @@ export class GameController {
   recalls = 0;
   /** The whole attempt's routes and incidents, for the debrief's after-action chart (see trace.ts). */
   readonly trace = new MissionTrace();
+  /** Turning points: a breath of slow motion and a stamp when something decisive happens (see beats.ts). */
+  readonly beats = new BeatDirector();
 
   private accumulator = 0;
   private readonly previous = new Map<string, { x: number; z: number; facing: number }>();
@@ -77,8 +80,9 @@ export class GameController {
   /** Advances the simulation by real elapsed time; call once per rendered frame. */
   advance(dtSeconds: number): void {
     const s = this.world.state;
+    const now = performance.now();
     if (!this.paused && !this.held && s.status === 'running') {
-      this.accumulator += Math.min(dtSeconds, MAX_FRAME_SECONDS) * this.speed;
+      this.accumulator += Math.min(dtSeconds, MAX_FRAME_SECONDS) * this.speed * this.beats.scale(now);
       let steps = 0;
       while (this.accumulator >= DT && steps < 12) {
         this.capturePrevious();
@@ -88,13 +92,13 @@ export class GameController {
         this.tape.observe(events, this.world);
         this.tape.record(this.world);
         this.trace.observe(events, this.world);
+        this.beats.observe(events, this.world, now);
         if (events.length > 0) for (const listener of this.eventListeners) listener(events);
       }
       this.alpha = Math.min(1, this.accumulator / DT);
     } else {
       this.alpha = 1;
     }
-    const now = performance.now();
     if (now - this.lastHud >= HUD_INTERVAL_MS) {
       this.lastHud = now;
       this.notifyHud();
@@ -166,6 +170,7 @@ export class GameController {
     this.previous.clear();
     this.accumulator = 0;
     this.speed = 1;
+    this.beats.clear();
     this.notifyHud();
   }
 
@@ -178,6 +183,7 @@ export class GameController {
     this.speed = 1;
     this.tape.clear();
     this.recalls = 0;
+    this.beats.clear();
     this.tape.record(this.world);
     this.trace.begin(this.world);
     this.notifyHud();

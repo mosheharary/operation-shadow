@@ -1,5 +1,6 @@
 import { type GameEvent, obstructionLoss, Surface, type Vec2 } from '@operation-shadow/engine';
 import * as THREE from 'three';
+import { type Beat, BEAT_STYLES } from '../runtime/beats';
 import type { GameController } from '../runtime/controller';
 import type { SpokenLine } from '../runtime/dialogue';
 import type { GameSettings } from '../runtime/settings';
@@ -59,6 +60,8 @@ export class AudioEngine {
   private master!: GainNode;
   private buses = {} as Record<Bus, GainNode>;
   private duck!: GainNode;
+  /** Low-pass over the world's sounds, closed for a breath during a turning point. */
+  private muffle!: BiquadFilterNode;
   private readonly loops = new Map<LoopName, { source: AudioBufferSourceNode; gain: GainNode }>();
   private readonly music = new Map<MusicTrack, { el: HTMLAudioElement; gain: GainNode }>();
   private musicState: MusicTrack | 'none' = 'none';
@@ -86,9 +89,13 @@ export class AudioEngine {
     this.master.connect(ctx.destination);
     this.duck = ctx.createGain();
     this.duck.connect(this.master);
+    this.muffle = ctx.createBiquadFilter();
+    this.muffle.type = 'lowpass';
+    this.muffle.frequency.value = 20000;
+    this.muffle.connect(this.master);
     for (const bus of ['music', 'voice', 'effects', 'ambient', 'ui'] as Bus[]) {
       const gain = ctx.createGain();
-      gain.connect(bus === 'music' ? this.duck : this.master);
+      gain.connect(bus === 'music' ? this.duck : bus === 'effects' || bus === 'ambient' ? this.muffle : this.master);
       this.buses[bus] = gain;
     }
     this.applySettings(settings);
@@ -289,6 +296,25 @@ export class AudioEngine {
 
   uiDeny(): void {
     this.play2D('ui-deny', { gain: 0.6 });
+  }
+
+  /**
+   * A turning point (see runtime/beats.ts): the world's sounds close up as if heard underwater for
+   * as long as the clock is slowed, and a stamp comes down (the spotted stinger already marks a
+   * sighting).
+   */
+  beat(beat: Beat): void {
+    const ctx = this.ctx;
+    if (!ctx || ctx.state !== 'running') return;
+    const { hold, recover } = BEAT_STYLES[beat.kind];
+    const t = ctx.currentTime;
+    const f = this.muffle.frequency;
+    f.cancelScheduledValues(t);
+    f.setValueAtTime(f.value, t);
+    f.exponentialRampToValueAtTime(650, t + 0.08);
+    f.setValueAtTime(650, t + 0.08 + hold);
+    f.exponentialRampToValueAtTime(20000, t + 0.08 + hold + recover);
+    if (beat.kind !== 'spotted') this.play2D('stamp', { gain: beat.tone === 'quiet' ? 0.45 : 0.75, delay: 0.06 });
   }
 
   /** The field recorder winding to another frame. */

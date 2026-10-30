@@ -31,7 +31,8 @@ export function wireSessionEvents(controller: GameController, dialogue: Dialogue
           break;
         case 'detected': {
           const op = world.operative(e.targetId);
-          if (op) ui.toast(`${SPECIALIST_PROFILES[op.role].callSign} has been spotted`, 'danger');
+          // With turning points on, the sighting gets its stamp on the spot instead (see beats.ts).
+          if (op && !controller.beats.enabled) ui.toast(`${SPECIALIST_PROFILES[op.role].callSign} has been spotted`, 'danger');
           break;
         }
         case 'alarm':
@@ -50,7 +51,7 @@ export function wireSessionEvents(controller: GameController, dialogue: Dialogue
           break;
         }
         case 'objective':
-          if (e.status === 'completed') ui.toast('Objective complete', 'info');
+          if (e.status === 'completed' && !controller.beats.enabled) ui.toast('Objective complete', 'info');
           else if (e.status === 'active') ui.toast('New objective', 'info');
           break;
         default:

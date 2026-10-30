@@ -236,6 +236,10 @@ function SettingsFields() {
           <span>Foresight in tactical pause</span>
         </label>
         <label className={styles.check}>
+          <input type="checkbox" checked={settings.showBeats} onChange={(e) => settings.update({ showBeats: e.target.checked })} />
+          <span>Turning points: slow motion and a stamp when something decisive happens</span>
+        </label>
+        <label className={styles.check}>
           <input type="checkbox" checked={settings.reducedShake} onChange={(e) => settings.update({ reducedShake: e.target.checked })} />
           <span>Reduce camera shake</span>
         </label>

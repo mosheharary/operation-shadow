@@ -10,6 +10,7 @@ import { GameInput } from '../input/game-input';
 import type { GameController } from '../runtime/controller';
 import { useSettings } from '../runtime/settings';
 import { useGameUi } from '../runtime/store';
+import { Beats } from './beats';
 import { Effects } from './effects';
 import { Foresight } from './foresight';
 import { skyFor } from './sky';
@@ -120,6 +121,7 @@ export function GameScene({ controller, onSample = ignoreSample, testHooks = fal
       <TargetingPreview controller={controller} />
       {controller.entry.tutorial && <TutorialMarker controller={controller} />}
       <Effects controller={controller} />
+      <Beats controller={controller} />
       <CameraRig controller={controller} edgeScroll={edgeScroll} reducedShake={reducedShake} />
       <GameInput controller={controller} />
       {post && <PostEffects sky={skyFor(hour)} />}

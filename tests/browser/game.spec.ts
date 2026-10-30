@@ -240,6 +240,23 @@ test.describe('Silent Tide', () => {
     await expect(page.getByTestId('watch-engineer')).toBeVisible();
   });
 
+  test('a sighting is a turning point: a stamp lands on the spot and the clock catches its breath', async ({ page }) => {
+    await startMission(page);
+    await page.keyboard.press('Digit1');
+    await page.keyboard.press('KeyZ');
+    const start = (await probe(page)).operatives.find((o) => o.id === 'op:engineer')!;
+    const sentry = (await probe(page)).guards.find((g) => g.id === 'g:beach')!;
+    // Walk upright up the open beach toward the beach patrol, and stay in his sight.
+    const target = (await screenOf(page, start.x + (sentry.x - start.x) * 0.7, start.z + (sentry.z - start.z) * 0.7))!;
+    await page.mouse.click(target.x, target.y, { button: 'right' });
+    // Read straight off the page: the stamp is only up for a couple of seconds.
+    const stampKind = () => page.evaluate(() => document.querySelector<HTMLElement>('[data-testid="beat-stamp"]')?.dataset.kind ?? null);
+    await expect.poll(stampKind, { timeout: 60_000, intervals: [100] }).toMatch(/spotted|alarm/);
+    // The moment passes: the stamp lifts and the clock runs at full pace again.
+    await expect(page.getByTestId('beat-stamp')).toBeHidden({ timeout: 15_000 });
+    await expect.poll(async () => (await probe(page)).beat).toBeNull();
+  });
+
   test('a squad that charges the garrison is lost and gets an honest debrief', async ({ page }) => {
     test.slow();
     await startMission(page);

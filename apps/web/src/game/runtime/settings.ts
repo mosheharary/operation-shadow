@@ -33,6 +33,8 @@ export interface GameSettings {
   showSightlines: boolean;
   /** In tactical pause, ghosts play out the next ten seconds and warn of a sighting on the way. */
   showForesight: boolean;
+  /** A breath of slow motion and an ink stamp on the spot when something decisive happens (see beats.ts). */
+  showBeats: boolean;
   showFps: boolean;
   masterVolume: number;
   musicVolume: number;
@@ -60,6 +62,7 @@ const DEFAULTS: GameSettings = {
   showNoise: true,
   showSightlines: true,
   showForesight: true,
+  showBeats: true,
   showFps: false,
   masterVolume: 0.8,
   musicVolume: 0.55,

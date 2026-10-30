@@ -63,7 +63,13 @@ export function PlaySession({ setup, title, fallback }: { setup: GameSetup; titl
     setActiveAudio(audio);
     const stopAudioEvents = controller.onEvents((events) => audio.handle(events));
     const stopVoices = dialogue.onLine((line) => audio.speak(line));
-    const stopSettings = useSettings.subscribe((settings) => audio.applySettings(settings));
+    const stopBeats = controller.beats.onBeat((beat) => audio.beat(beat));
+    // Turning points follow their setting (see beats.ts).
+    controller.beats.setEnabled(useSettings.getState().showBeats);
+    const stopSettings = useSettings.subscribe((settings) => {
+      audio.applySettings(settings);
+      controller.beats.setEnabled(settings.showBeats);
+    });
     const first = controller.world.state.operatives[0];
     if (first) useGameUi.getState().select([first.id]);
     if (setup.initialSave) restoreView(controller, setup.initialSave);
@@ -77,6 +83,7 @@ export function PlaySession({ setup, title, fallback }: { setup: GameSetup; titl
       unsubscribe();
       stopAudioEvents();
       stopVoices();
+      stopBeats();
       stopSettings();
       setActiveAudio(null);
       audio.dispose();

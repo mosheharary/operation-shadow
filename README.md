@@ -79,6 +79,11 @@ toward them as his suspicion builds, pale, then amber, then red; if it reaches t
 throbs with a quickening heartbeat, a watcher out of view gets an eye on the edge pointing at him, and the portrait
 says how far he has got. Get down or out of his line before the thread arrives.
 
+The moments that decide a mission land with weight. A sentry dropped, a squad member spotted, the alarm, a man down
+or an objective done: the clock dips into slow motion for a breath, the colour drains, and an ink stamp slams down on
+the spot naming what just happened. Finishing the last required objective stamps **Now extract** on the way out, with
+a needle on the screen edge if it is out of view. Turn it off under Settings if you prefer plain toasts.
+
 Tactical pause shows the future. While paused the world greys like a plan on a table and the next ten seconds play out
 as ghosts: every patrol and every squad member with an order walks a dotted track on a short loop, a sentry starting to
 size someone up is ringed amber, and a sighting is ringed red with a thread from the sentry, where the forecast stops.

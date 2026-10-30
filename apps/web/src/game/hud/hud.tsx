@@ -1,6 +1,7 @@
 'use client';
 
 import { AbilityBar } from './ability-bar';
+import { BeatStamp, BeatVeil } from './beat-stamp';
 import { Cinematic } from './cinematic';
 import { ControlBar } from './controls';
 import { DangerRim } from './danger-rim';
@@ -33,6 +34,7 @@ export function Hud(props: MenuCallbacks) {
     <div className={styles.hud} data-cinematic={cinematic?.kind ?? (recalling ? 'recall' : undefined)}>
       {/* Under every panel: it tints the world, not the HUD. */}
       <ForesightTint />
+      <BeatVeil />
       {controller.entry.tutorial && <TutorialPanel />}
       <DragBox />
       <div className={styles.topLeft}>
@@ -60,6 +62,7 @@ export function Hud(props: MenuCallbacks) {
       </div>
       {/* Above the panels: a watcher's edge marker must never hide behind one. */}
       <DangerRim />
+      <BeatStamp />
       <MenuLayer {...props} />
       <Debrief {...props} />
       <TooltipLayer />

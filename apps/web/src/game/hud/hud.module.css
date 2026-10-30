@@ -2095,3 +2095,204 @@
     animation: none;
   }
 }
+
+/* Turning points: a breath of grey over the world and an ink stamp on the spot (see beat-stamp.tsx). */
+.beatTint,
+.beatAnchor {
+  --ink: 217, 210, 189;
+}
+
+.beatTint[data-tone='good'],
+.beatAnchor[data-tone='good'] {
+  --ink: 159, 214, 138;
+}
+
+.beatTint[data-tone='warning'],
+.beatAnchor[data-tone='warning'] {
+  --ink: 240, 180, 80;
+}
+
+.beatTint[data-tone='danger'],
+.beatAnchor[data-tone='danger'] {
+  --ink: 255, 90, 72;
+}
+
+/* Colour drains from the world while the clock is slowed, and comes back with it. */
+.beatVeil {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, rgba(128, 128, 128, 0.55) 40%, rgba(128, 128, 128, 0.8) 100%);
+  mix-blend-mode: saturation;
+  opacity: 0;
+  animation: beat-breath var(--breath) ease-out forwards;
+}
+
+.beatTint {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 50%, rgba(var(--ink), 0.24) 100%);
+  opacity: 0;
+  animation: beat-breath var(--breath) ease-out forwards;
+}
+
+@keyframes beat-breath {
+  0% {
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  45% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.beatAnchor {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  --angle: 0rad;
+}
+
+.beatStamp {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  min-width: 9rem;
+  max-width: 17rem;
+  padding: 0.4rem 0.85rem 0.45rem;
+  border: 3px solid rgba(var(--ink), 0.92);
+  outline: 1px solid rgba(var(--ink), 0.6);
+  outline-offset: 3px;
+  border-radius: 3px;
+  background: rgba(10, 12, 14, 0.5);
+  color: rgb(var(--ink));
+  text-align: center;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.7);
+  white-space: nowrap;
+  transform-origin: 50% 100%;
+  animation: beat-stamp var(--show) cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
+}
+
+.beatAnchor[data-edge='1'] .beatStamp {
+  bottom: auto;
+  top: 0;
+  transform-origin: 50% 50%;
+  animation-name: beat-stamp-edge;
+}
+
+.beatStamp strong {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-heading);
+  font-size: 1.55rem;
+  line-height: 1;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.beatStamp > span {
+  font-family: var(--font-type);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  color: rgba(var(--ink), 0.85);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.beatArrow {
+  display: none;
+  width: 0;
+  height: 0;
+  border-top: 0.45rem solid transparent;
+  border-bottom: 0.45rem solid transparent;
+  border-left: 0.8rem solid rgb(var(--ink));
+  transform: rotate(var(--angle));
+}
+
+.beatAnchor[data-edge='1'] .beatArrow {
+  display: inline-block;
+}
+
+/* Slams down from above the table, settles askew, holds, then lifts away. */
+@keyframes beat-stamp {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -1.2rem) scale(2.3) rotate(-14deg);
+  }
+  7% {
+    opacity: 1;
+    transform: translate(-50%, -1.2rem) scale(0.94) rotate(-4deg);
+  }
+  11% {
+    transform: translate(-50%, -1.2rem) scale(1.03) rotate(-5deg);
+  }
+  15%,
+  85% {
+    opacity: 1;
+    transform: translate(-50%, -1.2rem) scale(1) rotate(-5deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -2rem) scale(1) rotate(-5deg);
+  }
+}
+
+@keyframes beat-stamp-edge {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(2.3) rotate(-14deg);
+  }
+  7% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(0.94) rotate(-4deg);
+  }
+  15%,
+  85% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1) rotate(-5deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1) rotate(-5deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .beatStamp,
+  .beatAnchor[data-edge='1'] .beatStamp {
+    animation-name: beat-fade;
+  }
+
+  .beatAnchor[data-edge='1'] .beatStamp {
+    transform: translate(-50%, -50%) rotate(-5deg);
+  }
+
+  .beatStamp {
+    transform: translate(-50%, -1.2rem) rotate(-5deg);
+  }
+}
+
+@keyframes beat-fade {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  8%,
+  85% {
+    opacity: 1;
+  }
+}

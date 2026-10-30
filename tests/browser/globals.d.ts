@@ -12,6 +12,7 @@ interface GameProbe {
   guards: { id: string; x: number; z: number; status: string; state: string }[];
   sightlines: { guardId: string; targetId: string; level: number; stage: 'watch' | 'suspect' | 'close' | 'seen'; seeing: boolean }[];
   sightlinesVisible: number;
+  beat: { kind: string; title: string; scale: number } | null;
 }
 
 declare global {
