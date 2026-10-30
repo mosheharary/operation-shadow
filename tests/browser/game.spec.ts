@@ -55,6 +55,20 @@ test.describe('Silent Tide', () => {
     await expect(page.getByTestId('portrait-medic')).toBeVisible();
   });
 
+  test('a fresh mission opens on the insertion reel with the clock held, and a key skips it', async ({ page }) => {
+    await page.goto(`/play/silent-tide?squad=${SQUAD}&seed=42`);
+    const reel = page.getByTestId('cinematic');
+    await expect(reel).toBeVisible({ timeout: 60_000 });
+    await expect(reel).toHaveAttribute('data-kind', 'intro');
+    await expect(reel).toContainText('Silent Tide');
+    expect((await probe(page)).tick).toBe(0);
+    await page.keyboard.press('Space');
+    await expect(reel).toBeHidden();
+    // The skipping key never reaches the game: Space did not pause it.
+    await expect.poll(async () => (await probe(page)).tick).toBeGreaterThan(10);
+    expect((await probe(page)).paused).toBe(false);
+  });
+
   test('an invalid squad in the URL returns to the briefing with the reason', async ({ page }) => {
     await page.goto('/play/silent-tide?squad=recon,marine,medic');
     await expect(page).toHaveURL(/\/missions\/silent-tide\?error=/);

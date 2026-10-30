@@ -8,6 +8,7 @@ import { getBindings, isBound } from '../input/bindings';
 import type { GameController } from '../runtime/controller';
 import { useSettings } from '../runtime/settings';
 import { useGameUi } from '../runtime/store';
+import { type CameraPose, reelPose } from './cinematic';
 
 const DEFAULT_PITCH = 0.93;
 const DEFAULT_DISTANCE = 40;
@@ -57,6 +58,10 @@ export function setCameraView(view: CameraView | null): void {
   requestedView = view ? { ...view } : null;
 }
 
+let livePose: CameraPose | null = null;
+/** What the camera shows right now (the look point, not the pan target), for the closing shot. */
+export const getCameraPose = (): CameraPose | null => (livePose ? { ...livePose } : null);
+
 const focusPoint = new THREE.Vector3();
 const forward = new THREE.Vector3();
 /** Ground point the camera looks at (used by lighting and effects to stay near the action). */
@@ -70,7 +75,7 @@ export function cameraFocus(camera: THREE.Camera): THREE.Vector3 {
  * Opening view: a classic diagonal (isometric) angle that looks from the insertion point toward
  * the primary objective, so the mission area fills the screen instead of the map edge.
  */
-function openingView(controller: GameController): { yaw: number; target: Vec2 } {
+export function openingView(controller: GameController): { yaw: number; target: Vec2 } {
   const spawn = controller.mission.squadSpawns[0]?.pos ?? { x: controller.level.width / 2, z: controller.level.depth / 2 };
   const primary = controller.mission.objectives.find((o) => o.required);
   const objectId = primary?.kind === 'disable-target' ? primary.targetId : primary?.kind === 'acquire-item' ? primary.itemObjectId : primary?.kind === 'rescue' ? primary.prisonerId : null;
@@ -80,6 +85,39 @@ function openingView(controller: GameController): { yaw: number; target: Vec2 } 
   const yaw = Math.round((raw - Math.PI / 4) / (Math.PI / 2)) * (Math.PI / 2) + Math.PI / 4;
   const look = { x: -Math.sin(yaw), z: -Math.cos(yaw) };
   return { yaw, target: { x: spawn.x + look.x * 9, z: spawn.z + look.z * 9 } };
+}
+
+/** The opening view as a full pose: where the insertion reel ends and play begins. */
+export function openingPose(controller: GameController): CameraPose {
+  const { yaw, target } = openingView(controller);
+  return { x: target.x, z: target.z, yaw, pitch: DEFAULT_PITCH, distance: DEFAULT_DISTANCE };
+}
+
+/** Places the camera for a pose: behind and above the look point, never under the terrain. */
+function placeCamera(camera: THREE.Camera, controller: GameController, pose: CameraPose, jitter = 0): void {
+  const grid = controller.world.grid;
+  const ground = grid.heightAt({ x: pose.x, z: pose.z });
+  const horizontal = Math.cos(pose.pitch) * pose.distance;
+  let cx = pose.x + Math.sin(pose.yaw) * horizontal;
+  let cz = pose.z + Math.cos(pose.yaw) * horizontal;
+  let cy = ground + Math.sin(pose.pitch) * pose.distance;
+  const clearance = grid.heightAt({ x: cx, z: cz }) + 3;
+  if (cy < clearance) cy = clearance;
+  if (jitter > 0) {
+    cx += (Math.random() - 0.5) * jitter;
+    cy += (Math.random() - 0.5) * jitter * 0.5;
+    cz += (Math.random() - 0.5) * jitter;
+  }
+  camera.position.set(cx, cy, cz);
+  camera.lookAt(pose.x, ground + 1, pose.z);
+  // The near plane follows the zoom: nothing comes close to a camera this high, and pushing it
+  // out keeps depth precision (shadows, ambient occlusion) across the much longer zoomed-out view.
+  const near = THREE.MathUtils.clamp(pose.distance * 0.08, 0.5, 15);
+  if (camera instanceof THREE.PerspectiveCamera && Math.abs(camera.near - near) > camera.near * 0.02) {
+    camera.near = near;
+    camera.updateProjectionMatrix();
+  }
+  livePose = { ...pose };
 }
 
 interface RigState {
@@ -209,6 +247,12 @@ export function CameraRig({ controller, edgeScroll = false, reducedShake = false
   useFrame((_, dtRaw) => {
     const dt = Math.min(dtRaw, 0.05);
     const r = rig.current;
+    // A cinematic reel (mission opening or closing) holds the camera; the rig waits where it was.
+    const scripted = reelPose(performance.now());
+    if (scripted) {
+      placeCamera(camera, controller, scripted);
+      return;
+    }
     const ui = useGameUi.getState();
     if (requestedView) {
       const v = requestedView;
@@ -274,35 +318,17 @@ export function CameraRig({ controller, edgeScroll = false, reducedShake = false
     r.yaw += (r.desiredYaw - r.yaw) * smooth;
     r.distance += (r.desiredDistance - r.distance) * smooth;
 
-    const grid = controller.world.grid;
     // Zoomed far out, the view drifts to the middle of the map so the whole map is framed
     // (otherwise a squad at the map edge leaves half the screen looking at empty sky).
     const overview = THREE.MathUtils.smoothstep(r.distance, DEFAULT_DISTANCE * 1.5, MAX_DISTANCE);
     const lookX = THREE.MathUtils.lerp(r.target.x, width / 2, overview);
     const lookZ = THREE.MathUtils.lerp(r.target.y, depth / 2, overview);
-    const ground = grid.heightAt({ x: lookX, z: lookZ });
-    const horizontal = Math.cos(r.pitch) * r.distance;
-    let cx = lookX + Math.sin(r.yaw) * horizontal;
-    let cz = lookZ + Math.cos(r.yaw) * horizontal;
-    let cy = ground + Math.sin(r.pitch) * r.distance;
-    const clearance = grid.heightAt({ x: cx, z: cz }) + 3;
-    if (cy < clearance) cy = clearance;
+    let jitter = 0;
     if (shake > 0.001) {
-      const amount = shake * (reducedShake ? 0.2 : 1);
-      cx += (Math.random() - 0.5) * amount;
-      cy += (Math.random() - 0.5) * amount * 0.5;
-      cz += (Math.random() - 0.5) * amount;
+      jitter = shake * (reducedShake ? 0.2 : 1);
       shake *= Math.exp(-dt * 7);
     }
-    camera.position.set(cx, cy, cz);
-    camera.lookAt(lookX, ground + 1, lookZ);
-    // The near plane follows the zoom: nothing comes close to a camera this high, and pushing it
-    // out keeps depth precision (shadows, ambient occlusion) across the much longer zoomed-out view.
-    const near = THREE.MathUtils.clamp(r.distance * 0.08, 0.5, 15);
-    if (camera instanceof THREE.PerspectiveCamera && Math.abs(camera.near - near) > camera.near * 0.02) {
-      camera.near = near;
-      camera.updateProjectionMatrix();
-    }
+    placeCamera(camera, controller, { x: lookX, z: lookZ, yaw: r.yaw, pitch: r.pitch, distance: r.distance }, jitter);
     currentView = { x: r.desiredTarget.x, z: r.desiredTarget.y, distance: r.desiredDistance, yaw: r.desiredYaw };
   });
 

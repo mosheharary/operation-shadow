@@ -46,6 +46,14 @@ export interface DragBox {
   y1: number;
 }
 
+/** A cinematic in progress: which reel and which of its shots (for letterbox, captions and skipping). */
+export interface CinematicState {
+  kind: 'intro' | 'outro';
+  shot: number;
+  /** Length of the reel up to its resting shot (or its end), for the progress line. */
+  seconds: number;
+}
+
 export interface GameUiState {
   selected: string[];
   hovered: HoverTarget;
@@ -64,6 +72,8 @@ export interface GameUiState {
   dragBox: DragBox | null;
   /** Ground ring the tutorial points at. */
   tutorialMarker: Vec2 | null;
+  /** The mission's opening or closing reel; the HUD steps aside while one plays. */
+  cinematic: CinematicState | null;
   select: (ids: string[], additive?: boolean) => void;
   setHovered: (target: HoverTarget) => void;
   setGroundPoint: (point: Vec2 | null) => void;
@@ -81,6 +91,7 @@ export interface GameUiState {
   markOrder: (pos: Vec2, kind: OrderMarker['kind']) => void;
   setDragBox: (box: DragBox | null) => void;
   setTutorialMarker: (pos: Vec2 | null) => void;
+  setCinematic: (cinematic: CinematicState | null) => void;
   reset: () => void;
 }
 
@@ -103,6 +114,7 @@ const initial = {
   orderMarker: null as OrderMarker | null,
   dragBox: null as DragBox | null,
   tutorialMarker: null as Vec2 | null,
+  cinematic: null as CinematicState | null,
 };
 
 /** UI-only state for one game session. Gameplay state lives in the engine, never here. */
@@ -155,5 +167,6 @@ export const useGameUi = create<GameUiState>((set) => ({
   markOrder: (pos, kind) => set({ orderMarker: { id: nextId++, pos, kind, at: performance.now() } }),
   setDragBox: (dragBox) => set({ dragBox }),
   setTutorialMarker: (tutorialMarker) => set({ tutorialMarker }),
+  setCinematic: (cinematic) => set({ cinematic }),
   reset: () => set({ ...initial }),
 }));

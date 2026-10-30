@@ -3,6 +3,7 @@
 import { type Medal, scoreMission, TICK_RATE } from '@operation-shadow/engine';
 import { useEffect, useRef } from 'react';
 import { useHudTick } from '../runtime/game-context';
+import { useGameUi } from '../runtime/store';
 import type { MenuCallbacks } from './menus';
 import { presentText } from './present';
 import { formatClock } from './status-bar';
@@ -21,7 +22,9 @@ export function Debrief({ onRestart, onExit }: MenuCallbacks) {
   const controller = useHudTick();
   const { state } = controller.world;
   const first = useRef<HTMLButtonElement>(null);
-  const over = state.status !== 'running';
+  // The report waits for the closing shot's verdict (skippable) before it comes up.
+  const closing = useGameUi((s) => s.cinematic?.kind === 'outro');
+  const over = state.status !== 'running' && !closing;
   useEffect(() => {
     if (over) first.current?.focus();
   }, [over]);

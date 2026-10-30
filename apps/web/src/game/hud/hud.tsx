@@ -1,6 +1,7 @@
 'use client';
 
 import { AbilityBar } from './ability-bar';
+import { Cinematic } from './cinematic';
 import { ControlBar } from './controls';
 import { Debrief } from './debrief';
 import { EnemyInfo } from './enemy-info';
@@ -16,13 +17,16 @@ import { StatusBar } from './status-bar';
 import { TooltipLayer } from './tooltip';
 import { TutorialPanel } from '../tutorial/tutorial-panel';
 import { useController } from '../runtime/game-context';
+import { useGameUi } from '../runtime/store';
 import styles from './hud.module.css';
 
 /** Screen-edge HUD (no permanent labels in the world). Empty areas pass pointer input to the 3D view. */
 export function Hud(props: MenuCallbacks) {
   const controller = useController();
+  const cinematic = useGameUi((s) => s.cinematic);
   return (
-    <div className={styles.hud}>
+    // While a cinematic plays the panels fade out and only the letterbox and captions remain.
+    <div className={styles.hud} data-cinematic={cinematic?.kind}>
       {controller.entry.tutorial && <TutorialPanel />}
       <DragBox />
       <div className={styles.topLeft}>
@@ -50,6 +54,7 @@ export function Hud(props: MenuCallbacks) {
       <MenuLayer {...props} />
       <Debrief {...props} />
       <TooltipLayer />
+      <Cinematic />
     </div>
   );
 }

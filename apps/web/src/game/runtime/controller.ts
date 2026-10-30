@@ -42,6 +42,8 @@ export class GameController {
   /** Simulation speed multiplier (1 = real time). */
   speed = 1;
   paused = false;
+  /** Held by a cinematic: the clock stops without counting as a tactical pause. */
+  held = false;
   /** Interpolation factor between the previous and current tick (0..1). */
   alpha = 1;
 
@@ -65,7 +67,7 @@ export class GameController {
   /** Advances the simulation by real elapsed time; call once per rendered frame. */
   advance(dtSeconds: number): void {
     const s = this.world.state;
-    if (!this.paused && s.status === 'running') {
+    if (!this.paused && !this.held && s.status === 'running') {
       this.accumulator += Math.min(dtSeconds, MAX_FRAME_SECONDS) * this.speed;
       let steps = 0;
       while (this.accumulator >= DT && steps < 12) {
@@ -131,6 +133,11 @@ export class GameController {
     this.notifyHud();
   }
 
+  setHeld(held: boolean): void {
+    this.held = held;
+    this.notifyHud();
+  }
+
   /** Continues from a saved simulation state (checked by the engine before play resumes). */
   load(state: SimState): void {
     this.world = World.restore(this.level, this.mission, state);
@@ -145,6 +152,7 @@ export class GameController {
     this.previous.clear();
     this.accumulator = 0;
     this.paused = false;
+    this.held = false;
     this.speed = 1;
     this.notifyHud();
   }

@@ -1143,3 +1143,177 @@
   pointer-events: none;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
 }
+
+/* Mission bookends: letterbox, shot captions and the verdict (see cinematic.tsx). */
+.hud > * {
+  transition: opacity 0.6s ease;
+}
+
+.hud[data-cinematic] > :not(.cinematic) {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.cinematic {
+  position: absolute;
+  inset: 0;
+  pointer-events: auto;
+  cursor: pointer;
+  background: radial-gradient(ellipse at center, transparent 55%, rgba(4, 6, 8, 0.55) 100%);
+  animation: cinematicIn 0.6s ease both;
+}
+
+.letterboxTop,
+.letterboxBottom {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 11vh;
+  background: #050607;
+}
+
+.letterboxTop {
+  top: 0;
+  animation: barTop 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.letterboxBottom {
+  bottom: 0;
+  animation: barBottom 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.reelProgress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 2px;
+  width: 100%;
+  background: var(--brass);
+  transform-origin: left;
+  animation: reelProgress linear both;
+}
+
+.skipHint {
+  position: absolute;
+  right: 2rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font: 600 0.72rem var(--font-body);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  opacity: 0.75;
+}
+
+.caption {
+  position: absolute;
+  left: clamp(1.5rem, 6vw, 5rem);
+  bottom: calc(11vh + 1.75rem);
+  max-width: min(42rem, 80vw);
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.85);
+  animation: captionIn 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.caption p,
+.verdict p {
+  margin: 0;
+}
+
+.captionEyebrow {
+  font: 600 0.78rem var(--font-body);
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--brass-strong);
+}
+
+.captionTitle {
+  margin-top: 0.3rem !important;
+  font: 700 clamp(2rem, 4.6vw, 3.6rem) / 1 var(--font-heading);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.captionLine {
+  margin-top: 0.6rem !important;
+  font: 1rem/1.45 var(--font-type);
+  color: rgba(232, 226, 212, 0.86);
+}
+
+.verdict {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  padding: 0 1.5rem;
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.9);
+  animation: verdictIn 1.1s cubic-bezier(0.2, 0.7, 0.2, 1) 0.3s both;
+}
+
+.verdictTitle {
+  font: 700 clamp(2.6rem, 7vw, 5.4rem) / 1 var(--font-heading);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.verdictSuccess .verdictTitle {
+  color: var(--brass-strong);
+}
+
+.verdictFailed .verdictTitle {
+  color: var(--rust);
+}
+
+@keyframes cinematicIn {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes barTop {
+  from {
+    transform: translateY(-100%);
+  }
+}
+
+@keyframes barBottom {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes reelProgress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes captionIn {
+  from {
+    opacity: 0;
+    transform: translateX(-1.5rem);
+    letter-spacing: 0.02em;
+  }
+}
+
+@keyframes verdictIn {
+  from {
+    opacity: 0;
+    transform: scale(1.12);
+    filter: blur(6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cinematic,
+  .letterboxTop,
+  .letterboxBottom,
+  .caption,
+  .verdict {
+    animation-duration: 0.01s;
+  }
+}

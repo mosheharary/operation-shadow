@@ -54,6 +54,10 @@ lists the required specialists; pick your squad and a difficulty, then deploy. T
 The control bar under the alarm indicator has buttons for pause, turning the camera, the mission menu and **exit
 without saving** (it asks first). Every button in the HUD explains itself on hover.
 
+A fresh mission opens on a short letterboxed insertion reel with the clock held: the whole map, the primary
+objective, then down to the squad on its landing point. The end of a mission gets a closing shot and a verdict before
+the debrief, which then plays over a slow orbit of the scene. Any key or click skips either.
+
 Stay out of the bright inner part of a view cone, keep to shadows and grass, hide bodies and tie up unconscious
 sentries: they wake up. Noise rings on the ground show how far a sound carries.
 
