@@ -13,7 +13,8 @@ names, maps or text from it.
    hide the evidence.
 3. **Act:** sabotage, steal or rescue; optional objectives may appear during the mission.
 4. **Extract:** every surviving specialist must reach the extraction zone.
-5. **Debrief:** score, rank (S–D) and medals from the real statistics of the run.
+5. **Debrief:** score, rank (S–D) and medals from the real statistics of the run, beside an after-action chart that
+   replays the attempt on the map (see Scoring).
 
 Non-lethal play is always viable and rewarded; killing is never required and never scores points.
 
@@ -99,6 +100,14 @@ Success scores 1,000 plus: time against par (up to 400), stealth by peak alarm m
 B ≥ 1,450, C ≥ 1,200, D below. Medals: Ghost (never detected, alarm ≤ 1), Restraint (no kills), Untouchable (no
 injuries or captures), Thorough (all optional objectives), Swift (under par). Time is simulation time, so pausing to
 plan is never penalised.
+
+The debrief's after-action chart replays the attempt in 5 to 12 seconds on a plotting-table map framed on the
+action: every squad member's route (a point every half second of mission time when they have moved), stamps for
+sightings (one per squad member per six seconds), takedowns, kills, bodies found, casualties, extractions and
+completed objectives, hollow diamonds on objectives left undone, and a time strip with the alarm level as a band.
+Quiet seconds (nobody moving, nothing happening) play five times faster than busy ones. It can be scrubbed and
+replayed, and holds still under reduced motion. The trace covers the whole attempt (from the load, for a continued
+save) and is cut back with the field recorder.
 
 ## Progress and saves
 

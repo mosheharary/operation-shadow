@@ -5,6 +5,7 @@ import { useEffect, useRef } from 'react';
 import { useHudTick } from '../runtime/game-context';
 import { canRecall, openRecall } from '../runtime/recall-session';
 import { useGameUi } from '../runtime/store';
+import { AfterActionChart } from './after-action';
 import type { MenuCallbacks } from './menus';
 import { presentText } from './present';
 import { formatClock } from './status-bar';
@@ -51,53 +52,56 @@ export function Debrief({ onRestart, onExit }: MenuCallbacks) {
 
   return (
     <div className={styles.modalBackdrop}>
-      <div className={`${styles.modal} ${styles.modalWide}`} role="dialog" aria-modal="true" aria-labelledby="debrief-title" data-testid="debrief" data-outcome={state.status}>
+      <div className={`${styles.modal} ${styles.modalWide} ${styles.debriefModal}`} role="dialog" aria-modal="true" aria-labelledby="debrief-title" data-testid="debrief" data-outcome={state.status}>
         <p className="eyebrow">{controller.entry.title} · Debrief</p>
         <h2 id="debrief-title" className={styles.modalTitle}>
           {success ? 'Mission complete' : 'Mission failed'}
         </h2>
         <p className={styles.debriefText}>{success ? controller.entry.debrief.success : controller.entry.debrief.failure}</p>
         {state.outcome && !success && <p className={styles.debriefReason}>{presentText(state.outcome.message)}</p>}
-        <div className={styles.debriefGrid}>
-          {success && (
+        <div className={styles.debriefLayout}>
+          <AfterActionChart />
+          <div className={styles.debriefGrid}>
+            {success && (
+              <section>
+                <h3>
+                  Score {score.score} · Rank {score.rank}
+                </h3>
+                <table className={styles.breakdown}>
+                  <tbody>
+                    {score.breakdown.map((row) => (
+                      <tr key={row.label}>
+                        <th scope="row">{row.label}</th>
+                        <td>{row.points}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {score.medals.length > 0 && (
+                  <ul className={styles.medals}>
+                    {score.medals.map((m) => (
+                      <li key={m}>
+                        <strong>{MEDALS[m].name}</strong> {MEDALS[m].text}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </section>
+            )}
             <section>
-              <h3>
-                Score {score.score} · Rank {score.rank}
-              </h3>
+              <h3>Field report</h3>
               <table className={styles.breakdown}>
                 <tbody>
-                  {score.breakdown.map((row) => (
-                    <tr key={row.label}>
-                      <th scope="row">{row.label}</th>
-                      <td>{row.points}</td>
+                  {stats.map(([label, value]) => (
+                    <tr key={label}>
+                      <th scope="row">{label}</th>
+                      <td>{value}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-              {score.medals.length > 0 && (
-                <ul className={styles.medals}>
-                  {score.medals.map((m) => (
-                    <li key={m}>
-                      <strong>{MEDALS[m].name}</strong> {MEDALS[m].text}
-                    </li>
-                  ))}
-                </ul>
-              )}
             </section>
-          )}
-          <section>
-            <h3>Field report</h3>
-            <table className={styles.breakdown}>
-              <tbody>
-                {stats.map(([label, value]) => (
-                  <tr key={label}>
-                    <th scope="row">{label}</th>
-                    <td>{value}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </section>
+          </div>
         </div>
         <div className={styles.menuButtons}>
           {rewindable && (

@@ -27,7 +27,7 @@ const SURFACE_RGB: Partial<Record<Surface, [number, number, number]>> = {
 };
 
 /** Static base layer: ground, water, buildings and walls, one pixel per metre-pair. */
-function renderBase(level: LevelData): HTMLCanvasElement {
+export function renderBase(level: LevelData): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
   canvas.width = level.cols;
   canvas.height = level.rows;

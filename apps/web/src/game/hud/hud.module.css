@@ -1740,3 +1740,213 @@
     animation: none;
   }
 }
+
+/* ── After-action chart (debrief) ────────────────────────────────────────── */
+.debriefModal {
+  width: min(76rem, calc(100vw - 2rem));
+}
+
+.debriefLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(16rem, 1fr);
+  gap: 1rem 1.75rem;
+  align-items: start;
+}
+
+.debriefLayout .debriefGrid {
+  grid-template-columns: 1fr;
+  margin-top: 0;
+}
+
+@media (max-width: 56rem) {
+  .debriefLayout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.afterAction {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.afterActionHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.afterActionHead h3 {
+  margin: 0;
+  font-family: var(--font-heading);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--brass);
+}
+
+.afterActionClock {
+  font-family: var(--font-type);
+  font-size: 1.05rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.afterActionClock small {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+/* The chart sits on the plotting table: brass frame, inner shadow, and a red cast as the alarm rises. */
+.afterActionMap {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(201, 164, 92, 0.45);
+  border-radius: var(--radius);
+  background: #0b0d0f;
+  box-shadow: inset 0 0 0 3px rgba(8, 10, 12, 0.9), 0 6px 20px rgba(0, 0, 0, 0.45);
+}
+
+.afterActionMap canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 46vh;
+  object-fit: contain;
+}
+
+.afterActionMap::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.65);
+  transition: box-shadow 0.4s ease;
+}
+
+.afterActionMap[data-alarm='2']::after {
+  box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.6), inset 0 0 26px rgba(240, 162, 58, 0.35);
+}
+
+.afterActionMap[data-alarm='3']::after,
+.afterActionMap[data-alarm='4']::after {
+  box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.55), inset 0 0 34px rgba(255, 80, 50, 0.5);
+}
+
+.afterActionCaption {
+  position: absolute;
+  left: 0.6rem;
+  bottom: 0.6rem;
+  margin: 0;
+  padding: 0.3rem 0.6rem;
+  border-left: 3px solid currentColor;
+  background: rgba(8, 10, 12, 0.85);
+  font-family: var(--font-type);
+  font-size: 0.85rem;
+  animation: afterActionCaption 0.35s ease-out;
+}
+
+.afterActionCaption time {
+  margin-left: 0.4rem;
+  color: var(--muted);
+}
+
+@keyframes afterActionCaption {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+.afterActionStrip {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.afterActionPlay {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--brass);
+  border-radius: 50%;
+  background: var(--panel-strong);
+  color: var(--brass-strong);
+  cursor: pointer;
+}
+
+.afterActionPlay:hover {
+  background: rgba(201, 164, 92, 0.2);
+}
+
+.afterActionTrack {
+  position: relative;
+  flex: 1;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.afterActionTrack canvas {
+  display: block;
+  width: 100%;
+  height: 1.9rem;
+}
+
+/* The range input is the scrubber; the strip beneath it draws the playhead. */
+.afterActionTrack input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: ew-resize;
+}
+
+.afterActionTrack:focus-within {
+  outline: 2px solid var(--brass-strong);
+  outline-offset: 1px;
+}
+
+.afterActionLegend,
+.afterActionKey {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.afterActionLegend li {
+  font-variant-numeric: tabular-nums;
+}
+
+.afterActionLegend li::before {
+  content: '';
+  display: inline-block;
+  width: 0.9rem;
+  height: 3px;
+  margin-right: 0.35rem;
+  vertical-align: middle;
+  background: var(--route);
+}
+
+.afterActionLegend strong {
+  color: var(--route);
+}
+
+.afterActionKey span {
+  margin-right: 0.3rem;
+  font-weight: 700;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .afterActionCaption {
+    animation: none;
+  }
+}

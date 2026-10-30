@@ -14,6 +14,7 @@ import {
 } from '@operation-shadow/engine';
 import type { SavePayload } from '@operation-shadow/schemas';
 import { RecallTape } from './recall';
+import { MissionTrace } from './trace';
 
 export interface GameSetup {
   missionKey: string;
@@ -51,6 +52,8 @@ export class GameController {
   readonly tape = new RecallTape();
   /** Times this attempt was wound back (shown in the debrief). */
   recalls = 0;
+  /** The whole attempt's routes and incidents, for the debrief's after-action chart (see trace.ts). */
+  readonly trace = new MissionTrace();
 
   private accumulator = 0;
   private readonly previous = new Map<string, { x: number; z: number; facing: number }>();
@@ -68,6 +71,7 @@ export class GameController {
     this.mission = built.mission;
     this.world = World.create(this.level, this.mission, { seed: setup.seed, squad: setup.squad, difficulty: setup.difficulty });
     this.tape.record(this.world);
+    this.trace.begin(this.world);
   }
 
   /** Advances the simulation by real elapsed time; call once per rendered frame. */
@@ -83,6 +87,7 @@ export class GameController {
         steps += 1;
         this.tape.observe(events, this.world);
         this.tape.record(this.world);
+        this.trace.observe(events, this.world);
         if (events.length > 0) for (const listener of this.eventListeners) listener(events);
       }
       this.alpha = Math.min(1, this.accumulator / DT);
@@ -152,6 +157,7 @@ export class GameController {
     this.tape.clear();
     this.recalls = 0;
     this.tape.record(this.world);
+    this.trace.begin(this.world);
   }
 
   /** Puts the world back to an earlier state of this same attempt (the tape is kept). */
@@ -173,6 +179,7 @@ export class GameController {
     this.tape.clear();
     this.recalls = 0;
     this.tape.record(this.world);
+    this.trace.begin(this.world);
     this.notifyHud();
   }
 }

@@ -61,6 +61,12 @@ A fresh mission opens on a short letterboxed insertion reel with the clock held:
 objective, then down to the squad on its landing point. The end of a mission gets a closing shot and a verdict before
 the debrief, which then plays over a slow orbit of the scene. Any key or click skips either.
 
+The debrief opens on an **after-action chart**: the whole attempt replayed in a few seconds on a plotting table,
+framed on where the action was. Each squad member's route inks itself in their colour, sightings, takedowns, bodies
+found, casualties and objectives stamp the map as the playhead passes them, objectives left undone stay marked, and a
+strip underneath shows the alarm rising and falling. Quiet stretches play faster than busy ones; drag the strip to
+scrub, or replay it.
+
 A mistake need not end the attempt. The **field recorder** keeps the last minute of play, a frame every two seconds:
 press Backspace (or the rewind button in the control bar, or **Wind back** on a failed mission's debrief) and the
 scene turns to old film and winds back to just before the latest trouble began, with the sightings, alarms and

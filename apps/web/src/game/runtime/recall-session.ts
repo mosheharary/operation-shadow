@@ -79,6 +79,7 @@ export function resumeRecall(controller: GameController): void {
   const failed = present.state.status !== 'running';
   const back = Math.round((present.state.tick - controller.world.state.tick) / TICK_RATE);
   controller.tape.cut(recall.index);
+  controller.trace.cut(controller.world.state.tick);
   controller.recalls += 1;
   present = null;
   ui.setRecall(null);

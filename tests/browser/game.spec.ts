@@ -262,6 +262,20 @@ test.describe('Silent Tide', () => {
     await expect(debrief).toHaveAttribute('data-outcome', 'failed');
     await expect(debrief).toContainText('Mission failed');
     await expect(debrief).toContainText('Field report');
+    // The after-action chart replays the attempt: routes, the sightings and casualties, then rests at the end.
+    const chart = debrief.getByTestId('after-action');
+    await expect(chart).toBeVisible();
+    expect(Number(await chart.getAttribute('data-routes'))).toBeGreaterThan(0);
+    expect(Number(await chart.getAttribute('data-incidents'))).toBeGreaterThan(0);
+    await expect(chart).toHaveAttribute('data-state', 'done', { timeout: 30_000 });
+    await expect(chart).toContainText('Spotted');
+    // Scrubbing to the start holds the replay there; play runs it again.
+    await chart.getByTestId('after-action-scrub').focus();
+    await page.keyboard.press('Home');
+    await expect(chart).toHaveAttribute('data-state', 'paused');
+    await expect(chart.getByTestId('after-action-clock')).toContainText(/^0:00/);
+    await chart.getByTestId('after-action-play').click();
+    await expect(chart).not.toHaveAttribute('data-state', 'paused');
     await debrief.getByRole('button', { name: 'Retry mission' }).click();
     await expect(debrief).toBeHidden();
     await expect.poll(async () => (await probe(page)).status).toBe('running');
